@@ -21,7 +21,7 @@ const Signup: React.FC = () => {
             </div>
 
             <div className = 'lol'>
-                <input id = "password" type = "password" placeholder="Confrim Password" className = "input" required></input>
+                <input id = "password" type = "password" placeholder="Confirm Password" className = "input" required></input>
             </div>
 
             <div className = 'lol'>
