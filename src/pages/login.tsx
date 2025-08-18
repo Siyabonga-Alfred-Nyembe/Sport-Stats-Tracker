@@ -1,7 +1,6 @@
 import React from "react";
-import Signup from "./signup";
 import "../Styles/signUpLogin.css";
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Login: React.FC = () => {
   return (
