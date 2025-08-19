@@ -2,8 +2,8 @@ import "../Styles/landingPage.css";
 import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
 
 function LandingPage() {
-  const navigate = useNavigate(); // Get the navigate function
-
+  const navigate = useNavigate(); 
+// Get the navigate function
   return (
     <>
       <section className="landBody">
