@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import supabase from "../../supabaseClient";
 import "../Styles/signUpLogin.css";
-import ResetPassword from "./reset"; // adjust path to where you put it
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState("");
