@@ -8,7 +8,6 @@ A React + TypeScript + Vite web application for tracking football statistics wit
 
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Environment Setup](#environment-setup)
 - [Running the Application](#running-the-application)
 - [Project Structure](#project-structure)
 - [Features](#features)
@@ -33,8 +32,8 @@ Before you begin, ensure you have the following installed:
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository-url>
-   cd sporty.com
+   git clone https://github.com/Siyabonga-Alfred-Nyembe/Sport-Stats-Tracker
+   cd Sport-Stat-Tracker
    ```
 
 2. **Install dependencies:**
@@ -44,35 +43,6 @@ Before you begin, ensure you have the following installed:
    yarn install
    ```
 
-## Environment Setup
-
-1. **Create environment file:**
-   Create a `.env` file in the root directory:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-2. **Supabase Configuration:**
-   - Sign up at [supabase.com](https://supabase.com)
-   - Create a new project
-   - Go to Settings → API to find your URL and anon key
-   - Set up the following database table:
-
-   ```sql
-   CREATE TABLE users (
-     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-     username TEXT UNIQUE NOT NULL,
-     email TEXT NOT NULL,
-     password TEXT NOT NULL,
-     created_at TIMESTAMPTZ DEFAULT NOW()
-   );
-   ```
-
-3. **Google OAuth Setup (Optional):**
-   - Go to Supabase Dashboard → Authentication → Providers
-   - Enable Google provider
-   - Configure with your Google OAuth credentials
 
 ## Running the Application
 
