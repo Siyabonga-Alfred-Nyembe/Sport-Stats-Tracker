@@ -7,17 +7,15 @@ const googleColors = ["#4285F4", "#EA4335", "#FBBC05", "#34A853"];
 const Land: React.FC = () => {
   const location = useLocation();
   const [username, setUsername] = useState("User");
-  const [isGoogleUser, setIsGoogleUser] = useState(false); // Make sure this line is uncommented
+  const [isGoogleUser, setIsGoogleUser] = useState(false);
 
   useEffect(() => {
-    
     if (location.state?.username) {
       setUsername(location.state.username);
       setIsGoogleUser(location.state.isGoogleUser || false);
       return;
     }
 
-   
     const fetchGoogleUser = async () => {
       const { data } = await supabase.auth.getSession();
       const user = data.session?.user;
@@ -35,39 +33,38 @@ const Land: React.FC = () => {
   }, [location.state]);
 
   return (
-  <div
-    style={{
-      backgroundColor: "black",
-      height: "100vh",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      fontSize: "4rem",
-      fontWeight: "bold",
-      flexDirection: "column",
-    }}
-  >
-    <div>
-      {username.split("").map((char, idx) => (
-        <span
-          key={idx}
-          style={{
-            color: googleColors[idx % googleColors.length],
-          }}
-        >
-          {char}
-        </span>
-      ))}
-    </div>
+    <section
+      style={{
+        backgroundColor: "black",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: "4rem",
+        fontWeight: "bold",
+        flexDirection: "column",
+      }}
+    >
+      <section>
+        {username.split("").map((char, idx) => (
+          <span
+            key={idx}
+            style={{
+              color: googleColors[idx % googleColors.length],
+            }}
+          >
+            {char}
+          </span>
+        ))}
+      </section>
 
-    {isGoogleUser && (
-      <p style={{ color: "white", fontSize: "1.5rem", marginTop: "1rem" }}>
-        (Signed in with Google)
-      </p>
-    )}
-  </div>
-);
-
+      {isGoogleUser && (
+        <p style={{ color: "white", fontSize: "1.5rem", marginTop: "1rem" }}>
+          (Signed in with Google)
+        </p>
+      )}
+    </section>
+  );
 };
 
 export default Land;

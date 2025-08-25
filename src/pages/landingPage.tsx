@@ -1,14 +1,13 @@
 import "../Styles/landingPage.css";
-import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
+import { useNavigate } from "react-router-dom";
 
 function LandingPage() {
   const navigate = useNavigate(); 
-// Get the navigate function
+
   return (
     <>
       <section className="landBody">
         <header>
-          {/* Use onClick handlers to trigger navigation */}
           <button className="hbtn" onClick={() => navigate('/login')}>
             Login &rarr;
           </button>

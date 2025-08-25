@@ -15,7 +15,7 @@ const ForgotPassword: React.FC = () => {
 
     try {
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + "/reset", // go straight to reser
+        redirectTo: window.location.origin + "/reset",
       });
 
       if (error) {
@@ -39,7 +39,7 @@ const ForgotPassword: React.FC = () => {
         <form onSubmit={handleResetPassword}>
           <h1 id="loginheader">FORGOT PASSWORD</h1>
 
-          <div className="lol">
+          <section className="lol">
             <label htmlFor="email">Email</label>
             <input
               id="email"
@@ -50,16 +50,16 @@ const ForgotPassword: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value.trim())}
             />
-          </div>
+          </section>
 
           {message && <p style={{ color: "green" }}>{message}</p>}
           {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
 
-          <div className="lol">
+          <section className="lol">
             <button className="loginbutton" type="submit">
               RESET PASSWORD
             </button>
-          </div>
+          </section>
 
           <p>
             Remembered your password? <Link to="/login">Log in</Link>

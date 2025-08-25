@@ -1,46 +1,49 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
-import SHA256 from "crypto-js/sha256";
 import "../Styles/signUpLogin.css";
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-
-  // Hash function
-  const hashString = (str: string) => SHA256(str.trim()).toString();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
 
     try {
- 
-      const { data: userData, error } = await supabase
-        .from("users")
-        .select("id, username, password")
-        .eq("username", username)
-        .single();
-
-      if (error || !userData) {
-        setErrorMessage("Username not found.");
-        return;
-      }
-
- 
-      const hashedPassword = hashString(password);
-      if (hashedPassword !== userData.password) {
-        setErrorMessage("Invalid password.");
-        return;
-      }
-
-
-      navigate("/land", {
-        state: { username: userData.username, isGoogleUser: false },
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
+
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      if (data.user) {
+        // Check user type from metadata or database
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("id", data.user.id)
+          .single();
+
+        const userType = profileData?.user_type || "user";
+        
+        if (userType === "coach") {
+          navigate("/coach-dashboard", {
+            state: { username: data.user.email, userId: data.user.id },
+          });
+        } else {
+          navigate("/user-dashboard", {
+            state: { username: data.user.email, userId: data.user.id },
+          });
+        }
+      }
     } catch (err) {
       console.error("Login error:", err);
       setErrorMessage("An unexpected error occurred.");
@@ -49,17 +52,21 @@ const Login: React.FC = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const {error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin + "/land" },
+        options: { 
+          redirectTo: window.location.origin + "/auth-callback",
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        },
       });
 
       if (error) {
         setErrorMessage(error.message);
-        console.error("Google login error:", error.message);
       }
     } catch (err) {
-      console.error(err);
       setErrorMessage("Unexpected error during Google login.");
     }
   };
@@ -70,20 +77,20 @@ const Login: React.FC = () => {
         <form onSubmit={handleLogin}>
           <h1 id="loginheader">LOGIN</h1>
 
-          <div className="lol">
-            <label htmlFor="username">Username</label>
+          <section className="lol">
+            <label htmlFor="email">Email</label>
             <input
-              id="username"
-              type="text"
-              placeholder="Enter username"
+              id="email"
+              type="email"
+              placeholder="Enter your email"
               className="input"
               required
-              value={username}
-              onChange={(e) => setUsername(e.target.value.trim())}
+              value={email}
+              onChange={(e) => setEmail(e.target.value.trim())}
             />
-          </div>
+          </section>
 
-          <div className="lol">
+          <section className="lol">
             <label htmlFor="password">Password</label>
             <input
               id="password"
@@ -94,15 +101,15 @@ const Login: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-          </div>
+          </section>
 
           {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
 
-          <div className="lol">
+          <section className="lol">
             <button className="loginbutton" type="submit">
               LOGIN
             </button>
-          </div>
+          </section>
 
           <section className="divider">OR</section>
 

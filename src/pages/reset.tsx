@@ -1,60 +1,71 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import supabase from "../../supabaseClient";
-import SHA256 from "crypto-js/sha256";
 import { useNavigate } from "react-router-dom";
 import "../Styles/signUpLogin.css";
 
 const ResetPassword: React.FC = () => {
-  const [username, setUsername] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [session, setSession] = useState<any>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
 
-    if (newPassword !== confirmPassword) {
+    if (password !== confirmPassword) {
       setErrorMessage("Passwords do not match.");
       return;
     }
 
     try {
+      const { error } = await supabase.auth.updateUser({
+        password: password,
+      });
 
-      const { data: userData, error } = await supabase
-        .from("users")
-        .select("id, username")
-        .eq("username", username)
-        .single();
-
-      if (error || !userData) {
-        setErrorMessage("Username not found.");
+      if (error) {
+        setErrorMessage(error.message);
         return;
       }
 
+      setSuccessMessage("Password reset successful! Redirecting to dashboard...");
+      
+      // Get user type from profile
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("id", session.user.id)
+          .single();
 
-      const hashedPassword = SHA256(newPassword).toString();
-
-
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({ password: hashedPassword })
-        .eq("id", userData.id);
-
-      if (updateError) {
-        setErrorMessage("Failed to reset password. Try again.");
-        return;
+        const userType = profile?.user_type || "user";
+        
+        setTimeout(() => {
+          if (userType === "coach") {
+            navigate("/coach-dashboard");
+          } else {
+            navigate("/user-dashboard");
+          }
+        }, 2000);
       }
-
-      setSuccessMessage("Password reset successful! Redirecting to login...");
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
     } catch (err) {
-      console.error("Reset password error:", err);
       setErrorMessage("Unexpected error occurred.");
     }
   };
@@ -65,33 +76,20 @@ const ResetPassword: React.FC = () => {
         <form onSubmit={handleReset}>
           <h1 id="loginheader">Reset Password</h1>
 
-          <div className="lol">
-            <label htmlFor="username">Username</label>
+          <section className="lol">
+            <label htmlFor="password">New Password</label>
             <input
-              id="username"
-              type="text"
-              placeholder="Enter your username"
-              className="input"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value.trim())}
-            />
-          </div>
-
-          <div className="lol">
-            <label htmlFor="newPassword">New Password</label>
-            <input
-              id="newPassword"
+              id="password"
               type="password"
               placeholder="Enter new password"
               className="input"
               required
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
-          </div>
+          </section>
 
-          <div className="lol">
+          <section className="lol">
             <label htmlFor="confirmPassword">Confirm Password</label>
             <input
               id="confirmPassword"
@@ -102,16 +100,16 @@ const ResetPassword: React.FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-          </div>
+          </section>
 
           {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
           {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
 
-          <div className="lol">
+          <section className="lol">
             <button className="loginbutton" type="submit">
               Reset Password
             </button>
-          </div>
+          </section>
         </form>
       </section>
     </section>

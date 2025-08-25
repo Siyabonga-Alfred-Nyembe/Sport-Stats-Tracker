@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
 import SHA256 from "crypto-js/sha256";
+import "../Styles/signUpLogin.css";
 
 const Signup: React.FC = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [userType, setUserType] = useState("user");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
@@ -26,7 +28,9 @@ const Signup: React.FC = () => {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: window.location.origin + "/login" },
+        options: { 
+          emailRedirectTo: window.location.origin + "/auth-callback"
+        },
       });
 
       if (authError) {
@@ -46,6 +50,7 @@ const Signup: React.FC = () => {
             username,
             email: hashedEmail,
             password: hashedPassword,
+            user_type: userType,
           },
         ]);
 
@@ -56,10 +61,23 @@ const Signup: React.FC = () => {
       }
 
       setErrorMessage("");
-      alert(
-        "Signup successful! Please check your email to confirm before logging in."
-      );
-      navigate("/login");
+      
+      if (!authData.session) {
+        alert(
+          "Signup successful! Please check your email to confirm before logging in."
+        );
+        navigate("/login");
+      } else {
+        if (userType === "coach") {
+          navigate("/coach-dashboard", {
+            state: { username, userId: authData.user?.id },
+          });
+        } else {
+          navigate("/user-dashboard", {
+            state: { username, userId: authData.user?.id },
+          });
+        }
+      }
     } catch (err) {
       console.error("Unexpected error:", err);
       setErrorMessage("An unexpected error occurred.");
@@ -70,7 +88,7 @@ const Signup: React.FC = () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin + "/land" },
+        options: { redirectTo: window.location.origin + "/auth-callback" },
       });
 
       if (error) {
@@ -91,7 +109,7 @@ const Signup: React.FC = () => {
         <form onSubmit={handleSignUp}>
           <h1 id="loginheader">SIGNUP</h1>
 
-          <div className="lol">
+          <section className="lol">
             <label htmlFor="username">Username</label>
             <input
               id="username"
@@ -102,9 +120,9 @@ const Signup: React.FC = () => {
               onChange={(e) => setUsername(e.target.value)}
               required
             />
-          </div>
+          </section>
 
-          <div className="lol">
+          <section className="lol">
             <label htmlFor="email">Email</label>
             <input
               id="email"
@@ -115,9 +133,23 @@ const Signup: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-          </div>
+          </section>
 
-          <div className="lol">
+          <section className="lol">
+            <label htmlFor="userType">I am a:</label>
+            <select
+              id="userType"
+              className="input"
+              value={userType}
+              onChange={(e) => setUserType(e.target.value)}
+              required
+            >
+              <option value="user">Fan/User</option>
+              <option value="coach">Coach</option>
+            </select>
+          </section>
+
+          <section className="lol">
             <label htmlFor="password">Password</label>
             <input
               id="password"
@@ -128,9 +160,9 @@ const Signup: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-          </div>
+          </section>
 
-          <div className="lol">
+          <section className="lol">
             <label htmlFor="confirmPassword">Confirm Password</label>
             <input
               id="confirmPassword"
@@ -141,15 +173,15 @@ const Signup: React.FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-          </div>
+          </section>
 
           {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
 
-          <div className="lol">
+          <section className="lol">
             <button className="loginbutton" type="submit">
               SIGN UP
             </button>
-          </div>
+          </section>
 
           <section className="divider">OR</section>
 
@@ -157,6 +189,7 @@ const Signup: React.FC = () => {
             <img
               src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000"
               width="20"
+              alt="Google logo"
             />
             Continue with Google
           </button>
