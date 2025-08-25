@@ -11,10 +11,13 @@
     "test": "jest"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.0.0",
+    "@iconscout/react-unicons": "^2.2.5",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.55.0",
     "crypto-js": "^4.2.0",
+    "framer-motion": "^12.23.12",
     "js-sha256": "^0.11.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
