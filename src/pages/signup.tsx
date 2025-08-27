@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
 import SHA256 from "crypto-js/sha256";
-import "../Styles/signUpLogin.css";
+import "../Styles/Auth.css";
 
 const Signup: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -104,98 +104,86 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <section className="siBody">
-      <section id="loginsection">
-        <form onSubmit={handleSignUp}>
-          <h1 id="loginheader">SIGNUP</h1>
+    <section className="auth-body">
+      <section className="auth-container">
+        <form onSubmit={handleSignUp} className="auth-form">
+          <h1 className="auth-header">SIGN UP</h1>
 
-          <section className="lol">
-            <label htmlFor="username">Username</label>
+          <div className="input-group">
             <input
               id="username"
               type="text"
-              placeholder="Enter username"
-              className="input"
+              className="input-field"
+              placeholder=" "
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
             />
-          </section>
+            <label htmlFor="username" className="input-label">Username</label>
+          </div>
 
-          <section className="lol">
-            <label htmlFor="email">Email</label>
+          <div className="input-group">
             <input
               id="email"
               type="email"
-              placeholder="Enter email"
-              className="input"
+              className="input-field"
+              placeholder=" "
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-          </section>
+            <label htmlFor="email" className="input-label">Email</label>
+          </div>
 
-          <section className="lol">
-            <label htmlFor="userType">I am a:</label>
-            <select
-              id="userType"
-              className="input"
-              value={userType}
-              onChange={(e) => setUserType(e.target.value)}
-              required
+         <div className="user-type-toggle">
+            <button
+              type="button"
+              className={`toggle-btn ${userType === 'user' ? 'active' : ''}`}
+              onClick={() => setUserType('user')}
             >
-              <option value="user">Fan/User</option>
-              <option value="coach">Coach</option>
-            </select>
-          </section>
+              User
+            </button>
+            <button
+              type="button"
+              className={`toggle-btn ${userType === 'coach' ? 'active' : ''}`}
+              onClick={() => setUserType('coach')}
+            >
+              Coach
+            </button>
+          </div>
 
-          <section className="lol">
-            <label htmlFor="password">Password</label>
+          <div className="input-group">
             <input
               id="password"
               type="password"
-              placeholder="Enter password"
-              className="input"
+              className="input-field"
+              placeholder=" "
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-          </section>
+            <label htmlFor="password" className="input-label">Password</label>
+          </div>
 
-          <section className="lol">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+          <div className="input-group">
             <input
               id="confirmPassword"
               type="password"
-              placeholder="Confirm password"
-              className="input"
+              className="input-field"
+              placeholder=" "
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-          </section>
+            <label htmlFor="confirmPassword" className="input-label">Confirm Password</label>
+          </div>
 
-          {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-          <section className="lol">
-            <button className="loginbutton" type="submit">
-              SIGN UP
-            </button>
-          </section>
+          <button className="auth-button" type="submit">SIGN UP</button>
 
-          <section className="divider">OR</section>
-
-          <button className="google" type="button" onClick={handleGoogleSignIn}>
-            <img
-              src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000"
-              width="20"
-              alt="Google logo"
-            />
-            Continue with Google
-          </button>
-
-          <p>
-            Already have an account? <Link to="/login">log in</Link>
+          <p className="switch-link">
+            Already have an account? <Link to="/login">Log In</Link>
           </p>
         </form>
       </section>
@@ -204,3 +192,50 @@ const Signup: React.FC = () => {
 };
 
 export default Signup;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

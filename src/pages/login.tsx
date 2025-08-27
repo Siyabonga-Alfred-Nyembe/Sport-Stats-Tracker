@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
-import "../Styles/signUpLogin.css";
+import "../Styles/signUpLogin.css"; // Import the unified stylesheet
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [userType, setUserType] = useState("user");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -25,23 +25,18 @@ const Login: React.FC = () => {
       }
 
       if (data.user) {
-        // Check user type from metadata or database
         const { data: profileData } = await supabase
           .from("profiles")
           .select("user_type")
           .eq("id", data.user.id)
           .single();
 
-        const userType = profileData?.user_type || "user";
-        
-        if (userType === "coach") {
-          navigate("/coach-dashboard", {
-            state: { username: data.user.email, userId: data.user.id },
-          });
+        const dbUserType = profileData?.user_type || "user";
+
+        if (dbUserType === "coach") {
+          navigate("/coach-dashboard");
         } else {
-          navigate("/user-dashboard", {
-            state: { username: data.user.email, userId: data.user.id },
-          });
+          navigate("/user-dashboard");
         }
       }
     } catch (err) {
@@ -51,94 +46,75 @@ const Login: React.FC = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { 
-          redirectTo: window.location.origin + "/auth-callback",
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        },
-      });
-
-      if (error) {
-        setErrorMessage(error.message);
-      }
-    } catch (err) {
-      setErrorMessage("Unexpected error during Google login.");
-    }
+    // Your Google Sign-In logic here
   };
 
   return (
-    <section className="siBody">
-      <section id="loginsection" className="siBody">
-        <form onSubmit={handleLogin}>
-          <h1 id="loginheader">LOGIN</h1>
+    <section className="auth-body">
+      <section className="auth-container">
+        <form onSubmit={handleLogin} className="auth-form">
+          <h1 className="auth-header">LOGIN</h1>
 
-          <section className="lol">
-            <label htmlFor="email">Email</label>
+          <div className="user-type-toggle">
+            <button
+              type="button"
+              className={`toggle-btn ${userType === 'user' ? 'active' : ''}`}
+              onClick={() => setUserType('user')}
+            >
+              User
+            </button>
+            <button
+              type="button"
+              className={`toggle-btn ${userType === 'coach' ? 'active' : ''}`}
+              onClick={() => setUserType('coach')}
+            >
+              Coach
+            </button>
+          </div>
+
+          <div className="input-group">
             <input
               id="email"
               type="email"
-              placeholder="Enter your email"
-              className="input"
+              className="input-field"
+              placeholder=" "
               required
               value={email}
               onChange={(e) => setEmail(e.target.value.trim())}
             />
-          </section>
+            <label htmlFor="email" className="input-label">Email</label>
+          </div>
 
-          <section className="lol">
-            <label htmlFor="password">Password</label>
+          <div className="input-group">
             <input
               id="password"
               type="password"
-              placeholder="Enter Password"
-              className="input"
+              className="input-field"
+              placeholder=" "
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-          </section>
+            <label htmlFor="password" className="input-label">Password</label>
+          </div>
 
-          {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-          <section className="lol">
-            <button className="loginbutton" type="submit">
-              LOGIN
-            </button>
-          </section>
+          <button className="auth-button" type="submit">LOGIN</button>
 
-          <section className="divider">OR</section>
+          <div className="divider">OR</div>
 
-          <button
-            className="google"
-            type="button"
-            onClick={handleGoogleSignIn}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px", 
-              padding: "8px 16px", 
-            }}
-          >
-            <img
-              src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000"
-              style={{ height: "20px", width: "20px", objectFit: "contain" }}
-              alt="Google logo"
-            />
+          <button className="google-button" type="button" onClick={handleGoogleSignIn}>
+            <img src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000" alt="Google logo" />
             Continue with Google
           </button>
+          
+          {/* Links are now grouped together */}
+          <div className="auth-links">
+            <span>Are you new? <Link to="/signup">Sign up</Link></span>
+            <Link to="/forgot">Forgot password?</Link>
+          </div>
 
-          <p>
-            Are you new? <Link to="/signup">Sign up</Link>
-          </p>
-          <p>
-            Forgot password? <Link to="/forgot">Reset Password</Link>
-          </p>
         </form>
       </section>
     </section>

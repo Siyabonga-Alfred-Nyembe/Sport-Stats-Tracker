@@ -1,0 +1,46 @@
+/* src/components/MatchCard.css */
+
+.match-card {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.match-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.match-teams {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.team-name {
+  flex: 1;
+  text-align: center;
+  color: #333;
+}
+
+.score {
+  margin: 0 20px;
+  background-color: #8a2be2;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.match-date {
+  text-align: center;
+  margin-top: 15px;
+  color: #555;
+  font-size: 0.9rem;
+}
