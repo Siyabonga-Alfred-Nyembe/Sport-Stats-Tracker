@@ -1,7 +1,10 @@
 
 // src/components/PlayerManagement/PlayerManagementPage.tsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import supabase from '../../../../supabaseClient';
+import { getCurrentTeamId } from '../../../services/teamService';
+import InlineAlert from '../../components/InlineAlert';
 
 import RosterManagement from './RosterManagement';
 import LineupSelection from './LineupSelection';
@@ -32,64 +35,73 @@ export interface Player {
   imageUrl: string; // Added for the player card
 }
 
-const mockTeams: Team[] = [
-  { id: 'team1', name: 'Red Lions', coachId: 'c1' },
-  { id: 'team2', name: 'Blue Sharks', coachId: 'c2' },
-];
-
-const mockPlayers: Player[] = [
-  {
-    id: 'p1',
-    name: 'Leo Vega',
-    jerseyNum: "10",
-    teamId: 'team1',
-    position: 'Striker',
-    stats: { goals: 2, assists: 1, minutesPlayed: 90, yellowCards: 0, redCards: 0 },
-    imageUrl: 'https://via.placeholder.com/280x250/8a2be2/FFF?text=Leo+Vega',
-  },
-  {
-    id: 'p2',
-    name: 'Mia Chen',
-    jerseyNum: "10",
-    teamId: 'team1',
-    position: 'Midfielder',
-    stats: { goals: 0, assists: 3, minutesPlayed: 90, yellowCards: 1, redCards: 0 },
-    imageUrl: 'https://via.placeholder.com/280x250/333/FFF?text=Mia+Chen',
-  },
-  {
-    id: 'p3',
-    name: 'Sam Jones',
-    jerseyNum: "10",
-    teamId: 'team2',
-    position: 'Defender',
-    stats: { goals: 0, assists: 0, minutesPlayed: 75, yellowCards: 0, redCards: 0 },
-    imageUrl: 'https://via.placeholder.com/280x250/555/FFF?text=Sam+Jones',
-  },
-];
+// Data will be read from Supabase
 
 
 
 const PlayerManagementPage: React.FC = () => {
   // This would come from user authentication state in a real app
-  const currentTeamId = 'team1'; // Coach's current team
+  const currentTeamId = getCurrentTeamId() || 'kaizer_chiefs'; // Coach's current team
 
-  const [players, setPlayers] = useState<Player[]>(mockPlayers.filter(p => p.teamId === currentTeamId));
+  const [players, setPlayers] = useState<Player[]>([]);
   const [lineup, setLineup] = useState<Player[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleAddPlayer = (newPlayerData: Omit<Player, 'id' | 'stats' | 'imageUrl' | 'teamId'>) => {
-    const player: Player = {
-      id: Date.now().toString(),
-      ...newPlayerData,
-      teamId: currentTeamId, // Automatically assign the coach's teamId here
-      stats: { goals: 0, assists: 0, minutesPlayed: 0, yellowCards: 0, redCards: 0 },
-      imageUrl: `https://via.placeholder.com/280x250/8a2be2/FFF?text=${newPlayerData.name.replace(' ', '+')}`,
+  useEffect(() => {
+    const loadPlayers = async () => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .eq('team_id', currentTeamId)
+        .order('name');
+      if (data) {
+        const mapped: Player[] = data.map((p: any) => ({
+          id: String(p.id),
+          jerseyNum: String(p.jersey_num ?? ''),
+          name: p.name,
+          teamId: p.team_id,
+          position: p.position ?? '',
+          stats: { goals: 0, assists: 0, minutesPlayed: 0, yellowCards: 0, redCards: 0 },
+          imageUrl: p.image_url ?? `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(p.name)}`,
+        }));
+        setPlayers(mapped);
+      } else if (error) {
+        setErrorMsg('We could not load your players. Please refresh or try again later.');
+      }
     };
-    setPlayers(prev => [...prev, player]);
+    loadPlayers();
+  }, [currentTeamId]);
+
+  const handleAddPlayer = async (newPlayerData: Omit<Player, 'id' | 'stats' | 'imageUrl' | 'teamId'>) => {
+    const payload = {
+      name: newPlayerData.name,
+      position: newPlayerData.position,
+      jersey_num: newPlayerData.jerseyNum,
+      team_id: currentTeamId,
+      image_url: `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(newPlayerData.name)}`,
+    };
+    const { data, error } = await supabase.from('players').insert(payload).select().single();
+    if (!error && data) {
+      const saved: Player = {
+        id: String(data.id),
+        jerseyNum: String(data.jersey_num ?? ''),
+        name: data.name,
+        teamId: data.team_id,
+        position: data.position ?? '',
+        stats: { goals: 0, assists: 0, minutesPlayed: 0, yellowCards: 0, redCards: 0 },
+        imageUrl: data.image_url,
+      };
+      setPlayers(prev => [...prev, saved]);
+    } else if (error) {
+      setErrorMsg('We could not add that player. Please try again.');
+    }
   };
 
-  const handleRemovePlayer = (playerId: string) => {
+  const handleRemovePlayer = async (playerId: string) => {
     setLineup(prev => prev.filter(p => p.id !== playerId));
     setPlayers(prev => prev.filter(p => p.id !== playerId));
+    const { error } = await supabase.from('players').delete().eq('id', playerId);
+    if (error) setErrorMsg('We could not remove that player. Please try again.');
   };
 
   const handleAddToLineup = (player: Player) => {
@@ -104,6 +116,7 @@ const PlayerManagementPage: React.FC = () => {
 
   return (
     <main className="management-container">
+      <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} />
       <RosterManagement
         players={players}
         lineupIds={new Set(lineup.map(p => p.id))}

@@ -10,6 +10,7 @@ import CoachDashboard from "./pages/coachDashboard/CoachDashboard";
 import UserDashboard from "./pages/userDashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import AuthCallback from "./pages/authCallback";
+import TeamSetup from "./pages/TeamSetup";
 import "./App.css";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/reset" element={<ResetPassword />} />
           <Route path="/land" element={<Land />} />
           <Route path="/coach-dashboard" element={<CoachDashboard />} />
+          <Route path="/team-setup" element={<TeamSetup />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
           <Route path="/profile-settings" element={<ProfileSettings />} />
           <Route path="/auth-callback" element={<AuthCallback />} />
