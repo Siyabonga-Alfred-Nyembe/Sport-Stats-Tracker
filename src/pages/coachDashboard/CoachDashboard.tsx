@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardHeader from "./DashboardHeader";
 import MyTeamTab from "./MyTeamTab";
@@ -6,6 +6,7 @@ import MyTeamTab from "./MyTeamTab";
 import MatchesPage from "./matchManaging/MatchesPage";
 import PlayerManagementPage from "./playerManagement/PlayerManagementPage";
 import "../../Styles/dashboard.css";
+import { getCurrentTeamId } from "../../services/teamService";
 
 // --- NOTE: These interfaces should ideally be in a single, shared types.ts file ---
 
@@ -46,6 +47,13 @@ const CoachDashboard: React.FC = () => {
 
   const handleProfileClick = () => navigate("/profile-settings");
   const handleReportIssue = () => console.log("Opening issue report form");
+
+  useEffect(() => {
+    const teamId = getCurrentTeamId();
+    if (!teamId) {
+      navigate('/team-setup');
+    }
+  }, [navigate]);
 
   return (
     <section className="dashboard coach-dashboard">

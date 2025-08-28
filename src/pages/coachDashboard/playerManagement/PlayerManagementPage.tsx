@@ -3,6 +3,8 @@
 
 import React, { useEffect, useState } from 'react';
 import supabase from '../../../../supabaseClient';
+import { getCurrentTeamId } from '../../../services/teamService';
+import InlineAlert from '../../components/InlineAlert';
 
 import RosterManagement from './RosterManagement';
 import LineupSelection from './LineupSelection';
@@ -39,14 +41,15 @@ export interface Player {
 
 const PlayerManagementPage: React.FC = () => {
   // This would come from user authentication state in a real app
-  const currentTeamId = 'kaizer_chiefs'; // Coach's current team
+  const currentTeamId = getCurrentTeamId() || 'kaizer_chiefs'; // Coach's current team
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [lineup, setLineup] = useState<Player[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPlayers = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('players')
         .select('*')
         .eq('team_id', currentTeamId)
@@ -62,6 +65,8 @@ const PlayerManagementPage: React.FC = () => {
           imageUrl: p.image_url ?? `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(p.name)}`,
         }));
         setPlayers(mapped);
+      } else if (error) {
+        setErrorMsg('We could not load your players. Please refresh or try again later.');
       }
     };
     loadPlayers();
@@ -87,13 +92,16 @@ const PlayerManagementPage: React.FC = () => {
         imageUrl: data.image_url,
       };
       setPlayers(prev => [...prev, saved]);
+    } else if (error) {
+      setErrorMsg('We could not add that player. Please try again.');
     }
   };
 
   const handleRemovePlayer = async (playerId: string) => {
     setLineup(prev => prev.filter(p => p.id !== playerId));
     setPlayers(prev => prev.filter(p => p.id !== playerId));
-    await supabase.from('players').delete().eq('id', playerId);
+    const { error } = await supabase.from('players').delete().eq('id', playerId);
+    if (error) setErrorMsg('We could not remove that player. Please try again.');
   };
 
   const handleAddToLineup = (player: Player) => {
@@ -108,6 +116,7 @@ const PlayerManagementPage: React.FC = () => {
 
   return (
     <main className="management-container">
+      <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} />
       <RosterManagement
         players={players}
         lineupIds={new Set(lineup.map(p => p.id))}

@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import MatchDetailsModal from './MatchDetailsModal';
 import './MatchesPage.css';
 import supabase from '../../../../supabaseClient';
+import InlineAlert from '../../components/InlineAlert';
 
 
 export interface Team {
@@ -72,11 +73,12 @@ export interface Match {
 
 
 import MatchCard from '../../components/matchCard'; // Import the new MatchCard component
+import { getCurrentTeamId } from '../../../services/teamService';
 
 
 const MatchesPage: React.FC = () => {
   // Team resolution: replace with actual auth-bound team if available
-  const currentTeamId = 'kaizer_chiefs';
+  const currentTeamId = getCurrentTeamId() || 'kaizer_chiefs';
   const [matches, setMatches] = useState<Match[]>([]);
   const [matchEvents, setMatchEvents] = useState<MatchEvent[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -86,6 +88,8 @@ const MatchesPage: React.FC = () => {
   const [teamScore, setTeamScore] = useState('');
   const [opponentScore, setOpponentScore] = useState('');
   const [date, setDate] = useState('');
+
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Load matches, events, players
   useEffect(() => {
@@ -110,6 +114,8 @@ const MatchesPage: React.FC = () => {
           shotsOnTarget: m.shots_on_target ?? undefined,
         }));
         setMatches(mapped);
+      } else if (matchErr) {
+        setErrorMsg('We could not load your matches. Please refresh or try again later.');
       }
 
       // Events
@@ -144,6 +150,8 @@ const MatchesPage: React.FC = () => {
           imageUrl: p.image_url ?? `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(p.name)}`,
         }));
         setPlayers(mappedPlayers);
+      } else {
+        setErrorMsg((prev) => prev ?? 'We could not load your players. Please refresh or try again later.');
       }
     };
     loadData();
@@ -177,6 +185,7 @@ const MatchesPage: React.FC = () => {
       setMatches(prev => [saved, ...prev]);
     } else if (error) {
       console.error('Failed to insert match:', error);
+      setErrorMsg('We could not save your match. Please check your permissions and try again.');
     }
     setOpponentName('');
     setTeamScore('');
@@ -198,7 +207,8 @@ const MatchesPage: React.FC = () => {
     if ((stats as any).passAccuracy !== undefined) toDb.pass_accuracy = (stats as any).passAccuracy;
     if ((stats as any).tackles !== undefined) toDb.tackles = (stats as any).tackles;
     if ((stats as any).saves !== undefined) toDb.saves = (stats as any).saves;
-    await supabase.from('matches').update(toDb).eq('id', matchId);
+    const { error } = await supabase.from('matches').update(toDb).eq('id', matchId);
+    if (error) setErrorMsg('We could not update the match stats. Please try again.');
   };
   
   const handleAddPlayerEvent = async (_eventId: string, matchId: string, playerId: string, eventType: MatchEvent['eventType']) => {
@@ -209,6 +219,7 @@ const MatchesPage: React.FC = () => {
       setMatchEvents(prev => [...prev, newEvent]);
     } else if (error) {
       console.error('Failed to insert match event:', error);
+      setErrorMsg('We could not log that event. Please try again.');
     }
   };
   
@@ -217,11 +228,13 @@ const MatchesPage: React.FC = () => {
     const { error } = await supabase.from('match_events').delete().eq('id', eventId);
     if (error) {
       console.error('Failed to delete match event:', error);
+      setErrorMsg('We could not remove that event. Please try again.');
     }
   };
 
   return (
     <main className="matches-container">
+      <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} />
       <section className="management-section">
         <h2 className="section-title">Match Center</h2>
         {/* The form for creating a new match remains the same */}
