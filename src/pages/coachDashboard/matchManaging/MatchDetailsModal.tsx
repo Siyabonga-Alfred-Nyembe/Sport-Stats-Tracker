@@ -1,6 +1,7 @@
 // src/components/Matches/MatchDetailsModal.tsx
 
 import React, { useState } from 'react';
+import supabase from '../../../../supabaseClient';
 
 export interface Team {
   id: string;
@@ -49,6 +50,15 @@ export interface Match {
   possession?: number; // Your team's possession %
   shots?: number;
   shotsOnTarget?: number;
+  // Extra stats
+  corners?: number;
+  fouls?: number;
+  offsides?: number;
+  xg?: number; // expected goals
+  passes?: number;
+  passAccuracy?: number; // %
+  tackles?: number;
+  saves?: number;
 }
 
 
@@ -145,6 +155,55 @@ const MatchDetailsModal: React.FC<Props> = ({ match, players, events, onClose, o
               type="number"
               defaultValue={match.shotsOnTarget}
               onBlur={(e) => onUpdateTeamStats(match.id, { shotsOnTarget: Number(e.target.value) })}
+            />
+            <label>Corners</label>
+            <input
+              type="number"
+              defaultValue={(match as any).corners}
+              onBlur={(e) => onUpdateTeamStats(match.id, { ...(match as any), corners: Number(e.target.value) })}
+            />
+            <label>Fouls</label>
+            <input
+              type="number"
+              defaultValue={(match as any).fouls}
+              onBlur={(e) => onUpdateTeamStats(match.id, { ...(match as any), fouls: Number(e.target.value) })}
+            />
+            <label>Offsides</label>
+            <input
+              type="number"
+              defaultValue={(match as any).offsides}
+              onBlur={(e) => onUpdateTeamStats(match.id, { ...(match as any), offsides: Number(e.target.value) })}
+            />
+            <label>Expected Goals (xG)</label>
+            <input
+              type="number"
+              step="0.01"
+              defaultValue={(match as any).xg}
+              onBlur={(e) => onUpdateTeamStats(match.id, { ...(match as any), xg: Number(e.target.value) })}
+            />
+            <label>Passes</label>
+            <input
+              type="number"
+              defaultValue={(match as any).passes}
+              onBlur={(e) => onUpdateTeamStats(match.id, { ...(match as any), passes: Number(e.target.value) })}
+            />
+            <label>Pass Accuracy (%)</label>
+            <input
+              type="number"
+              defaultValue={(match as any).passAccuracy}
+              onBlur={(e) => onUpdateTeamStats(match.id, { ...(match as any), passAccuracy: Number(e.target.value) })}
+            />
+            <label>Tackles</label>
+            <input
+              type="number"
+              defaultValue={(match as any).tackles}
+              onBlur={(e) => onUpdateTeamStats(match.id, { ...(match as any), tackles: Number(e.target.value) })}
+            />
+            <label>Saves</label>
+            <input
+              type="number"
+              defaultValue={(match as any).saves}
+              onBlur={(e) => onUpdateTeamStats(match.id, { ...(match as any), saves: Number(e.target.value) })}
             />
           </div>
         </section>
