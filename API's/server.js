@@ -13,7 +13,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 }
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Health
+// Health is whether the connection is okay or not
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
 // Get basic team info

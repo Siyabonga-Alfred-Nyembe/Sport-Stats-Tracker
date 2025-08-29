@@ -7,6 +7,7 @@ import MatchesPage from "./matchManaging/MatchesPage";
 import PlayerManagementPage from "./playerManagement/PlayerManagementPage";
 import "../../Styles/dashboard.css";
 import { getCurrentTeamId } from "../../services/teamService";
+import supabase from "../../../supabaseClient";
 
 // --- NOTE: These interfaces should ideally be in a single, shared types.ts file ---
 
@@ -44,6 +45,9 @@ const CoachDashboard: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]); 
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [countPlayers, setCountPlayers] = useState<number>(0);
+  const [countTeams, setCountTeams] = useState<number>(0);
+  const [countMatches, setCountMatches] = useState<number>(0);
 
   const handleProfileClick = () => navigate("/profile-settings");
   const handleReportIssue = () => console.log("Opening issue report form");
@@ -55,6 +59,33 @@ const CoachDashboard: React.FC = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    const loadCounts = async () => {
+      const teamId = getCurrentTeamId();
+      // total teams
+      const { count: teamsCount } = await supabase
+        .from('teams')
+        .select('*', { count: 'exact', head: true });
+      setCountTeams(teamsCount ?? 0);
+
+      if (!teamId) return;
+      // players in current team
+      const { count: playersCount } = await supabase
+        .from('players')
+        .select('*', { count: 'exact', head: true })
+        .eq('team_id', teamId);
+      setCountPlayers(playersCount ?? 0);
+
+      // matches for current team
+      const { count: matchesCount } = await supabase
+        .from('matches')
+        .select('*', { count: 'exact', head: true })
+        .eq('team_id', teamId);
+      setCountMatches(matchesCount ?? 0);
+    };
+    loadCounts();
+  }, [activeTab]);
+
   return (
     <section className="dashboard coach-dashboard">
       <DashboardHeader 
@@ -62,6 +93,21 @@ const CoachDashboard: React.FC = () => {
         setActiveTab={setActiveTab}
         onReportIssue={handleReportIssue} 
       />
+
+      <section className="stats-cards">
+        <article className="stat-card white">
+          <h3>{countTeams}</h3>
+          <div>Total Teams</div>
+        </article>
+        <article className="stat-card blue">
+          <h3>{countPlayers}</h3>
+          <div>Total Players</div>
+        </article>
+        <article className="stat-card violet">
+          <h3>{countMatches}</h3>
+          <div>Matches</div>
+        </article>
+      </section>
 
       <section className="dashboard-content">
         {activeTab === "myTeam" && (
