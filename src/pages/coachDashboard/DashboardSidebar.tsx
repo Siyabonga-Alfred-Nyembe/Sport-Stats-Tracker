@@ -1,0 +1,30 @@
+import React from "react";
+
+interface Props {
+  onNavigate: (tab: string) => void;
+}
+
+const DashboardSidebar: React.FC<Props> = ({ onNavigate }) => {
+  return (
+    <aside className="coach-sidebar">
+      <h3 className="sidebar-title">R&S Sports</h3>
+      <nav className="sidebar-nav">
+        <button onClick={() => onNavigate('matches')}>Overview</button>
+        <button onClick={() => onNavigate('myTeam')}>Teams</button>
+        <button onClick={() => onNavigate('players')}>Players</button>
+        <button onClick={() => onNavigate('matches')}>Matches</button>
+      </nav>
+      <section className="sidebar-quick">
+        <h4>Quick Actions</h4>
+        <div className="quick-actions">
+          <button className="quick primary">Export</button>
+          <button className="quick">Import</button>
+        </div>
+      </section>
+    </aside>
+  );
+};
+
+export default DashboardSidebar;
+
+

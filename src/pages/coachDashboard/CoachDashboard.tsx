@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardHeader from "./DashboardHeader";
+import DashboardSidebar from "./DashboardSidebar";
 import MyTeamTab from "./MyTeamTab";
 // Updated import to use the correct name for clarity
 import MatchesPage from "./matchManaging/MatchesPage";
@@ -88,37 +89,40 @@ const CoachDashboard: React.FC = () => {
 
   return (
     <section className="dashboard coach-dashboard">
-      <DashboardHeader 
-        onProfileClick={handleProfileClick}
-        setActiveTab={setActiveTab}
-        onReportIssue={handleReportIssue} 
-      />
+      <DashboardSidebar onNavigate={setActiveTab} />
+      <section>
+        <DashboardHeader 
+          onProfileClick={handleProfileClick}
+          setActiveTab={setActiveTab}
+          onReportIssue={handleReportIssue} 
+        />
 
-      <section className="stats-cards">
-        <article className="stat-card white">
-          <h3>{countTeams}</h3>
-          <div>Total Teams</div>
-        </article>
-        <article className="stat-card blue">
-          <h3>{countPlayers}</h3>
-          <div>Total Players</div>
-        </article>
-        <article className="stat-card violet">
-          <h3>{countMatches}</h3>
-          <div>Matches</div>
-        </article>
-      </section>
+        <section className="stats-cards">
+          <article className="stat-card white">
+            <h3>{countTeams}</h3>
+            <div>Total Teams</div>
+          </article>
+          <article className="stat-card blue">
+            <h3>{countPlayers}</h3>
+            <div>Total Players</div>
+          </article>
+          <article className="stat-card violet">
+            <h3>{countMatches}</h3>
+            <div>Matches</div>
+          </article>
+        </section>
 
-      <section className="dashboard-content">
-        {activeTab === "myTeam" && (
-          <MyTeamTab teams={teams} setTeams={setTeams} navigate={navigate} />
-        )}
-        {activeTab === "matches" && (
-          <MatchesPage />
-        )}
-        {activeTab === "players" && (
-          <PlayerManagementPage />
-        )}
+        <section className="dashboard-content">
+          {activeTab === "myTeam" && (
+            <MyTeamTab teams={teams} setTeams={setTeams} navigate={navigate} />
+          )}
+          {activeTab === "matches" && (
+            <MatchesPage />
+          )}
+          {activeTab === "players" && (
+            <PlayerManagementPage />
+          )}
+        </section>
       </section>
     </section>
   );
