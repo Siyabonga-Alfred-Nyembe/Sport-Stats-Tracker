@@ -68,7 +68,6 @@ const CoachDashboard: React.FC = () => {
           <MyTeamTab teams={teams} setTeams={setTeams} navigate={navigate} />
         )}
         {activeTab === "matches" && (
-          // Render MatchesPage without passing unnecessary props
           <MatchesPage />
         )}
         {activeTab === "players" && (
