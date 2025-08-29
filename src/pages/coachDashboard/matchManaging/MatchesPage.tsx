@@ -88,8 +88,8 @@ const MatchesPage: React.FC = () => {
   const [teamScore, setTeamScore] = useState('');
   const [opponentScore, setOpponentScore] = useState('');
   const [date, setDate] = useState('');
-
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   // Load matches, events, players
   useEffect(() => {
@@ -250,7 +250,20 @@ const MatchesPage: React.FC = () => {
         </form>
         
         <div className="match-list">
-          {matches.map(match => (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+            <input
+              type="text"
+              placeholder="Search teams or dates"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }}
+            />
+          </div>
+          {matches.filter(m => {
+            const q = search.toLowerCase();
+            if (!q) return true;
+            return m.opponentName.toLowerCase().includes(q) || (m.date || '').includes(q);
+          }).map(match => (
             // We wrap the new MatchCard in a div to handle the click event
             <div key={match.id} onClick={() => setSelectedMatch(match)}>
               <MatchCard
