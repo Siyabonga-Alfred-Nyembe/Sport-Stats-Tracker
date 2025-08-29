@@ -7,10 +7,11 @@ import ForgotPassword from "./pages/forgot";
 import ResetPassword from "./pages/reset";
 import Land from "./pages/land";
 import CoachDashboard from "./pages/coachDashboard/CoachDashboard";
-import UserDashboard from "./pages/userDashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import AuthCallback from "./pages/authCallback";
 import TeamSetup from "./pages/TeamSetup";
+import UserDashboard from "./pages/userDashboard/RedesignedDashboard";
+import RedesignedDashboard from "./pages/userDashboard/RedesignedDashboard";
 import "./App.css";
 
 function App() {
@@ -30,6 +31,13 @@ function App() {
           <Route path="/user-dashboard" element={<UserDashboard />} />
           <Route path="/profile-settings" element={<ProfileSettings />} />
           <Route path="/auth-callback" element={<AuthCallback />} />
+          <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route path="/overview" element={<RedesignedDashboard />} />
+          <Route path="/teams" element={<RedesignedDashboard />} />
+          <Route path="/players" element={<RedesignedDashboard />} />
+          <Route path="/matches" element={<RedesignedDashboard />} />
+          <Route path="/matches/:id" element={<RedesignedDashboard />} />
+          <Route path="/favorites" element={<RedesignedDashboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </section>
