@@ -1,4 +1,4 @@
-// Player statistics
+// types.ts
 export interface PlayerStats {
   // Attacking
   goals: number;
@@ -68,8 +68,7 @@ export interface Match {
   shotsOnTarget?: number;
   corners?: number;
   fouls?: number;
-  offsides?: number;
-  xg?: number;             // Expected goals
+  offsides?: number;             // Expected goals
   passes?: number;
   passAccuracy?: number;   // %
   tackles?: number;

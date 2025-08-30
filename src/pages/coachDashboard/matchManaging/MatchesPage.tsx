@@ -6,17 +6,8 @@ import './MatchesPage.css';
 import supabase from '../../../../supabaseClient';
 import InlineAlert from '../../components/InlineAlert';
 import type {Team,PlayerStats,Player,MatchEvent,Match} from '../../../types'
-
-
-
-
-
-
-
-
 import MatchCard from '../../components/matchCard'; // Import the new MatchCard component
 import { getCurrentTeamId } from '../../../services/teamService';
-
 
 const MatchesPage: React.FC = () => {
   // Team resolution: replace with actual auth-bound team if available

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardHeader from "./DashboardHeader";
 import DashboardSidebar from "./DashboardSidebar";
-import MyTeamTab from "./MyTeamTab";
+import MyTeamTab from "./coachStatsPage/MyTeamTab";
 // Updated import to use the correct name for clarity
 import MatchesPage from "./matchManaging/MatchesPage";
 import PlayerManagementPage from "./playerManagement/PlayerManagementPage";
@@ -64,7 +64,7 @@ const CoachDashboard: React.FC = () => {
       <section>
         <section className="dashboard-content">
           {activeTab === "myTeam" && (
-            <MyTeamTab teams={teams} setTeams={setTeams} navigate={navigate} />
+            <MyTeamTab />
           )}
           {activeTab === "matches" && (
             <MatchesPage />
