@@ -1,14 +1,13 @@
-// src/__test__/TeamSetup.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
 import TeamSetup from '../pages/TeamSetup';
 import { vi } from 'vitest';
 
-// 🔹 Mock the createTeam service
+
 vi.mock('../services/teamService', () => ({
   createTeam: vi.fn(),
 }));
 
-// 🔹 Mock react-router-dom fully and override useNavigate
+//Mock react-router-dom fully and override useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<any>('react-router-dom');

@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for Sport-Stats-Tracker/src/pages/coachDashboard/playerManagement/mockDayt.ts</title>
+    <title>Code coverage report for Sport-Stats-Tracker/src/pages/coachDashboard/coachStatsPage/team-stats-helper.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../../../prettify.css" />
     <link rel="stylesheet" href="../../../../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../../../index.html">All files</a> / <a href="index.html">Sport-Stats-Tracker/src/pages/coachDashboard/playerManagement</a> mockDayt.ts</h1>
+        <h1><a href="../../../../../index.html">All files</a> / <a href="index.html">Sport-Stats-Tracker/src/pages/coachDashboard/coachStatsPage</a> team-stats-helper.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/54</span>
+                <span class='fraction'>0/43</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/54</span>
+                <span class='fraction'>0/43</span>
             </div>
         
             
@@ -105,18 +105,7 @@
 <a name='L40'></a><a href='#L40'>40</a>
 <a name='L41'></a><a href='#L41'>41</a>
 <a name='L42'></a><a href='#L42'>42</a>
-<a name='L43'></a><a href='#L43'>43</a>
-<a name='L44'></a><a href='#L44'>44</a>
-<a name='L45'></a><a href='#L45'>45</a>
-<a name='L46'></a><a href='#L46'>46</a>
-<a name='L47'></a><a href='#L47'>47</a>
-<a name='L48'></a><a href='#L48'>48</a>
-<a name='L49'></a><a href='#L49'>49</a>
-<a name='L50'></a><a href='#L50'>50</a>
-<a name='L51'></a><a href='#L51'>51</a>
-<a name='L52'></a><a href='#L52'>52</a>
-<a name='L53'></a><a href='#L53'>53</a>
-<a name='L54'></a><a href='#L54'>54</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L43'></a><a href='#L43'>43</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -158,78 +147,56 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >export interface Team {</span></span></span>
-<span class="cstat-no" title="statement not covered" >  id: string;</span>
-<span class="cstat-no" title="statement not covered" >  name: string;</span>
-<span class="cstat-no" title="statement not covered" >  coachId: string;</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >// src/pages/coachDashboard/team-stats-helper.ts</span></span></span>
+<span class="cstat-no" title="statement not covered" >import type{ Match } from '../../../types';</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export interface PlayerStats {</span>
-<span class="cstat-no" title="statement not covered" >  goals: number;</span>
-<span class="cstat-no" title="statement not covered" >  assists: number;</span>
-<span class="cstat-no" title="statement not covered" >  minutesPlayed: number;</span>
-<span class="cstat-no" title="statement not covered" >  yellowCards: number;</span>
-<span class="cstat-no" title="statement not covered" >  redCards: number;</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+<span class="cstat-no" title="statement not covered" >export const calculateTeamStats = (matches: Match[]) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  if (matches.length === 0) return null;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export interface Player {</span>
-<span class="cstat-no" title="statement not covered" >  id: string;</span>
-<span class="cstat-no" title="statement not covered" >  name: string;</span>
-<span class="cstat-no" title="statement not covered" >  teamId: string;</span>
-<span class="cstat-no" title="statement not covered" >  position: string;</span>
-<span class="cstat-no" title="statement not covered" >  stats: PlayerStats;</span>
-<span class="cstat-no" title="statement not covered" >  imageUrl: string; // Added for the player card</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+<span class="cstat-no" title="statement not covered" >  const totalMatches = matches.length;</span>
+<span class="cstat-no" title="statement not covered" >  const wins = matches.filter(m =&gt; m.teamScore &gt; m.opponentScore).length;</span>
+<span class="cstat-no" title="statement not covered" >  const draws = matches.filter(m =&gt; m.teamScore === m.opponentScore).length;</span>
+<span class="cstat-no" title="statement not covered" >  const losses = totalMatches - wins - draws;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export const mockTeams: Team[] = [</span>
-<span class="cstat-no" title="statement not covered" >  { id: 'team1', name: 'Cosmic Comets', coachId: 'coach123' },</span>
-<span class="cstat-no" title="statement not covered" >  { id: 'team2', name: 'Solar Flares', coachId: 'coach456' },</span>
-<span class="cstat-no" title="statement not covered" >];</span>
+<span class="cstat-no" title="statement not covered" >  const goalsFor = matches.reduce((sum, m) =&gt; sum + m.teamScore, 0);</span>
+<span class="cstat-no" title="statement not covered" >  const goalsAgainst = matches.reduce((sum, m) =&gt; sum + m.opponentScore, 0);</span>
+<span class="cstat-no" title="statement not covered" >  const goalDifference = goalsFor - goalsAgainst;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export const mockPlayers: Player[] = [</span>
-<span class="cstat-no" title="statement not covered" >  {</span>
-<span class="cstat-no" title="statement not covered" >    id: 'p1',</span>
-<span class="cstat-no" title="statement not covered" >    name: 'Leo Vega',</span>
-<span class="cstat-no" title="statement not covered" >    teamId: 'team1',</span>
-<span class="cstat-no" title="statement not covered" >    position: 'Striker',</span>
-<span class="cstat-no" title="statement not covered" >    stats: { goals: 2, assists: 1, minutesPlayed: 90, yellowCards: 0, redCards: 0 },</span>
-<span class="cstat-no" title="statement not covered" >    imageUrl: 'https://via.placeholder.com/280x250/8a2be2/FFF?text=Leo+Vega',</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >  {</span>
-<span class="cstat-no" title="statement not covered" >    id: 'p2',</span>
-<span class="cstat-no" title="statement not covered" >    name: 'Mia Chen',</span>
-<span class="cstat-no" title="statement not covered" >    teamId: 'team1',</span>
-<span class="cstat-no" title="statement not covered" >    position: 'Midfielder',</span>
-<span class="cstat-no" title="statement not covered" >    stats: { goals: 0, assists: 3, minutesPlayed: 90, yellowCards: 1, redCards: 0 },</span>
-<span class="cstat-no" title="statement not covered" >    imageUrl: 'https://via.placeholder.com/280x250/333/FFF?text=Mia+Chen',</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >  {</span>
-<span class="cstat-no" title="statement not covered" >    id: 'p3',</span>
-<span class="cstat-no" title="statement not covered" >    name: 'Sam Jones',</span>
-<span class="cstat-no" title="statement not covered" >    teamId: 'team2',</span>
-<span class="cstat-no" title="statement not covered" >    position: 'Defender',</span>
-<span class="cstat-no" title="statement not covered" >    stats: { goals: 0, assists: 0, minutesPlayed: 75, yellowCards: 0, redCards: 0 },</span>
-<span class="cstat-no" title="statement not covered" >    imageUrl: 'https://via.placeholder.com/280x250/555/FFF?text=Sam+Jones',</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >];</span></pre></td></tr></table></pre>
+<span class="cstat-no" title="statement not covered" >  const totalShots = matches.reduce((sum, m) =&gt; sum + (m.shots || 0), 0);</span>
+<span class="cstat-no" title="statement not covered" >  const totalPossession = matches.reduce((sum, m) =&gt; sum + (m.possession || 0), 0);</span>
+<span class="cstat-no" title="statement not covered" >  const totalFouls = matches.reduce((sum, m) =&gt; sum + (m.fouls || 0), 0);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  // Form is the result of the last 5 matches (W, D, L)</span>
+<span class="cstat-no" title="statement not covered" >  const form = matches.slice(0, 5).map(m =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (m.teamScore &gt; m.opponentScore) return 'W';</span>
+<span class="cstat-no" title="statement not covered" >    if (m.teamScore &lt; m.opponentScore) return 'L';</span>
+<span class="cstat-no" title="statement not covered" >    return 'D';</span>
+<span class="cstat-no" title="statement not covered" >  });</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  return {</span>
+<span class="cstat-no" title="statement not covered" >    totalMatches,</span>
+<span class="cstat-no" title="statement not covered" >    wins,</span>
+<span class="cstat-no" title="statement not covered" >    draws,</span>
+<span class="cstat-no" title="statement not covered" >    losses,</span>
+<span class="cstat-no" title="statement not covered" >    winPercentage: totalMatches &gt; 0 ? Math.round((wins / totalMatches) * 100) : 0,</span>
+<span class="cstat-no" title="statement not covered" >    goalsFor,</span>
+<span class="cstat-no" title="statement not covered" >    goalsAgainst,</span>
+<span class="cstat-no" title="statement not covered" >    goalDifference,</span>
+<span class="cstat-no" title="statement not covered" >    avgGoalsFor: totalMatches &gt; 0 ? (goalsFor / totalMatches).toFixed(2) : 0,</span>
+<span class="cstat-no" title="statement not covered" >    avgGoalsAgainst: totalMatches &gt; 0 ? (goalsAgainst / totalMatches).toFixed(2) : 0,</span>
+<span class="cstat-no" title="statement not covered" >    avgShots: totalMatches &gt; 0 ? (totalShots / totalMatches).toFixed(2) : 0,</span>
+<span class="cstat-no" title="statement not covered" >    avgPossession: totalMatches &gt; 0 ? Math.round(totalPossession / totalMatches) : 0,</span>
+<span class="cstat-no" title="statement not covered" >    avgFouls: totalMatches &gt; 0 ? (totalFouls / totalMatches).toFixed(2) : 0,</span>
+<span class="cstat-no" title="statement not covered" >    form,</span>
+<span class="cstat-no" title="statement not covered" >  };</span>
+<span class="cstat-no" title="statement not covered" >};</span></pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-08-29T22:58:44.607Z
+                at 2025-08-30T20:06:08.375Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

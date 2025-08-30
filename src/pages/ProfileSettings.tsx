@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
+import { uploadAvatar, upsertUserProfile, fetchUserProfile } from "../services/profileService";
+import InlineAlert from "./components/InlineAlert";
 import "../Styles/profileSettings.css";
 
 interface ProfileData {
@@ -18,6 +20,7 @@ const ProfileSettings: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -31,26 +34,17 @@ const ProfileSettings: React.FC = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("name, bio, profile_picture")
-        .eq("id", user.id)
-        .single();
-
-      if (error && error.code !== "PGRST116") {
-        console.error("Error fetching profile:", error);
-        return;
-      }
-
+      const data = await fetchUserProfile(user.id);
       if (data) {
         setProfile({
-          name: data.name || "",
+          name: data.display_name || "",
           bio: data.bio || "",
-          profilePicture: data.profile_picture
+          profilePicture: data.avatar_url || null
         });
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
+      setErrorMsg("We could not load your profile. Please try again later.");
     }
   };
 
@@ -66,23 +60,20 @@ const ProfileSettings: React.FC = () => {
         return;
       }
 
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({
+      try {
+        await upsertUserProfile({
           id: user.id,
-          name: profile.name,
+          display_name: profile.name,
           bio: profile.bio,
-          profile_picture: profile.profilePicture,
-          updated_at: new Date().toISOString()
+          avatar_url: profile.profilePicture || null,
         });
-
-      if (error) {
-        setMessage("Error saving profile: " + error.message);
-      } else {
         setMessage("Profile saved successfully!");
+        setErrorMsg(null);
+      } catch (err: any) {
+        setErrorMsg("We could not save your profile. Please try again.");
       }
     } catch (error) {
-      setMessage("An unexpected error occurred.");
+      setErrorMsg("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -96,24 +87,14 @@ const ProfileSettings: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('profile-pictures')
-        .upload(fileName, file);
-
-      if (uploadError) {
-        setMessage("Error uploading image: " + uploadError.message);
+      const publicUrl = await uploadAvatar(user.id, file);
+      if (!publicUrl) {
+        setErrorMsg("We could not upload your picture. Please try again later.");
         return;
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-pictures')
-        .getPublicUrl(fileName);
-
       setProfile({ ...profile, profilePicture: publicUrl });
     } catch (error) {
-      setMessage("Error uploading image");
+      setErrorMsg("Error uploading image. Please try again.");
     }
   };
 
@@ -127,6 +108,7 @@ const ProfileSettings: React.FC = () => {
       </header>
 
       <form onSubmit={handleSave} className="profile-form">
+        <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} />
         <section className="profile-picture-section">
           <section className="profile-picture">
             {profile.profilePicture ? (

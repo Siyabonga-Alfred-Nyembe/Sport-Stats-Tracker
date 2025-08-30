@@ -3,15 +3,15 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     coverage: {
-      provider: "istanbul",
-      reporter: ["text", "html"],
-      all: false,
+      provider: "istanbul",             // uses Istanbul for coverage
+      reporter: ["text", "html"],       // text table + HTML report
       include: [
         "src/pages/**/*.tsx",
         "src/components/**/*.tsx",
-        "src", "tests"
+        "src/services/**/*.ts",
+        "src/**/*.ts",                   // include other TS files like types, services, utils
       ],
-      exclude: ["node_modules/", "dist/"],
+      exclude: ["node_modules/", "dist/"],  // exclude external folders
     },
   },
 });

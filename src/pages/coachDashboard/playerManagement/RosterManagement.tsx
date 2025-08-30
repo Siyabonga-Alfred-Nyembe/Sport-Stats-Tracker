@@ -1,37 +1,27 @@
-// src/components/PlayerManagement/RosterManagement.tsx
-
 import React, { useState } from 'react';
+import type { Player } from '../../../types'; // Ensure this path is correct for your project
 import PlayerCard from '../../components/playerCard';
 
-export interface PlayerStats {
-  goals: number;
-  assists: number;
-  minutesPlayed: number;
-  yellowCards: number;
-  redCards: number;
-}
 
-export interface Player {
-    
-  id: string;
-  jerseyNum: string;
-  name: string;
-  teamId: string;
-  position: string;
-  stats: PlayerStats;
-  imageUrl: string; // Added for the player card
-}
+
 
 interface Props {
   players: Player[];
   lineupIds: Set<string>;
-  // The onAddPlayer prop no longer includes teamId in its argument
   onAddPlayer: (player: Omit<Player, 'id' | 'stats' | 'imageUrl' | 'teamId'>) => void;
   onRemovePlayer: (playerId: string) => void;
   onAddToLineup: (player: Player) => void;
+  onPlayerClick: (player: Player) => void; // New prop to handle clicks
 }
 
-const RosterManagement: React.FC<Props> = ({ players, lineupIds, onAddPlayer, onRemovePlayer, onAddToLineup }) => {
+const RosterManagement: React.FC<Props> = ({ 
+  players, 
+  lineupIds, 
+  onAddPlayer, 
+  onRemovePlayer, 
+  onAddToLineup, 
+  onPlayerClick // Destructure the new prop
+}) => {
   const [name, setName] = useState('');
   const [position, setPosition] = useState('');
   const [jerseyNum, setJerseyNum] = useState('');
@@ -39,10 +29,7 @@ const RosterManagement: React.FC<Props> = ({ players, lineupIds, onAddPlayer, on
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !position.trim() || !jerseyNum.trim()) return;
-
-    // teamId is no longer passed from here
     onAddPlayer({ name, position, jerseyNum });
-
     setName('');
     setPosition('');
     setJerseyNum('');
@@ -56,31 +43,39 @@ const RosterManagement: React.FC<Props> = ({ players, lineupIds, onAddPlayer, on
         <input type="text" placeholder="Player Name" value={name} onChange={e => setName(e.target.value)} required />
         <input type="text" placeholder="Position" value={position} onChange={e => setPosition(e.target.value)} required />
         <input type="number" placeholder="Jersey Number" value={jerseyNum} onChange={e => setJerseyNum(e.target.value)} required />
-        
-        {/* The team selection dropdown has been removed */}
-        
         <button type="submit">Add Player</button>
       </form>
 
       <div className="card-grid">
         {players.map(player => (
-          <PlayerCard 
+          // --- UPDATED SECTION ---
+          // Wrapped the PlayerCard in a div to make the entire card clickable
+          <div 
             key={player.id} 
-            name={player.name} 
-            position={player.position} 
-            jerseyNum={player.jerseyNum} 
-            imageUrl={player.imageUrl}
+            className="player-card-wrapper" 
+            onClick={() => onPlayerClick(player)}
           >
-            <button
-              onClick={() => onAddToLineup(player)}
-              disabled={lineupIds.has(player.id)}
+            <PlayerCard 
+              name={player.name} 
+              position={player.position} 
+              jerseyNum={player.jerseyNum} 
+              imageUrl={player.imageUrl}
             >
-              Add to Lineup
-            </button>
-            <button onClick={() => onRemovePlayer(player.id)} className="remove-btn">
-              Remove
-            </button>
-          </PlayerCard>
+              <button
+                onClick={(e) => { e.stopPropagation(); onAddToLineup(player); }} // Stop propagation to prevent modal open
+                disabled={lineupIds.has(player.id)}
+              >
+                Add to Lineup
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onRemovePlayer(player.id); }} // Stop propagation here too
+                className="remove-btn"
+              >
+                Remove
+              </button>
+            </PlayerCard>
+          </div>
+          // --- END OF UPDATED SECTION ---
         ))}
       </div>
     </section>

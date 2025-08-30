@@ -1,10 +1,18 @@
-// supabaseClient.js
+// supabaseClient.ts
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = "https://ntnudvecvuqvimuwsdip.supabase.co";
-const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50bnVkdmVjdnVxdmltdXdzZGlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDQ0NzcsImV4cCI6MjA3MDkyMDQ3N30.HUm10PWetcdMNAUYPQbAGr1IhFCrxbrRdVqYKNg2GCc";
+// Expect Vite env variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error("❌ Missing Supabase credentials!");
+  console.error("Please create a .env file in your project root with:");
+  console.error("VITE_SUPABASE_URL=your_supabase_project_url");
+  console.error("VITE_SUPABASE_ANON_KEY=your_supabase_anon_key");
+  console.error("Current values:", { supabaseUrl, supabaseAnonKey });
+}
+
+const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "");
 
 export default supabase;

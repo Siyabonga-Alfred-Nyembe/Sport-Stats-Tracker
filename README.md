@@ -43,6 +43,16 @@ Before you begin, ensure you have the following installed:
    yarn install
    ```
 
+### Environment variables
+
+Create a `.env` in the project root (do not commit). Vite exposes variables prefixed with `VITE_` to the client.
+
+```
+VITE_SUPABASE_URL=https://YOUR-PROJECT-REF.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+```
+
+Restart the dev server after changing env vars.
 
 ## Running the Application
 

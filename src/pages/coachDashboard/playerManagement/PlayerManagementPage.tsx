@@ -1,51 +1,43 @@
-
-// src/components/PlayerManagement/PlayerManagementPage.tsx
+// src/pages/coachDashboard/playerManagement/PlayerManagementPage.tsx
 
 import React, { useEffect, useState } from 'react';
 import supabase from '../../../../supabaseClient';
 import { getCurrentTeamId } from '../../../services/teamService';
-import InlineAlert from '../../components/InlineAlert';
-
 import RosterManagement from './RosterManagement';
 import LineupSelection from './LineupSelection';
+import PlayerStatsModal from './PlayerStatsModal';
 import './PlayerManagement.css';
 
-export interface Team {
-  id: string;
-  name: string;
-  coachId: string;
-}
+// 1. Import the Player and PlayerStats types from your central types file
+import type { Player, PlayerStats } from "../../../types";
 
-export interface PlayerStats {
-  goals: number;
-  assists: number;
-  minutesPlayed: number;
-  yellowCards: number;
-  redCards: number;
-}
-
-export interface Player {
-    
-  id: string;
-  jerseyNum: string;
-  name: string;
-  teamId: string;
-  position: string;
-  stats: PlayerStats;
-  imageUrl: string; // Added for the player card
-}
-
-// Data will be read from Supabase
-
-
+// Helper function to create a default, complete stats object
+const createDefaultStats = (): PlayerStats => ({
+  goals: 0,
+  assists: 0,
+  shots: 0,
+  shotsOnTarget: 0,
+  chancesCreated: 0,
+  tackles: 0,
+  interceptions: 0,
+  clearances: 0,
+  saves: 0,
+  cleansheets: 0,
+  savePercentage: 0,
+  passCompletion: 0,
+  minutesPlayed: 0,
+  yellowCards: 0,
+  redCards: 0,
+  performanceData: [0, 0, 0, 0, 0],
+});
 
 const PlayerManagementPage: React.FC = () => {
-  // This would come from user authentication state in a real app
-  const currentTeamId = getCurrentTeamId() || 'kaizer_chiefs'; // Coach's current team
+  const currentTeamId = getCurrentTeamId() || 'kaizer_chiefs';
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [lineup, setLineup] = useState<Player[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
   useEffect(() => {
     const loadPlayers = async () => {
@@ -54,6 +46,7 @@ const PlayerManagementPage: React.FC = () => {
         .select('*')
         .eq('team_id', currentTeamId)
         .order('name');
+        
       if (data) {
         const mapped: Player[] = data.map((p: any) => ({
           id: String(p.id),
@@ -61,7 +54,8 @@ const PlayerManagementPage: React.FC = () => {
           name: p.name,
           teamId: p.team_id,
           position: p.position ?? '',
-          stats: { goals: 0, assists: 0, minutesPlayed: 0, yellowCards: 0, redCards: 0 },
+          // 2. IMPORTANT: Initialize the FULL stats object here
+          stats: createDefaultStats(), // In a real app, you would fetch these stats
           imageUrl: p.image_url ?? `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(p.name)}`,
         }));
         setPlayers(mapped);
@@ -88,7 +82,8 @@ const PlayerManagementPage: React.FC = () => {
         name: data.name,
         teamId: data.team_id,
         position: data.position ?? '',
-        stats: { goals: 0, assists: 0, minutesPlayed: 0, yellowCards: 0, redCards: 0 },
+        // 3. Also initialize the full stats object for new players
+        stats: createDefaultStats(),
         imageUrl: data.image_url,
       };
       setPlayers(prev => [...prev, saved]);
@@ -100,8 +95,7 @@ const PlayerManagementPage: React.FC = () => {
   const handleRemovePlayer = async (playerId: string) => {
     setLineup(prev => prev.filter(p => p.id !== playerId));
     setPlayers(prev => prev.filter(p => p.id !== playerId));
-    const { error } = await supabase.from('players').delete().eq('id', playerId);
-    if (error) setErrorMsg('We could not remove that player. Please try again.');
+    await supabase.from('players').delete().eq('id', playerId);
   };
 
   const handleAddToLineup = (player: Player) => {
@@ -113,26 +107,31 @@ const PlayerManagementPage: React.FC = () => {
   const handleRemoveFromLineup = (playerId: string) => {
     setLineup(prev => prev.filter(p => p.id !== playerId));
   };
-
+  
   return (
     <main className="management-container">
-      <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} />
+      {/* <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} /> */}
       <RosterManagement
         players={players}
         lineupIds={new Set(lineup.map(p => p.id))}
         onAddPlayer={handleAddPlayer}
         onRemovePlayer={handleRemovePlayer}
         onAddToLineup={handleAddToLineup}
-        // The 'teams' prop is no longer passed down
+        onPlayerClick={(player) => setSelectedPlayer(player)}
       />
       <LineupSelection
         lineup={lineup}
         onRemoveFromLineup={handleRemoveFromLineup}
       />
+      
+      {selectedPlayer && (
+        <PlayerStatsModal 
+          player={selectedPlayer} 
+          onClose={() => setSelectedPlayer(null)} 
+        />
+      )}
     </main>
   );
 };
 
 export default PlayerManagementPage;
-
-// ✅ Mock data
