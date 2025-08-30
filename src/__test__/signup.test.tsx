@@ -1,4 +1,3 @@
-// src/__tests__/Signup.ui.test.tsx
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Signup from "../pages/signup";

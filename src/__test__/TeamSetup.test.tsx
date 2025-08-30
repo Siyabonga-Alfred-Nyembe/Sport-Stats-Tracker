@@ -61,7 +61,6 @@ describe('TeamSetup Component', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /create team/i }));
 
-    // Wait for async effect
     await screen.findByRole('button', { name: /create team/i });
 
     expect(mockNavigate).toHaveBeenCalledWith('/coach-dashboard');

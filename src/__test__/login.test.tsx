@@ -30,5 +30,4 @@ describe("Login Component", () => {
     expect(screen.getByRole("button", { name: /login/i })).toBeInTheDocument();
   });
 
-  // Other tests: wrap Login in BrowserRouter as well
 });

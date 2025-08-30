@@ -1,4 +1,3 @@
-// __tests__/LandingPage.test.tsx
 import { render, screen, fireEvent } from "@testing-library/react";
 import LandingPage from "../pages/landingPage"; // adjust path if needed
 import { vi } from "vitest";
