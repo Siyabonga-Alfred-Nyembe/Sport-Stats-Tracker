@@ -5,71 +5,13 @@ import MatchDetailsModal from './MatchDetailsModal';
 import './MatchesPage.css';
 import supabase from '../../../../supabaseClient';
 import InlineAlert from '../../components/InlineAlert';
-
-
-export interface Team {
-  id: string;
-  name: string;
-  coachId: string;
-}
-
-export interface PlayerStats {
-  goals: number;
-  assists: number;
-  minutesPlayed: number;
-  yellowCards: number;
-  redCards: number;
-}
-
-export interface Player {
-    
-  id: string;
-  jerseyNum: string;
-  name: string;
-  teamId: string;
-  position: string;
-  stats: PlayerStats;
-  imageUrl: string; // Added for the player card
-}
-
-export interface MatchEvent {
-  id: string;
-  matchId: string;
-  playerId: string;
-  eventType: 'goal' | 'assist' | 'yellow_card' | 'red_card';
-  minute?: number; // Optional: The minute the event occurred
-}
-
-// The main Match object, now with team-level stats
-export interface Match {
-  id: string;
-  teamId: string; // Your team's ID
-  opponentName: string;
-  teamScore: number;
-  opponentScore: number;
-  date: string;
-  status: 'scheduled' | 'completed';
-  
-  // Team-level stats
-  possession?: number; // Your team's possession %
-  shots?: number;
-  shotsOnTarget?: number;
-}
-
-
-
-// Supabase-backed state; we keep no mocks
-
-// Players will be read from Supabase
-
-
-// Teams will be read from Supabase in future; for now we use a stable team id
+import type {Team,PlayerStats,Player,MatchEvent,Match} from '../../../types'
 
 
 
 
 
-// src/components/Matches/MatchesPage.tsx
+
 
 
 import MatchCard from '../../components/matchCard'; // Import the new MatchCard component
@@ -141,14 +83,36 @@ const MatchesPage: React.FC = () => {
         .eq('team_id', currentTeamId);
       if (playerRows) {
         const mappedPlayers: Player[] = playerRows.map((p: any) => ({
-          id: String(p.id),
-          name: p.name,
-          jerseyNum: String(p.jersey_num ?? ''),
-          teamId: p.team_id,
-          position: p.position ?? '',
-          stats: { goals: 0, assists: 0, minutesPlayed: 0, yellowCards: 0, redCards: 0 },
-          imageUrl: p.image_url ?? `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(p.name)}`,
-        }));
+  id: String(p.id),
+  name: p.name,
+  jerseyNum: String(p.jersey_num ?? ''),
+  teamId: p.team_id,
+  position: p.position ?? '',
+  stats: {
+    goals: 0,
+    assists: 0,
+    shots: 0,
+    shotsOnTarget: 0,
+    chancesCreated: 0,
+    tackles: 0,
+    interceptions: 0,
+    clearances: 0,
+    saves: 0,
+    cleansheets: 0,
+    savePercentage: 0,
+    passCompletion: 0,
+    minutesPlayed: 0,
+    yellowCards: 0,
+    redCards: 0,
+    performanceData: [],
+  },
+  imageUrl:
+    p.image_url ??
+    `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(
+      p.name
+    )}`,
+}));
+
         setPlayers(mappedPlayers);
       } else {
         setErrorMsg((prev) => prev ?? 'We could not load your players. Please refresh or try again later.');
@@ -243,8 +207,8 @@ const MatchesPage: React.FC = () => {
           <input type="text" placeholder="Opponent Name" value={opponentName} onChange={e => setOpponentName(e.target.value)} required />
           <input type="date" value={date} onChange={e => setDate(e.target.value)} required />
           <div className="score-inputs">
-            <input type="number" placeholder="Your Score" value={teamScore} onChange={e => setTeamScore(e.target.value)} />
-            <input type="number" placeholder="Opponent Score" value={opponentScore} onChange={e => setOpponentScore(e.target.value)} />
+            <input type="number" min="0"placeholder="Your Score" value={teamScore} onChange={e => setTeamScore(e.target.value)} />
+            <input type="number" min="0" placeholder="Opponent Score" value={opponentScore} onChange={e => setOpponentScore(e.target.value)} />
           </div>
           <button type="submit">Create Match</button>
         </form>

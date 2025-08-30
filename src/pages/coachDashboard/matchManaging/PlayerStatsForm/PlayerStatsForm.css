@@ -1,0 +1,42 @@
+.stats-form {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  padding: 1rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.stats-form h5 {
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+}
+
+.stats-form label {
+  display: block;
+  font-size: 0.85rem;
+  color: #333;
+  margin-top: 0.4rem;
+}
+
+.stats-form input {
+  width: 100%;
+  padding: 0.4rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  margin-bottom: 0.5rem;
+}
+
+.stats-form button {
+  background: #7b24c6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.stats-form button:hover {
+  background: #5f1c9b;
+}

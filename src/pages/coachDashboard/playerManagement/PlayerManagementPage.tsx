@@ -92,10 +92,22 @@ const PlayerManagementPage: React.FC = () => {
     }
   };
 
-  const handleRemovePlayer = async (playerId: string) => { /* ... your existing logic ... */ };
-  const handleAddToLineup = (player: Player) => { /* ... your existing logic ... */ };
-  const handleRemoveFromLineup = (playerId: string) => { /* ... your existing logic ... */ };
+  const handleRemovePlayer = async (playerId: string) => {
+    setLineup(prev => prev.filter(p => p.id !== playerId));
+    setPlayers(prev => prev.filter(p => p.id !== playerId));
+    await supabase.from('players').delete().eq('id', playerId);
+  };
 
+  const handleAddToLineup = (player: Player) => {
+    if (!lineup.find(p => p.id === player.id)) {
+      setLineup(prev => [...prev, player]);
+    }
+  };
+
+  const handleRemoveFromLineup = (playerId: string) => {
+    setLineup(prev => prev.filter(p => p.id !== playerId));
+  };
+  
   return (
     <main className="management-container">
       {/* <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} /> */}
