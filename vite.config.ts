@@ -1,7 +1,17 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vitest/config";
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-})
+  test: {
+    coverage: {
+      provider: "istanbul",             // uses Istanbul for coverage
+      reporter: ["text", "html"],       // text table + HTML report
+      include: [
+        "src/pages/**/*.tsx",
+        "src/components/**/*.tsx",
+        "src/services/**/*.ts",
+        "src/**/*.ts",                   // include other TS files like types, services, utils
+      ],
+      exclude: ["node_modules/", "dist/"],  // exclude external folders
+    },
+  },
+});
