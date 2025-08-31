@@ -206,8 +206,11 @@ app.get('/teams/:teamId/summary', async (req, res) => {
 });
 
 const port = process.env.PORT || 4000;
-app.listen(port, () => {
-  console.log(`API listening at http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => {
+    console.log(`API listening at http://localhost:${port}`);
+  });
+}
 
+export default app;
 
