@@ -104,7 +104,7 @@ sporty.com/
 ├── package.json
 ├── vite.config.ts         # Vite configuration
 ├── tsconfig.json          # TypeScript configuration
-└── jest.config.cjs        # Jest testing configuration
+└── vitest.config.cjs        # Vitest testing configuration
 ```
 
 ## Features
@@ -139,20 +139,18 @@ sporty.com/
 | `npm run build` | Create optimized production build |
 | `npm run preview` | Preview production build locally |
 | `npm run lint` | Run ESLint for code quality checks |
-| `npm test` | Run Jest tests |
+| `npm run test` | Run Vitest tests |
 
 ## Testing
 
-This project uses Jest for testing:
+This project uses Vitest for testing:
 
 ```bash
 # Run tests
-npm test
+npm run test
 # or
 yarn test
 
-# Run tests in watch mode
-npm run test:watch
 ```
 
 Example test file is included in `src/__test__/mock.test.js`.
@@ -172,7 +170,7 @@ Example test file is included in `src/__test__/mock.test.js`.
 ## Technology Stack
 
 ### Frontend
-- **React 19.1.1** - UI library
+- **React 18.3.1** - UI library
 - **TypeScript** - Type safety
 - **Vite 7.1.2** - Build tool and dev server
 - **React Router Dom 7.8.1** - Client-side routing
@@ -190,7 +188,7 @@ Example test file is included in `src/__test__/mock.test.js`.
 
 ### Development Tools
 - **TypeScript ESLint** - Code linting
-- **Jest** - Testing framework
+- **Vitest** - Testing framework
 - **ts-jest** - TypeScript Jest preset
 
 ## Contributing
