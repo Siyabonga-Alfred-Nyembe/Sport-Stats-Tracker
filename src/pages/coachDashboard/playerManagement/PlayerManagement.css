@@ -303,6 +303,7 @@ body {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  user-select: none;
 }
 
 /* Field markings */
@@ -382,56 +383,19 @@ body {
   border-left: none;
 }
 
-/* Player positions */
-.field-positions {
+/* Draggable players */
+.draggable-player {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 20px;
+  transition: none;
   z-index: 10;
 }
 
-.position-row {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  width: 100%;
-  min-height: 80px;
+.draggable-player.dragging {
+  z-index: 1000;
+  transition: none;
 }
 
-.goalkeeper-row {
-  justify-content: center;
-  min-height: 60px;
-}
-
-.defenders-row {
-  justify-content: space-around;
-  min-height: 80px;
-}
-
-.midfielders-row {
-  justify-content: space-around;
-  min-height: 80px;
-}
-
-.forwards-row {
-  justify-content: space-around;
-  min-height: 80px;
-}
-
-.player-position {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 80px;
-}
-
-.player-marker {
+.draggable-player .player-marker {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -444,12 +408,23 @@ body {
   padding: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
-  cursor: pointer;
+  cursor: grab;
+  user-select: none;
 }
 
-.player-marker:hover {
+.draggable-player.dragging .player-marker {
+  cursor: grabbing;
   transform: scale(1.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.draggable-player .player-marker:hover {
+  transform: scale(1.05);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.draggable-player.dragging .player-marker:hover {
+  transform: scale(1.1);
 }
 
 .jersey-number {
@@ -489,9 +464,10 @@ body {
   justify-content: center;
   transition: all 0.2s ease;
   opacity: 0;
+  z-index: 20;
 }
 
-.player-marker:hover .remove-player-btn {
+.draggable-player:hover .remove-player-btn {
   opacity: 1;
 }
 
@@ -501,24 +477,40 @@ body {
 }
 
 /* Position-specific styling */
-.goalkeeper .player-marker {
+.draggable-player.goalkeeper .player-marker {
   border-color: #ef4444;
   background: rgba(239, 68, 68, 0.1);
 }
 
-.defender .player-marker {
+.draggable-player.goalkeeper .jersey-number {
+  color: #ef4444;
+}
+
+.draggable-player.defender .player-marker {
   border-color: #f59e0b;
   background: rgba(245, 158, 11, 0.1);
 }
 
-.midfielder .player-marker {
+.draggable-player.defender .jersey-number {
+  color: #f59e0b;
+}
+
+.draggable-player.midfielder .player-marker {
   border-color: #10b981;
   background: rgba(16, 185, 129, 0.1);
 }
 
-.forward .player-marker {
+.draggable-player.midfielder .jersey-number {
+  color: #10b981;
+}
+
+.draggable-player.forward .player-marker {
   border-color: #8b5cf6;
   background: rgba(139, 92, 246, 0.1);
+}
+
+.draggable-player.forward .jersey-number {
+  color: #8b5cf6;
 }
 
 /* Formation display */
@@ -538,9 +530,41 @@ body {
 }
 
 .formation-display p {
-  margin: 0;
+  margin: 0 0 5px 0;
   color: #666;
   font-size: 0.9rem;
+}
+
+.drag-instruction {
+  color: #0b63d8 !important;
+  font-size: 0.8rem !important;
+  font-style: italic;
+  margin-top: 10px !important;
+}
+
+/* Field position indicators */
+.field-container::before {
+  content: 'GOAL';
+  position: absolute;
+  top: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 5;
+}
+
+.field-container::after {
+  content: 'GOAL';
+  position: absolute;
+  bottom: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 5;
 }
 
 /* Responsive adjustments for soccer field */
@@ -550,7 +574,7 @@ body {
     max-width: 100%;
   }
   
-  .player-marker {
+  .draggable-player .player-marker {
     width: 50px;
     height: 50px;
     padding: 6px;
@@ -565,11 +589,9 @@ body {
     max-width: 40px;
   }
   
-  .position-row {
-    min-height: 60px;
-  }
-  
-  .goalkeeper-row {
-    min-height: 50px;
+  .remove-player-btn {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
   }
 }
