@@ -1,28 +1,42 @@
 // src/components/PlayerManagement/StatsTable.tsx
 import React from 'react';
-import type { PlayerStats } from '../../../types';
+import type { Player } from '../../../types';
+import { getPositionSpecificStats } from './stats-helper';
 
 interface Props {
-  stats: PlayerStats;
+  player: Player; // Changed from stats to player to get position info
 }
 
-const StatsTable: React.FC<Props> = ({ stats }) => {
-  // Convert stat names from camelCase to Title Case
-  const formatLabel = (key: string) => {
-    const result = key.replace(/([A-Z])/g, " $1");
-    return result.charAt(0).toUpperCase() + result.slice(1);
-  };
+const StatsTable: React.FC<Props> = ({ player }) => {
+  const { generalStats, positionStats } = getPositionSpecificStats(player);
 
   return (
     <div className="stats-table">
-      {Object.entries(stats)
-        .filter(([key]) => key !== 'performanceData') // Exclude data used for chart
-        .map(([key, value]) => (
-          <div key={key} className="stat-row">
-            <span className="stat-key">{formatLabel(key)}</span>
-            <span className="stat-value">{value}</span>
+      {/* General Stats Section */}
+      <div className="stats-section">
+        <h4 className="stats-section-title">General Statistics</h4>
+        {generalStats.map((stat, index) => (
+          <div key={`general-${index}`} className="stat-row">
+            <span className="stat-label">{stat.label}</span>
+            <span className="stat-value">{stat.value}</span>
           </div>
         ))}
+      </div>
+
+      {/* Position-Specific Stats Section */}
+      {positionStats.length > 0 && (
+        <div className="stats-section">
+          <h4 className="stats-section-title">
+            {player.position} Statistics
+          </h4>
+          {positionStats.map((stat, index) => (
+            <div key={`position-${index}`} className="stat-row">
+              <span className="stat-label">{stat.label}</span>
+              <span className="stat-value">{stat.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

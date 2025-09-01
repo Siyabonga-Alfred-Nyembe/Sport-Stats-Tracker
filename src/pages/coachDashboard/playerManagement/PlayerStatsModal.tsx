@@ -1,6 +1,6 @@
 // src/components/PlayerManagement/PlayerStatsModal.tsx
 
-import React, { useRef, useState } from 'react'; // Add useState
+import React, { useRef, useState } from 'react';
 import type { Player } from '../../../types';
 import KeyStatCard from './KeyStatCard';
 import StatsChart from './StatsChart';
@@ -19,10 +19,10 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
   const modalContentRef = useRef<HTMLDivElement>(null);
   const { keyStats, chartStat } = getPlayerKeyStats(player);
   
-  // New state to provide user feedback during the export
+  // State to provide user feedback during the export
   const [isExporting, setIsExporting] = useState(false);
 
-  // --- NEW, ROBUST handleExportPdf FUNCTION ---
+  // Robust handleExportPdf function
    const handleExportPdf = async () => {
     const contentToCapture = modalContentRef.current;
     if (!contentToCapture) return;
@@ -35,7 +35,7 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
     const usablePageHeight = pdf.internal.pageSize.getHeight() - (pageMargin * 2);
     let yPosition = pageMargin;
 
-    // --- LAYOUT FIX: Find the table to modify its style ---
+    // Layout fix: Find the table to modify its style
     const statsTable = contentToCapture.querySelector<HTMLElement>('.stats-table');
     const originalColumns = statsTable ? statsTable.style.gridTemplateColumns : '';
 
@@ -60,7 +60,7 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
         yPosition += imgHeight;
       };
 
-      // --- Process elements one by one ---
+      // Process elements one by one
       const header = contentToCapture.querySelector<HTMLElement>('.modal-header');
       if (header) await addElementToPdf(header);
       
@@ -73,20 +73,23 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
       const fullStatsSection = contentToCapture.querySelector<HTMLElement>('.full-stats-section');
       if (fullStatsSection) {
         yPosition += 5;
-        const title = fullStatsSection.querySelector<HTMLElement>('h3');
-        const rows = fullStatsSection.querySelectorAll<HTMLElement>('.stat-row');
+        const sections = fullStatsSection.querySelectorAll<HTMLElement>('.stats-section');
         
+        // Add the title first
+        const title = fullStatsSection.querySelector<HTMLElement>('h3');
         if (title) await addElementToPdf(title);
         
-        for (const row of Array.from(rows)) {
-          await addElementToPdf(row);
+        // Then add each stats section
+        for (const section of Array.from(sections)) {
+          await addElementToPdf(section);
+          yPosition += 2; // Small spacing between sections
         }
       }
 
       pdf.save(`${player.name}_stats.pdf`);
 
     } finally {
-      // --- IMPORTANT: Restore the original layout after capture is complete ---
+      // Restore the original layout after capture is complete
       if (statsTable) {
         statsTable.style.gridTemplateColumns = originalColumns;
       }
@@ -126,10 +129,10 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
           <StatsChart data={player.stats.performanceData} />
         </section>
 
-        {/* Add a wrapper class for easier selection */}
+        {/* Updated to pass the entire player object */}
         <section className="rs-card full-stats-section">
           <h3>Full Statistics</h3>
-          <StatsTable stats={player.stats} />
+          <StatsTable player={player} />
         </section>
       </div>
     </div>
