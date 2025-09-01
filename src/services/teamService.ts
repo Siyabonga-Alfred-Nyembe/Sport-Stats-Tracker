@@ -51,7 +51,7 @@ export async function uploadTeamLogo(teamId: string, file: File): Promise<string
   return publicUrl?.publicUrl ?? null;
 }
 
-export async function createTeam(teamName: string, logoFile?: File | null): Promise<TeamRecord | null> {
+export async function createTeam(teamName: string, logoFile?: File | null, coachId?: string): Promise<TeamRecord | null> {
   const teamId = slugify(teamName);
   let logoUrl: string | null = null;
   if (logoFile) {
@@ -61,6 +61,7 @@ export async function createTeam(teamName: string, logoFile?: File | null): Prom
     id: teamId,
     name: teamName,
     logo_url: logoUrl,
+    coach_id: coachId || null,
   };
   const { data, error } = await supabase.from('teams').insert(payload).select().single();
   if (error) {

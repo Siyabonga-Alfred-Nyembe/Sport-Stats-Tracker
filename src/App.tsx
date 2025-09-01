@@ -12,6 +12,7 @@ import AuthCallback from "./pages/authCallback";
 import TeamSetup from "./pages/TeamSetup";
 import UserDashboard from "./pages/userDashboard/RedesignedDashboard";
 import RedesignedDashboard from "./pages/userDashboard/RedesignedDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 
 function App() {
@@ -22,22 +23,62 @@ function App() {
           <Route path="/" element={<LandingPage/>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/reset" element={<ResetPassword />} />
           <Route path="/land" element={<Land />} />
-          <Route path="/coach-dashboard" element={<CoachDashboard />} />
-          <Route path="/team-setup" element={<TeamSetup />} />
-          <Route path="/user-dashboard" element={<UserDashboard />} />
-          <Route path="/profile-settings" element={<ProfileSettings />} />
+          
+          {/* Protected Routes */}
+          <Route path="/coach-dashboard" element={
+            <ProtectedRoute requiredRole="Coach" redirectTo="/login">
+              <CoachDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/team-setup" element={
+            <ProtectedRoute requiredRole="Coach" redirectTo="/login">
+              <TeamSetup />
+            </ProtectedRoute>
+          } />
+          <Route path="/user-dashboard" element={
+            <ProtectedRoute requiredRole="Fan" redirectTo="/login">
+              <UserDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile-settings" element={
+            <ProtectedRoute>
+              <ProfileSettings />
+            </ProtectedRoute>
+          } />
           <Route path="/auth-callback" element={<AuthCallback />} />
-          <Route path="/user-dashboard" element={<UserDashboard />} />
-          <Route path="/overview" element={<RedesignedDashboard />} />
-          <Route path="/teams" element={<RedesignedDashboard />} />
-          <Route path="/players" element={<RedesignedDashboard />} />
-          <Route path="/matches" element={<RedesignedDashboard />} />
-          <Route path="/matches/:id" element={<RedesignedDashboard />} />
-          <Route path="/favorites" element={<RedesignedDashboard />} />
+          <Route path="/overview" element={
+            <ProtectedRoute requiredRole="Fan" redirectTo="/login">
+              <RedesignedDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/teams" element={
+            <ProtectedRoute requiredRole="Fan" redirectTo="/login">
+              <RedesignedDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/players" element={
+            <ProtectedRoute requiredRole="Fan" redirectTo="/login">
+              <RedesignedDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/matches" element={
+            <ProtectedRoute requiredRole="Fan" redirectTo="/login">
+              <RedesignedDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/matches/:id" element={
+            <ProtectedRoute requiredRole="Fan" redirectTo="/login">
+              <RedesignedDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/favorites" element={
+            <ProtectedRoute requiredRole="Fan" redirectTo="/login">
+              <RedesignedDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </section>
