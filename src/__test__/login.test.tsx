@@ -54,27 +54,4 @@ describe("Login Component", () => {
       options: { redirectTo: window.location.origin + "/auth-callback" },
     });
   });
-
-  // it("displays an error message if Google login fails", async () => {
-  //   const { default: supabase } = await import("../../supabaseClient");
-  //   supabase.auth.signInWithOAuth.mockResolvedValueOnce({
-  //     data: null,
-  //     error: { message: "Google sign-in error" },
-  //   });
-
-  //   render(
-  //     <BrowserRouter>
-  //       <Login />
-  //     </BrowserRouter>
-  //   );
-
-  //   const googleButton = screen.getByRole("button", {
-  //     name: /continue with google/i,
-  //   });
-
-  //   fireEvent.click(googleButton);
-
-  //   // Wait for error message to show up
-  //   expect(await screen.findByText(/google sign-in error/i)).toBeInTheDocument();
-  // });
 });
