@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/252</span>
+                <span class='fraction'>0/220</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/252</span>
+                <span class='fraction'>0/220</span>
             </div>
         
             
@@ -282,71 +282,7 @@
 <a name='L217'></a><a href='#L217'>217</a>
 <a name='L218'></a><a href='#L218'>218</a>
 <a name='L219'></a><a href='#L219'>219</a>
-<a name='L220'></a><a href='#L220'>220</a>
-<a name='L221'></a><a href='#L221'>221</a>
-<a name='L222'></a><a href='#L222'>222</a>
-<a name='L223'></a><a href='#L223'>223</a>
-<a name='L224'></a><a href='#L224'>224</a>
-<a name='L225'></a><a href='#L225'>225</a>
-<a name='L226'></a><a href='#L226'>226</a>
-<a name='L227'></a><a href='#L227'>227</a>
-<a name='L228'></a><a href='#L228'>228</a>
-<a name='L229'></a><a href='#L229'>229</a>
-<a name='L230'></a><a href='#L230'>230</a>
-<a name='L231'></a><a href='#L231'>231</a>
-<a name='L232'></a><a href='#L232'>232</a>
-<a name='L233'></a><a href='#L233'>233</a>
-<a name='L234'></a><a href='#L234'>234</a>
-<a name='L235'></a><a href='#L235'>235</a>
-<a name='L236'></a><a href='#L236'>236</a>
-<a name='L237'></a><a href='#L237'>237</a>
-<a name='L238'></a><a href='#L238'>238</a>
-<a name='L239'></a><a href='#L239'>239</a>
-<a name='L240'></a><a href='#L240'>240</a>
-<a name='L241'></a><a href='#L241'>241</a>
-<a name='L242'></a><a href='#L242'>242</a>
-<a name='L243'></a><a href='#L243'>243</a>
-<a name='L244'></a><a href='#L244'>244</a>
-<a name='L245'></a><a href='#L245'>245</a>
-<a name='L246'></a><a href='#L246'>246</a>
-<a name='L247'></a><a href='#L247'>247</a>
-<a name='L248'></a><a href='#L248'>248</a>
-<a name='L249'></a><a href='#L249'>249</a>
-<a name='L250'></a><a href='#L250'>250</a>
-<a name='L251'></a><a href='#L251'>251</a>
-<a name='L252'></a><a href='#L252'>252</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L220'></a><a href='#L220'>220</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -574,7 +510,9 @@
 <span class="cstat-no" title="statement not covered" >import InlineAlert from '../../components/InlineAlert';</span>
 <span class="cstat-no" title="statement not covered" >import type {Team,PlayerStats,Player,MatchEvent,Match} from '../../../types'</span>
 <span class="cstat-no" title="statement not covered" >import MatchCard from '../../components/matchCard'; // Import the new MatchCard component</span>
-<span class="cstat-no" title="statement not covered" >import { getCurrentTeamId } from '../../../services/teamService';</span>
+<span class="cstat-no" title="statement not covered" >import { getCurrentTeamId, fetchTeamById } from '../../../services/teamService';</span>
+<span class="cstat-no" title="statement not covered" >import { fetchTeamMatches, fetchMatchEvents, fetchPlayerStatsForMatch } from '../../../services/matchService';</span>
+<span class="cstat-no" title="statement not covered" >import { fetchPlayersWithStats } from '../../../services/playerService';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const MatchesPage: React.FC = () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  // Team resolution: replace with actual auth-bound team if available</span>
@@ -582,7 +520,7 @@
 <span class="cstat-no" title="statement not covered" >  const [matches, setMatches] = useState&lt;Match[]&gt;([]);</span>
 <span class="cstat-no" title="statement not covered" >  const [matchEvents, setMatchEvents] = useState&lt;MatchEvent[]&gt;([]);</span>
 <span class="cstat-no" title="statement not covered" >  const [players, setPlayers] = useState&lt;Player[]&gt;([]);</span>
-<span class="cstat-no" title="statement not covered" >  const currentTeam = useMemo(() =&gt; ({ id: currentTeamId, name: 'My Team', coachId: 'coach' }), []);</span>
+<span class="cstat-no" title="statement not covered" >  const [currentTeam, setCurrentTeam] = useState&lt;Team&gt;({ id: currentTeamId, name: 'Loading...', coachId: 'coach' });</span>
 <span class="cstat-no" title="statement not covered" >  const [selectedMatch, setSelectedMatch] = useState&lt;Match | null&gt;(null);</span>
 <span class="cstat-no" title="statement not covered" >  const [opponentName, setOpponentName] = useState('');</span>
 <span class="cstat-no" title="statement not covered" >  const [teamScore, setTeamScore] = useState('');</span>
@@ -590,98 +528,62 @@
 <span class="cstat-no" title="statement not covered" >  const [date, setDate] = useState('');</span>
 <span class="cstat-no" title="statement not covered" >  const [errorMsg, setErrorMsg] = useState&lt;string | null&gt;(null);</span>
 <span class="cstat-no" title="statement not covered" >  const [search, setSearch] = useState('');</span>
+<span class="cstat-no" title="statement not covered" >  const [isLoading, setIsLoading] = useState(true);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  // Load matches, events, players</span>
+<span class="cstat-no" title="statement not covered" >  // Load team data and other data from database</span>
 <span class="cstat-no" title="statement not covered" >  useEffect(() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    const loadData = async () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      // Matches</span>
-<span class="cstat-no" title="statement not covered" >      const { data: matchRows, error: matchErr } = await supabase</span>
-<span class="cstat-no" title="statement not covered" >        .from('matches')</span>
-<span class="cstat-no" title="statement not covered" >        .select('*')</span>
-<span class="cstat-no" title="statement not covered" >        .eq('team_id', currentTeamId)</span>
-<span class="cstat-no" title="statement not covered" >        .order('date', { ascending: false });</span>
-<span class="cstat-no" title="statement not covered" >      if (!matchErr &amp;&amp; matchRows) {</span>
-<span class="cstat-no" title="statement not covered" >        const mapped: Match[] = matchRows.map((m: any) =&gt; ({</span>
-<span class="cstat-no" title="statement not covered" >          id: String(m.id),</span>
-<span class="cstat-no" title="statement not covered" >          teamId: m.team_id,</span>
-<span class="cstat-no" title="statement not covered" >          opponentName: m.opponent_name,</span>
-<span class="cstat-no" title="statement not covered" >          teamScore: m.team_score ?? 0,</span>
-<span class="cstat-no" title="statement not covered" >          opponentScore: m.opponent_score ?? 0,</span>
-<span class="cstat-no" title="statement not covered" >          date: m.date,</span>
-<span class="cstat-no" title="statement not covered" >          status: (m.status as 'scheduled' | 'completed') ?? 'scheduled',</span>
-<span class="cstat-no" title="statement not covered" >          possession: m.possession ?? undefined,</span>
-<span class="cstat-no" title="statement not covered" >          shots: m.shots ?? undefined,</span>
-<span class="cstat-no" title="statement not covered" >          shotsOnTarget: m.shots_on_target ?? undefined,</span>
-<span class="cstat-no" title="statement not covered" >        }));</span>
-<span class="cstat-no" title="statement not covered" >        setMatches(mapped);</span>
-<span class="cstat-no" title="statement not covered" >      } else if (matchErr) {</span>
-<span class="cstat-no" title="statement not covered" >        setErrorMsg('We could not load your matches. Please refresh or try again later.');</span>
-<span class="cstat-no" title="statement not covered" >      }</span>
+<span class="cstat-no" title="statement not covered" >      try {</span>
+<span class="cstat-no" title="statement not covered" >        setIsLoading(true);</span>
+<span class="cstat-no" title="statement not covered" >        </span>
+<span class="cstat-no" title="statement not covered" >        // Fetch team details from database</span>
+<span class="cstat-no" title="statement not covered" >        const teamData = await fetchTeamById(currentTeamId);</span>
+<span class="cstat-no" title="statement not covered" >        if (teamData) {</span>
+<span class="cstat-no" title="statement not covered" >          setCurrentTeam({ </span>
+<span class="cstat-no" title="statement not covered" >            id: teamData.id, </span>
+<span class="cstat-no" title="statement not covered" >            name: teamData.name, </span>
+<span class="cstat-no" title="statement not covered" >            coachId: teamData.coach_id || 'coach' </span>
+<span class="cstat-no" title="statement not covered" >          });</span>
+<span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" >        </span>
+<span class="cstat-no" title="statement not covered" >        // Fetch matches using the service - no more hardcoded mapping</span>
+<span class="cstat-no" title="statement not covered" >        const teamMatches = await fetchTeamMatches(currentTeamId);</span>
+<span class="cstat-no" title="statement not covered" >        setMatches(teamMatches);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      // Events</span>
-<span class="cstat-no" title="statement not covered" >      const { data: eventRows } = await supabase</span>
-<span class="cstat-no" title="statement not covered" >        .from('match_events')</span>
-<span class="cstat-no" title="statement not covered" >        .select('*')</span>
-<span class="cstat-no" title="statement not covered" >        .in('match_id', (matchRows ?? []).map((m: any) =&gt; m.id));</span>
-<span class="cstat-no" title="statement not covered" >      if (eventRows) {</span>
-<span class="cstat-no" title="statement not covered" >        const evs: MatchEvent[] = eventRows.map((e: any) =&gt; ({</span>
-<span class="cstat-no" title="statement not covered" >          id: String(e.id),</span>
-<span class="cstat-no" title="statement not covered" >          matchId: String(e.match_id),</span>
-<span class="cstat-no" title="statement not covered" >          playerId: String(e.player_id),</span>
-<span class="cstat-no" title="statement not covered" >          eventType: e.event_type,</span>
-<span class="cstat-no" title="statement not covered" >          minute: e.minute ?? undefined,</span>
-<span class="cstat-no" title="statement not covered" >        }));</span>
-<span class="cstat-no" title="statement not covered" >        setMatchEvents(evs);</span>
-<span class="cstat-no" title="statement not covered" >      }</span>
+<span class="cstat-no" title="statement not covered" >        // Fetch events for all matches</span>
+<span class="cstat-no" title="statement not covered" >        const allEvents: MatchEvent[] = [];</span>
+<span class="cstat-no" title="statement not covered" >        for (const match of teamMatches) {</span>
+<span class="cstat-no" title="statement not covered" >          const matchEvents = await fetchMatchEvents(match.id);</span>
+<span class="cstat-no" title="statement not covered" >          // Transform database records to MatchEvent interface</span>
+<span class="cstat-no" title="statement not covered" >          const transformedEvents: MatchEvent[] = matchEvents.map(event =&gt; ({</span>
+<span class="cstat-no" title="statement not covered" >            id: event.id,</span>
+<span class="cstat-no" title="statement not covered" >            matchId: event.match_id,</span>
+<span class="cstat-no" title="statement not covered" >            playerId: event.player_id,</span>
+<span class="cstat-no" title="statement not covered" >            eventType: event.event_type,</span>
+<span class="cstat-no" title="statement not covered" >            minute: event.minute,</span>
+<span class="cstat-no" title="statement not covered" >          }));</span>
+<span class="cstat-no" title="statement not covered" >          allEvents.push(...transformedEvents);</span>
+<span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" >        setMatchEvents(allEvents);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      // Players</span>
-<span class="cstat-no" title="statement not covered" >      const { data: playerRows } = await supabase</span>
-<span class="cstat-no" title="statement not covered" >        .from('players')</span>
-<span class="cstat-no" title="statement not covered" >        .select('*')</span>
-<span class="cstat-no" title="statement not covered" >        .eq('team_id', currentTeamId);</span>
-<span class="cstat-no" title="statement not covered" >      if (playerRows) {</span>
-<span class="cstat-no" title="statement not covered" >        const mappedPlayers: Player[] = playerRows.map((p: any) =&gt; ({</span>
-<span class="cstat-no" title="statement not covered" >  id: String(p.id),</span>
-<span class="cstat-no" title="statement not covered" >  name: p.name,</span>
-<span class="cstat-no" title="statement not covered" >  jerseyNum: String(p.jersey_num ?? ''),</span>
-<span class="cstat-no" title="statement not covered" >  teamId: p.team_id,</span>
-<span class="cstat-no" title="statement not covered" >  position: p.position ?? '',</span>
-<span class="cstat-no" title="statement not covered" >  stats: {</span>
-<span class="cstat-no" title="statement not covered" >    goals: 0,</span>
-<span class="cstat-no" title="statement not covered" >    assists: 0,</span>
-<span class="cstat-no" title="statement not covered" >    shots: 0,</span>
-<span class="cstat-no" title="statement not covered" >    shotsOnTarget: 0,</span>
-<span class="cstat-no" title="statement not covered" >    chancesCreated: 0,</span>
-<span class="cstat-no" title="statement not covered" >    tackles: 0,</span>
-<span class="cstat-no" title="statement not covered" >    interceptions: 0,</span>
-<span class="cstat-no" title="statement not covered" >    clearances: 0,</span>
-<span class="cstat-no" title="statement not covered" >    saves: 0,</span>
-<span class="cstat-no" title="statement not covered" >    cleansheets: 0,</span>
-<span class="cstat-no" title="statement not covered" >    savePercentage: 0,</span>
-<span class="cstat-no" title="statement not covered" >    passCompletion: 0,</span>
-<span class="cstat-no" title="statement not covered" >    minutesPlayed: 0,</span>
-<span class="cstat-no" title="statement not covered" >    yellowCards: 0,</span>
-<span class="cstat-no" title="statement not covered" >    redCards: 0,</span>
-<span class="cstat-no" title="statement not covered" >    performanceData: [],</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >  imageUrl:</span>
-<span class="cstat-no" title="statement not covered" >    p.image_url ??</span>
-<span class="cstat-no" title="statement not covered" >    `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(</span>
-<span class="cstat-no" title="statement not covered" >      p.name</span>
-<span class="cstat-no" title="statement not covered" >    )}`,</span>
-<span class="cstat-no" title="statement not covered" >}));</span>
+<span class="cstat-no" title="statement not covered" >        // Fetch players with their stats from database</span>
+<span class="cstat-no" title="statement not covered" >        const playersWithStats = await fetchPlayersWithStats(currentTeamId);</span>
+<span class="cstat-no" title="statement not covered" >        setPlayers(playersWithStats);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        setPlayers(mappedPlayers);</span>
-<span class="cstat-no" title="statement not covered" >      } else {</span>
-<span class="cstat-no" title="statement not covered" >        setErrorMsg((prev) =&gt; prev ?? 'We could not load your players. Please refresh or try again later.');</span>
+<span class="cstat-no" title="statement not covered" >      } catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >        console.error('Error loading data:', error);</span>
+<span class="cstat-no" title="statement not covered" >        setErrorMsg('We could not load your data. Please refresh or try again later.');</span>
+<span class="cstat-no" title="statement not covered" >      } finally {</span>
+<span class="cstat-no" title="statement not covered" >        setIsLoading(false);</span>
 <span class="cstat-no" title="statement not covered" >      }</span>
 <span class="cstat-no" title="statement not covered" >    };</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    loadData();</span>
 <span class="cstat-no" title="statement not covered" >  }, [currentTeamId]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const handleCreateMatch = async (e: React.FormEvent) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    e.preventDefault();</span>
-<span class="cstat-no" title="statement not covered" >    if (!opponentName || !date) return;</span>
+<span class="cstat-no" title="statement not covered" >    if (!opponentName || !date || !currentTeam) return;</span>
 <span class="cstat-no" title="statement not covered" >    const payload = {</span>
 <span class="cstat-no" title="statement not covered" >      team_id: currentTeam.id,</span>
 <span class="cstat-no" title="statement not covered" >      opponent_name: opponentName,</span>
@@ -781,7 +683,9 @@
 <span class="cstat-no" title="statement not covered" >              style={{ padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }}</span>
 <span class="cstat-no" title="statement not covered" >            /&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >          {matches.filter(m =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >          {isLoading ? (</span>
+<span class="cstat-no" title="statement not covered" >            &lt;p&gt;Loading matches...&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >          ) : matches.filter(m =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            const q = search.toLowerCase();</span>
 <span class="cstat-no" title="statement not covered" >            if (!q) return true;</span>
 <span class="cstat-no" title="statement not covered" >            return m.opponentName.toLowerCase().includes(q) || (m.date || '').includes(q);</span>
@@ -789,7 +693,7 @@
 <span class="cstat-no" title="statement not covered" >            // We wrap the new MatchCard in a div to handle the click event</span>
 <span class="cstat-no" title="statement not covered" >            &lt;div key={match.id} onClick={() =&gt; setSelectedMatch(match)}&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;MatchCard</span>
-<span class="cstat-no" title="statement not covered" >                teamA={currentTeam.name}</span>
+<span class="cstat-no" title="statement not covered" >                teamA={currentTeam?.name || 'Loading...'}</span>
 <span class="cstat-no" title="statement not covered" >                teamB={match.opponentName}</span>
 <span class="cstat-no" title="statement not covered" >                scoreA={match.teamScore}</span>
 <span class="cstat-no" title="statement not covered" >                scoreB={match.opponentScore}</span>
@@ -801,7 +705,7 @@
 <span class="cstat-no" title="statement not covered" >      &lt;/section&gt;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >      {/* The modal functionality remains unchanged */}</span>
-<span class="cstat-no" title="statement not covered" >      {selectedMatch &amp;&amp; (</span>
+<span class="cstat-no" title="statement not covered" >      {selectedMatch &amp;&amp; currentTeam &amp;&amp; (</span>
 <span class="cstat-no" title="statement not covered" >        &lt;MatchDetailsModal </span>
 <span class="cstat-no" title="statement not covered" >          match={selectedMatch}</span>
 <span class="cstat-no" title="statement not covered" >          players={players.filter(p =&gt; p.teamId === currentTeam.id)}</span>
@@ -823,7 +727,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-08-31T14:00:25.925Z
+                at 2025-09-01T15:06:22.851Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

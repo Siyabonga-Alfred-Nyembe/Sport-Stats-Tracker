@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">20% </span>
+                <span class="strong">23.52% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>3/15</span>
+                <span class='fraction'>4/17</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">20% </span>
+                <span class="strong">23.52% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>3/15</span>
+                <span class='fraction'>4/17</span>
             </div>
         
             
@@ -83,14 +83,25 @@
 <a name='L18'></a><a href='#L18'>18</a>
 <a name='L19'></a><a href='#L19'>19</a>
 <a name='L20'></a><a href='#L20'>20</a>
-<a name='L21'></a><a href='#L21'>21</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -102,35 +113,39 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// pages/userDashboard/Sidebar.tsx
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">// pages/userDashboard/Sidebar.tsx
 import React from "react";
+import menImg from "../../images/menu.png"
+&nbsp;
 type Tab = "overview"|"teams"|"players"|"matches"|"favorites";
 interface Props { activeTab: Tab; goToTab: (t:Tab)=&gt;void; }
+&nbsp;
 const Sidebar: React.FC&lt;Props&gt; = <span class="fstat-no" title="function not covered" >({ activeTab, goToTab }) =&gt; (</span>
-<span class="cstat-no" title="statement not covered" >  &lt;aside className="rs-sidebar"&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;div className="rs-brand"&gt;R&amp;S Sports&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;nav className="rs-nav"&gt;</span>
-<span class="cstat-no" title="statement not covered" >      {(["overview","teams","players","matches","favorites"] as Tab[]).map(t=&gt;(</span>
-<span class="cstat-no" title="statement not covered" >        &lt;button key={t} className={activeTab===t?"active":""} onClick={()=&gt;goToTab(t)}&gt;{t[0].toUpperCase()+t.slice(1)}&lt;/button&gt;</span>
-<span class="cstat-no" title="statement not covered" >      ))}</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/nav&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;div style={{marginTop:16}} className="rs-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;div style={{fontSize:13,color:"var(--muted)"}}&gt;Quick Actions&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;div style={{display:"flex",gap:8}}&gt;&lt;button className="rs-btn"&gt;Export&lt;/button&gt;&lt;button className="rs-btn ghost"&gt;Import&lt;/button&gt;&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >  &lt;/aside&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;header&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;img src={menImg} alt="Menu" className="userMenImg"/&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;div className="rs-brand"&gt;R&amp;S Sports&lt;/div&gt;</span>
+      
+      {/* Navigation moved inside header for CSS sibling selector to work */}
+<span class="cstat-no" title="statement not covered" >      &lt;nav className="rs-nav"&gt;</span>
+<span class="cstat-no" title="statement not covered" >        {(["overview","teams","players","matches","favorites"] as Tab[]).map(t=&gt;(</span>
+<span class="cstat-no" title="statement not covered" >          &lt;button key={t} className={activeTab===t?"active":""} onClick={()=&gt;goToTab(t)}&gt;</span>
+<span class="cstat-no" title="statement not covered" >            {t[0].toUpperCase()+t.slice(1)}</span>
+<span class="cstat-no" title="statement not covered" >          &lt;/button&gt;</span>
+<span class="cstat-no" title="statement not covered" >        ))}</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/nav&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;/header&gt;</span>
+<span class="cstat-no" title="statement not covered" >  &lt;/&gt;</span>
 );
 &nbsp;
-export default Sidebar;
-&nbsp;</pre></td></tr></table></pre>
+export default Sidebar;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-08-31T14:00:25.925Z
+                at 2025-09-01T15:06:22.851Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

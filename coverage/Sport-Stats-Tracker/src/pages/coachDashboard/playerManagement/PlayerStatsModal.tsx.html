@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/139</span>
+                <span class='fraction'>0/142</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/139</span>
+                <span class='fraction'>0/142</span>
             </div>
         
             
@@ -201,7 +201,13 @@
 <a name='L136'></a><a href='#L136'>136</a>
 <a name='L137'></a><a href='#L137'>137</a>
 <a name='L138'></a><a href='#L138'>138</a>
-<a name='L139'></a><a href='#L139'>139</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -341,7 +347,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >// src/components/PlayerManagement/PlayerStatsModal.tsx</span></span></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >import React, { useRef, useState } from 'react'; // Add useState</span>
+<span class="cstat-no" title="statement not covered" >import React, { useRef, useState } from 'react';</span>
 <span class="cstat-no" title="statement not covered" >import type { Player } from '../../../types';</span>
 <span class="cstat-no" title="statement not covered" >import KeyStatCard from './KeyStatCard';</span>
 <span class="cstat-no" title="statement not covered" >import StatsChart from './StatsChart';</span>
@@ -360,10 +366,10 @@
 <span class="cstat-no" title="statement not covered" >  const modalContentRef = useRef&lt;HTMLDivElement&gt;(null);</span>
 <span class="cstat-no" title="statement not covered" >  const { keyStats, chartStat } = getPlayerKeyStats(player);</span>
 <span class="cstat-no" title="statement not covered" >  </span>
-<span class="cstat-no" title="statement not covered" >  // New state to provide user feedback during the export</span>
+<span class="cstat-no" title="statement not covered" >  // State to provide user feedback during the export</span>
 <span class="cstat-no" title="statement not covered" >  const [isExporting, setIsExporting] = useState(false);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  // --- NEW, ROBUST handleExportPdf FUNCTION ---</span>
+<span class="cstat-no" title="statement not covered" >  // Robust handleExportPdf function</span>
 <span class="cstat-no" title="statement not covered" >   const handleExportPdf = async () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    const contentToCapture = modalContentRef.current;</span>
 <span class="cstat-no" title="statement not covered" >    if (!contentToCapture) return;</span>
@@ -376,7 +382,7 @@
 <span class="cstat-no" title="statement not covered" >    const usablePageHeight = pdf.internal.pageSize.getHeight() - (pageMargin * 2);</span>
 <span class="cstat-no" title="statement not covered" >    let yPosition = pageMargin;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // --- LAYOUT FIX: Find the table to modify its style ---</span>
+<span class="cstat-no" title="statement not covered" >    // Layout fix: Find the table to modify its style</span>
 <span class="cstat-no" title="statement not covered" >    const statsTable = contentToCapture.querySelector&lt;HTMLElement&gt;('.stats-table');</span>
 <span class="cstat-no" title="statement not covered" >    const originalColumns = statsTable ? statsTable.style.gridTemplateColumns : '';</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -401,7 +407,7 @@
 <span class="cstat-no" title="statement not covered" >        yPosition += imgHeight;</span>
 <span class="cstat-no" title="statement not covered" >      };</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      // --- Process elements one by one ---</span>
+<span class="cstat-no" title="statement not covered" >      // Process elements one by one</span>
 <span class="cstat-no" title="statement not covered" >      const header = contentToCapture.querySelector&lt;HTMLElement&gt;('.modal-header');</span>
 <span class="cstat-no" title="statement not covered" >      if (header) await addElementToPdf(header);</span>
 <span class="cstat-no" title="statement not covered" >      </span>
@@ -414,20 +420,23 @@
 <span class="cstat-no" title="statement not covered" >      const fullStatsSection = contentToCapture.querySelector&lt;HTMLElement&gt;('.full-stats-section');</span>
 <span class="cstat-no" title="statement not covered" >      if (fullStatsSection) {</span>
 <span class="cstat-no" title="statement not covered" >        yPosition += 5;</span>
-<span class="cstat-no" title="statement not covered" >        const title = fullStatsSection.querySelector&lt;HTMLElement&gt;('h3');</span>
-<span class="cstat-no" title="statement not covered" >        const rows = fullStatsSection.querySelectorAll&lt;HTMLElement&gt;('.stat-row');</span>
+<span class="cstat-no" title="statement not covered" >        const sections = fullStatsSection.querySelectorAll&lt;HTMLElement&gt;('.stats-section');</span>
 <span class="cstat-no" title="statement not covered" >        </span>
+<span class="cstat-no" title="statement not covered" >        // Add the title first</span>
+<span class="cstat-no" title="statement not covered" >        const title = fullStatsSection.querySelector&lt;HTMLElement&gt;('h3');</span>
 <span class="cstat-no" title="statement not covered" >        if (title) await addElementToPdf(title);</span>
 <span class="cstat-no" title="statement not covered" >        </span>
-<span class="cstat-no" title="statement not covered" >        for (const row of Array.from(rows)) {</span>
-<span class="cstat-no" title="statement not covered" >          await addElementToPdf(row);</span>
+<span class="cstat-no" title="statement not covered" >        // Then add each stats section</span>
+<span class="cstat-no" title="statement not covered" >        for (const section of Array.from(sections)) {</span>
+<span class="cstat-no" title="statement not covered" >          await addElementToPdf(section);</span>
+<span class="cstat-no" title="statement not covered" >          yPosition += 2; // Small spacing between sections</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >      }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >      pdf.save(`${player.name}_stats.pdf`);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    } finally {</span>
-<span class="cstat-no" title="statement not covered" >      // --- IMPORTANT: Restore the original layout after capture is complete ---</span>
+<span class="cstat-no" title="statement not covered" >      // Restore the original layout after capture is complete</span>
 <span class="cstat-no" title="statement not covered" >      if (statsTable) {</span>
 <span class="cstat-no" title="statement not covered" >        statsTable.style.gridTemplateColumns = originalColumns;</span>
 <span class="cstat-no" title="statement not covered" >      }</span>
@@ -467,10 +476,10 @@
 <span class="cstat-no" title="statement not covered" >          &lt;StatsChart data={player.stats.performanceData} /&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/section&gt;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        {/* Add a wrapper class for easier selection */}</span>
+<span class="cstat-no" title="statement not covered" >        {/* Updated to pass the entire player object */}</span>
 <span class="cstat-no" title="statement not covered" >        &lt;section className="rs-card full-stats-section"&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;h3&gt;Full Statistics&lt;/h3&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;StatsTable stats={player.stats} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;StatsTable player={player} /&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/section&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >    &lt;/div&gt;</span>
@@ -484,7 +493,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-08-31T14:00:25.925Z
+                at 2025-09-01T15:06:22.851Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>
