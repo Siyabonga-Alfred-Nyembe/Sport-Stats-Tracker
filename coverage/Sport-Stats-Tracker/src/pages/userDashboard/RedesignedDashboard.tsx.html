@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">19.1% </span>
+                <span class="strong">19.56% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>17/89</span>
+                <span class='fraction'>18/92</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">19.1% </span>
+                <span class="strong">19.56% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>17/89</span>
+                <span class='fraction'>18/92</span>
             </div>
         
             
@@ -174,7 +174,13 @@
 <a name='L109'></a><a href='#L109'>109</a>
 <a name='L110'></a><a href='#L110'>110</a>
 <a name='L111'></a><a href='#L111'>111</a>
-<a name='L112'></a><a href='#L112'>112</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -190,12 +196,13 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -241,9 +248,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -300,7 +312,8 @@ import Chat from "./Chat.tsx";
 // Types kept for reference; UI types are derived via useDbData
 import { useLocalStorage } from "./hooks/useLocalStorage.ts";
 import { useDbData } from "./hooks/useDbData.ts";
-import "../../Styles/dashboard.css";
+import "../../Styles/user-dashboard.css";
+import menImg from "../../images/menu.png"
 &nbsp;
 &nbsp;
 const USERNAME_KEY = "rs_dashboard_username_v2";
@@ -352,9 +365,14 @@ const RedesignedDashboard: React.FC = <span class="fstat-no" title="function not
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
 <span class="cstat-no" title="statement not covered" >    &lt;div className="rs-dashboard"&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;Topbar username={username} setUsername={setUsername} onProfile={()=&gt;navigate("/profile-settings")} /&gt;</span>
+     
 <span class="cstat-no" title="statement not covered" >      &lt;div className="rs-container"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;Sidebar activeTab={activeTab} goToTab={(t: Tab) =&gt; { setActiveTab(t); navigate(t === "overview" ? "/user-dashboard" : `/${t}`); setSelectedMatchId(null); }} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;aside className="rs-sidebar"&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;Sidebar activeTab={activeTab} goToTab={(t: Tab) =&gt; { setActiveTab(t); navigate(t === "overview" ? "/user-dashboard" : `/${t}`); setSelectedMatchId(null); }} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;Topbar username={username} setUsername={setUsername} onProfile={()=&gt;navigate("/profile-settings")} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/aside&gt;</span>
+           
+       
 <span class="cstat-no" title="statement not covered" >        &lt;main className="rs-main"&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;div className="rs-card"&gt;</span>
 <span class="cstat-no" title="statement not covered" >            {loading &amp;&amp; &lt;div style={{color:"var(--muted)"}}&gt;Loading...&lt;/div&gt;}</span>
@@ -403,7 +421,7 @@ export default RedesignedDashboard;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-08-31T14:00:25.925Z
+                at 2025-09-01T15:06:22.851Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>
