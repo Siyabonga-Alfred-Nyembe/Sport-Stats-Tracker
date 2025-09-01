@@ -52,7 +52,7 @@ export interface MatchEvent {
   minute?: number; // Optional: The minute the event occurred
 }
 
-// The main Match object, with team-level stats
+// The main Match object, with team-level stats - matches database schema exactly
 export interface Match {
   id: string;
   teamId: string; // Your team's ID
@@ -61,17 +61,64 @@ export interface Match {
   opponentScore: number;
   date: string;
   status: 'scheduled' | 'completed';
-  // Team-level stats
+  // Team-level stats - all from database, no stubs
   possession?: number; // Your team's possession %
   shots?: number;
   shotsOnTarget?: number;
   corners?: number;
   fouls?: number;
-  offsides?: number; // Expected goals
+  offsides?: number;
   passes?: number;
   passAccuracy?: number; // %
   tackles?: number;
   saves?: number;
+}
+
+// Database record interfaces for type safety
+export interface DbMatchRecord {
+  id: string;
+  team_id: string;
+  opponent_name: string;
+  team_score: number;
+  opponent_score: number;
+  date: string;
+  status: 'scheduled' | 'completed';
+  possession?: number;
+  shots?: number;
+  shots_on_target?: number;
+  corners?: number;
+  fouls?: number;
+  offsides?: number;
+  passes?: number;
+  pass_accuracy?: number;
+  tackles?: number;
+  saves?: number;
+}
+
+export interface DbPlayerStatsRecord {
+  id: string;
+  player_id: string;
+  match_id: string;
+  goals: number;
+  assists: number;
+  shots: number;
+  shots_on_target: number;
+  chances_created: number;
+  dribbles_attempted: number;
+  dribbles_successful: number;
+  offsides: number;
+  tackles: number;
+  interceptions: number;
+  clearances: number;
+  saves: number;
+  clean_sheets: number;
+  save_percentage: number;
+  pass_completion: number;
+  minutes_played: number;
+  yellow_cards: number;
+  red_cards: number;
+  created_at: string;
+  updated_at: string;
 }
 
 // Helper function to create default stats for any position

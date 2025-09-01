@@ -7,7 +7,9 @@ import supabase from '../../../../supabaseClient';
 import InlineAlert from '../../components/InlineAlert';
 import type {Team,PlayerStats,Player,MatchEvent,Match} from '../../../types'
 import MatchCard from '../../components/matchCard'; // Import the new MatchCard component
-import { getCurrentTeamId } from '../../../services/teamService';
+import { getCurrentTeamId, fetchTeamById } from '../../../services/teamService';
+import { fetchTeamMatches, fetchMatchEvents, fetchPlayerStatsForMatch } from '../../../services/matchService';
+import { fetchPlayersWithStats } from '../../../services/playerService';
 
 const MatchesPage: React.FC = () => {
   // Team resolution: replace with actual auth-bound team if available
@@ -15,7 +17,7 @@ const MatchesPage: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [matchEvents, setMatchEvents] = useState<MatchEvent[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
-  const currentTeam = useMemo(() => ({ id: currentTeamId, name: 'My Team', coachId: 'coach' }), []);
+  const [currentTeam, setCurrentTeam] = useState<Team>({ id: currentTeamId, name: 'Loading...', coachId: 'coach' });
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [opponentName, setOpponentName] = useState('');
   const [teamScore, setTeamScore] = useState('');
@@ -23,101 +25,62 @@ const MatchesPage: React.FC = () => {
   const [date, setDate] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load matches, events, players
+  // Load team data and other data from database
   useEffect(() => {
     const loadData = async () => {
-      // Matches
-      const { data: matchRows, error: matchErr } = await supabase
-        .from('matches')
-        .select('*')
-        .eq('team_id', currentTeamId)
-        .order('date', { ascending: false });
-      if (!matchErr && matchRows) {
-        const mapped: Match[] = matchRows.map((m: any) => ({
-          id: String(m.id),
-          teamId: m.team_id,
-          opponentName: m.opponent_name,
-          teamScore: m.team_score ?? 0,
-          opponentScore: m.opponent_score ?? 0,
-          date: m.date,
-          status: (m.status as 'scheduled' | 'completed') ?? 'scheduled',
-          possession: m.possession ?? undefined,
-          shots: m.shots ?? undefined,
-          shotsOnTarget: m.shots_on_target ?? undefined,
-        }));
-        setMatches(mapped);
-      } else if (matchErr) {
-        setErrorMsg('We could not load your matches. Please refresh or try again later.');
-      }
+      try {
+        setIsLoading(true);
+        
+        // Fetch team details from database
+        const teamData = await fetchTeamById(currentTeamId);
+        if (teamData) {
+          setCurrentTeam({ 
+            id: teamData.id, 
+            name: teamData.name, 
+            coachId: teamData.coach_id || 'coach' 
+          });
+        }
+        
+        // Fetch matches using the service - no more hardcoded mapping
+        const teamMatches = await fetchTeamMatches(currentTeamId);
+        setMatches(teamMatches);
 
-      // Events
-      const { data: eventRows } = await supabase
-        .from('match_events')
-        .select('*')
-        .in('match_id', (matchRows ?? []).map((m: any) => m.id));
-      if (eventRows) {
-        const evs: MatchEvent[] = eventRows.map((e: any) => ({
-          id: String(e.id),
-          matchId: String(e.match_id),
-          playerId: String(e.player_id),
-          eventType: e.event_type,
-          minute: e.minute ?? undefined,
-        }));
-        setMatchEvents(evs);
-      }
+        // Fetch events for all matches
+        const allEvents: MatchEvent[] = [];
+        for (const match of teamMatches) {
+          const matchEvents = await fetchMatchEvents(match.id);
+          // Transform database records to MatchEvent interface
+          const transformedEvents: MatchEvent[] = matchEvents.map(event => ({
+            id: event.id,
+            matchId: event.match_id,
+            playerId: event.player_id,
+            eventType: event.event_type,
+            minute: event.minute,
+          }));
+          allEvents.push(...transformedEvents);
+        }
+        setMatchEvents(allEvents);
 
-      // Players
-      const { data: playerRows } = await supabase
-        .from('players')
-        .select('*')
-        .eq('team_id', currentTeamId);
-      if (playerRows) {
-        const mappedPlayers: Player[] = playerRows.map((p: any) => ({
-  id: String(p.id),
-  name: p.name,
-  jerseyNum: String(p.jersey_num ?? ''),
-  teamId: p.team_id,
-  position: p.position ?? '',
-  stats: {
-    goals: 0,
-    assists: 0,
-    shots: 0,
-    dribblesAttempted:5,
-  dribblesSuccessful:5,
-  offsides: 3,
-    shotsOnTarget: 0,
-    chancesCreated: 0,
-    tackles: 0,
-    interceptions: 0,
-    clearances: 0,
-    saves: 0,
-    cleansheets: 0,
-    savePercentage: 0,
-    passCompletion: 0,
-    minutesPlayed: 0,
-    yellowCards: 0,
-    redCards: 0,
-    performanceData: [],
-  },
-  imageUrl:
-    p.image_url ??
-    `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(
-      p.name
-    )}`,
-}));
+        // Fetch players with their stats from database
+        const playersWithStats = await fetchPlayersWithStats(currentTeamId);
+        setPlayers(playersWithStats);
 
-        setPlayers(mappedPlayers);
-      } else {
-        setErrorMsg((prev) => prev ?? 'We could not load your players. Please refresh or try again later.');
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setErrorMsg('We could not load your data. Please refresh or try again later.');
+      } finally {
+        setIsLoading(false);
       }
     };
+
     loadData();
   }, [currentTeamId]);
 
   const handleCreateMatch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!opponentName || !date) return;
+    if (!opponentName || !date || !currentTeam) return;
     const payload = {
       team_id: currentTeam.id,
       opponent_name: opponentName,
@@ -217,7 +180,9 @@ const MatchesPage: React.FC = () => {
               style={{ padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }}
             />
           </div>
-          {matches.filter(m => {
+          {isLoading ? (
+            <p>Loading matches...</p>
+          ) : matches.filter(m => {
             const q = search.toLowerCase();
             if (!q) return true;
             return m.opponentName.toLowerCase().includes(q) || (m.date || '').includes(q);
@@ -225,7 +190,7 @@ const MatchesPage: React.FC = () => {
             // We wrap the new MatchCard in a div to handle the click event
             <div key={match.id} onClick={() => setSelectedMatch(match)}>
               <MatchCard
-                teamA={currentTeam.name}
+                teamA={currentTeam?.name || 'Loading...'}
                 teamB={match.opponentName}
                 scoreA={match.teamScore}
                 scoreB={match.opponentScore}
@@ -237,7 +202,7 @@ const MatchesPage: React.FC = () => {
       </section>
 
       {/* The modal functionality remains unchanged */}
-      {selectedMatch && (
+      {selectedMatch && currentTeam && (
         <MatchDetailsModal 
           match={selectedMatch}
           players={players.filter(p => p.teamId === currentTeam.id)}
