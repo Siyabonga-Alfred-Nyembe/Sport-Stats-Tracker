@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import supabase from "../../supabaseClient";
-import "../Styles/Auth.css";
+import "../Styles/signUpLogin.css";
 
 const Signup: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");

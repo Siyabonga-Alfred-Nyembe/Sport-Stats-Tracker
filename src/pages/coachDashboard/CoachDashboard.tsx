@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardHeader from "./DashboardHeader";
 import DashboardSidebar from "./DashboardSidebar";
 import MyTeamTab from "./coachStatsPage/MyTeamTab";
 // Updated import to use the correct name for clarity
 import MatchesPage from "./matchManaging/MatchesPage";
 import PlayerManagementPage from "./playerManagement/PlayerManagementPage";
-import "../../Styles/dashboard.css";
+import "../../Styles/coach-dashboard.css";
 import { getCurrentTeamId } from "../../services/teamService";
 import supabase from "../../../supabaseClient";
 
@@ -61,7 +60,6 @@ const CoachDashboard: React.FC = () => {
   return (
     <section className="dashboard coach-dashboard">
       <DashboardSidebar onNavigate={setActiveTab} />
-      <section>
         <section className="dashboard-content">
           {activeTab === "myTeam" && (
             <MyTeamTab />
@@ -73,7 +71,6 @@ const CoachDashboard: React.FC = () => {
             <PlayerManagementPage />
           )}
         </section>
-      </section>
     </section>
   );
 };

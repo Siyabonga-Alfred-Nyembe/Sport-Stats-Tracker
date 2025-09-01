@@ -2,7 +2,7 @@
 
 .player-card {
   width: 100%; /* Let the grid determine the width */
-  border-radius: 20px;
+  border-radius: 2px;
   overflow: hidden;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -55,7 +55,7 @@
   margin: 5px 0 0;
   font-size: 1rem;
   font-weight: 500;
-  color: #8a2be2;
+  color: black;
   text-transform: uppercase;
   letter-spacing: 1px;
 }

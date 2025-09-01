@@ -1,9 +1,12 @@
 /* src/components/Matches/MatchesPage.css */
 
 .matches-container {
-  padding: 40px;
+  padding: 0px;
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .score-inputs {

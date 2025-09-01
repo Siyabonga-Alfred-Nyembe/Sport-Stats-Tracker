@@ -30,9 +30,7 @@ function LandingPage() {
               TO GET FOOTBALL STATISTICS:
             </p>
           </section>
-          <section className="recentMatches">
-            <h1>Some recent Matches</h1>
-          </section>
+         
         </main>
       </section>
     </>

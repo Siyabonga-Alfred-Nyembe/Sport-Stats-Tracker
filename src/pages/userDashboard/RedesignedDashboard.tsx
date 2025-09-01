@@ -13,7 +13,8 @@ import Chat from "./Chat.tsx";
 // Types kept for reference; UI types are derived via useDbData
 import { useLocalStorage } from "./hooks/useLocalStorage.ts";
 import { useDbData } from "./hooks/useDbData.ts";
-import "../../Styles/dashboard.css";
+import "../../Styles/user-dashboard.css";
+import menImg from "../../images/menu.png"
 
 
 const USERNAME_KEY = "rs_dashboard_username_v2";
@@ -65,9 +66,14 @@ const RedesignedDashboard: React.FC = () => {
 
   return (
     <div className="rs-dashboard">
-      <Topbar username={username} setUsername={setUsername} onProfile={()=>navigate("/profile-settings")} />
+     
       <div className="rs-container">
-        <Sidebar activeTab={activeTab} goToTab={(t: Tab) => { setActiveTab(t); navigate(t === "overview" ? "/user-dashboard" : `/${t}`); setSelectedMatchId(null); }} />
+        <aside className="rs-sidebar">
+          <Sidebar activeTab={activeTab} goToTab={(t: Tab) => { setActiveTab(t); navigate(t === "overview" ? "/user-dashboard" : `/${t}`); setSelectedMatchId(null); }} />
+            <Topbar username={username} setUsername={setUsername} onProfile={()=>navigate("/profile-settings")} />
+        </aside>
+           
+       
         <main className="rs-main">
           <div className="rs-card">
             {loading && <div style={{color:"var(--muted)"}}>Loading...</div>}

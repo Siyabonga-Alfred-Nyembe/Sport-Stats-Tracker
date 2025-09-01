@@ -41,8 +41,16 @@ const RosterManagement: React.FC<Props> = ({
       <form onSubmit={handleSubmit} className="add-player-form">
         <h3>Add New Player</h3>
         <input type="text" placeholder="Player Name" value={name} onChange={e => setName(e.target.value)} required />
-        <input type="text" placeholder="Position" value={position} onChange={e => setPosition(e.target.value)} required />
-        <input type="number" placeholder="Jersey Number" value={jerseyNum} onChange={e => setJerseyNum(e.target.value)} required />
+<select value={jerseyNum} onChange={e => setJerseyNum(e.target.value)} required>
+  <option value="">Select Position</option>
+  <option value="GK">GK</option>
+  <option value="MID">MID</option>
+  <option value="STR">STR</option>
+  <option value="DEF">DEF</option>
+  <option value="RB">RB</option>
+  <option value="LB">LB</option>
+</select>
+        <input min="0" type="number" placeholder="Jersey Number" value={jerseyNum} onChange={e => setJerseyNum(e.target.value)} required />
         <button type="submit">Add Player</button>
       </form>
 

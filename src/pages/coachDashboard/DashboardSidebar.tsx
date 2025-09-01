@@ -14,13 +14,6 @@ const DashboardSidebar: React.FC<Props> = ({ onNavigate }) => {
         <button onClick={() => onNavigate('players')}>Players</button>
         <button onClick={() => onNavigate('matches')}>Matches</button>
       </nav>
-      <section className="sidebar-quick">
-        <h4>Quick Actions</h4>
-        <div className="quick-actions">
-          <button className="quick primary">Export</button>
-          <button className="quick">Import</button>
-        </div>
-      </section>
     </aside>
   );
 };

@@ -9,8 +9,8 @@ interface Props {
 
 const StatCard: React.FC<Props> = ({ label, value }) => (
   <div className="rs-card stat-card">
-    <span className="stat-card-value">{value}</span>
-    <span className="stat-card-label">{label}</span>
+    <span className="stat-card-value">{label} </span>
+    <span className="stat-card-label"> {value}</span>
   </div>
 );
 
