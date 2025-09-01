@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createTeam } from '../services/teamService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import supabase from '../../supabaseClient';
 import InlineAlert from './components/InlineAlert';
 
 const TeamSetup: React.FC = () => {
@@ -8,14 +9,30 @@ const TeamSetup: React.FC = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUserId(session.user.id);
+      } else {
+        navigate('/login');
+      }
+    };
+    getCurrentUser();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!teamName.trim()) return;
+    if (!teamName.trim() || !userId) return;
+    
     setSaving(true);
-    const team = await createTeam(teamName.trim(), logoFile);
+    const team = await createTeam(teamName.trim(), logoFile, userId);
     setSaving(false);
+    
     if (team) {
       setErrorMsg(null);
       navigate('/coach-dashboard');
@@ -23,6 +40,21 @@ const TeamSetup: React.FC = () => {
       setErrorMsg('We could not create your team right now. Please check your internet and try again.');
     }
   };
+
+  if (!userId) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#666'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <main className="auth-container" style={{ maxWidth: 520, margin: '40px auto' }}>

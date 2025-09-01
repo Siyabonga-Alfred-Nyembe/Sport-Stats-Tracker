@@ -1,10 +1,14 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
+import { getUserRole, createUserProfile } from "../services/roleService";
+import RoleSelection from "../components/RoleSelection";
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
+  const [showRoleSelection, setShowRoleSelection] = useState(false);
+  const [userData, setUserData] = useState<{ id: string; email: string } | null>(null);
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -17,31 +21,41 @@ const AuthCallback: React.FC = () => {
       }
 
       if (session?.user) {
-        // Check if this is a new user (just signed up)
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("user_type")
-          .eq("id", session.user.id)
-          .single();
+        try {
+          // Check if user exists in our users table
+          const userRole = await getUserRole(session.user.id);
+          
+          if (!userRole) {
+            // New user - show role selection
+            setUserData({
+              id: session.user.id,
+              email: session.user.email || 'Unknown'
+            });
+            setShowRoleSelection(true);
+            return;
+          }
 
-        const userType = profile?.user_type || "user";
-        
-        if (userType === "coach") {
-          navigate("/coach-dashboard", {
-            state: { 
-              username: session.user.email, 
-              userId: session.user.id,
-              isGoogleUser: true 
-            },
-          });
-        } else {
-          navigate("/user-dashboard", {
-            state: { 
-              username: session.user.email, 
-              userId: session.user.id,
-              isGoogleUser: true 
-            },
-          });
+          // Existing user - redirect based on role
+          if (userRole.role === "Coach") {
+            navigate("/coach-dashboard", {
+              state: { 
+                username: session.user.email, 
+                userId: session.user.id,
+                isGoogleUser: true 
+              },
+            });
+          } else {
+            navigate("/user-dashboard", {
+              state: { 
+                username: session.user.email, 
+                userId: session.user.id,
+                isGoogleUser: true 
+              },
+            });
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+          navigate("/login");
         }
       } else {
         navigate("/login");
@@ -51,7 +65,51 @@ const AuthCallback: React.FC = () => {
     handleAuthCallback();
   }, [navigate]);
 
-  return <div>Loading...</div>;
+  const handleRoleSelected = async (role: 'Fan' | 'Coach') => {
+    if (!userData) return;
+
+    try {
+      // Create user profile with selected role
+      const success = await createUserProfile(userData.id, userData.email, role);
+      
+      if (success) {
+        if (role === 'Coach') {
+          navigate('/team-setup');
+        } else {
+          navigate('/user-dashboard');
+        }
+      } else {
+        console.error('Failed to create user profile');
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error creating user profile:', error);
+      navigate('/login');
+    }
+  };
+
+  if (showRoleSelection && userData) {
+    return (
+      <RoleSelection
+        userId={userData.id}
+        userEmail={userData.email}
+        onRoleSelected={handleRoleSelected}
+      />
+    );
+  }
+
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      fontSize: '1.2rem',
+      color: '#666'
+    }}>
+      Loading...
+    </div>
+  );
 };
 
 export default AuthCallback;

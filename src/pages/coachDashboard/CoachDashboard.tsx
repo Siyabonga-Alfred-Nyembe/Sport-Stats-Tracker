@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "./DashboardSidebar";
+import DashboardHeader from "./DashboardHeader";
 import MyTeamTab from "./coachStatsPage/MyTeamTab";
 // Updated import to use the correct name for clarity
 import MatchesPage from "./matchManaging/MatchesPage";
@@ -40,13 +41,20 @@ export interface Match {
 const CoachDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("matches"); // Default to matches to see it working
+  const [username, setUsername] = useState<string>("");
   
   // These states are no longer used by their respective pages but may be used by other tabs.
-
-  
   const [teams, setTeams] = useState<Team[]>([]);
 
-  
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUsername(session.user.email || 'Coach');
+      }
+    };
+    getCurrentUser();
+  }, []);
 
   useEffect(() => {
     const teamId = getCurrentTeamId();
@@ -55,22 +63,35 @@ const CoachDashboard: React.FC = () => {
     }
   }, [navigate]);
 
- 
+  const handleProfileClick = () => {
+    navigate('/profile-settings');
+  };
+
+  const handleReportIssue = () => {
+    // Handle report issue functionality
+    console.log('Report issue clicked');
+  };
 
   return (
     <section className="dashboard coach-dashboard">
+      <DashboardHeader 
+        onProfileClick={handleProfileClick}
+        setActiveTab={setActiveTab}
+        onReportIssue={handleReportIssue}
+        username={username}
+      />
       <DashboardSidebar onNavigate={setActiveTab} />
-        <section className="dashboard-content">
-          {activeTab === "myTeam" && (
-            <MyTeamTab />
-          )}
-          {activeTab === "matches" && (
-            <MatchesPage />
-          )}
-          {activeTab === "players" && (
-            <PlayerManagementPage />
-          )}
-        </section>
+      <section className="dashboard-content">
+        {activeTab === "myTeam" && (
+          <MyTeamTab />
+        )}
+        {activeTab === "matches" && (
+          <MatchesPage />
+        )}
+        {activeTab === "players" && (
+          <PlayerManagementPage />
+        )}
+      </section>
     </section>
   );
 };
