@@ -19,7 +19,7 @@ function App() {
     <Router>
       <section className="App" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <Routes>
-          <Route path="/" element={<LandingPage/>} />
+          <Route path="/" element={<CoachDashboard/>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           

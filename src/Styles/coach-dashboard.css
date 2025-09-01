@@ -15,7 +15,7 @@
   --text-inverse: #ffffff;
   --border-color: #e2e8f0;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 4px rgba(0h, 0, 0, 0.06);
 }
 
 /* --- Global & Reset --- */
@@ -32,7 +32,7 @@ body,
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  background: linear-gradient( 135deg, #F0FF00 10%, #58CFFB 100%);
+  background: linear-gradient(to right, #0077B6, #0096C7, #48CAE4);
   color: white;
 }
 
