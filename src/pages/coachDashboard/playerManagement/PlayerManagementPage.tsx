@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import supabase from '../../../../supabaseClient';
 import { getCurrentTeamId } from '../../../services/teamService';
 import { fetchPlayersWithStats } from '../../../services/playerService';
-import { loadLineup, saveLineup, updatePlayerPosition } from '../../../services/lineupService';
+import { loadLineup, saveLineup, updatePlayerPosition, debugLineup } from '../../../services/lineupService';
 import RosterManagement from './RosterManagement';
 import LineupSelection from './LineupSelection';
 import PlayerStatsModal from './PlayerStatsModal';
@@ -164,13 +164,15 @@ const PlayerManagementPage: React.FC = () => {
         positionY: 50,
       })));
 
-      if (success) {
-        setSuccessMsg(`${player.name} has been added to the lineup!`);
-        setTimeout(() => setSuccessMsg(null), 3000);
-      } else {
-        setErrorMsg('Could not save lineup to database. Please try again.');
-        setTimeout(() => setErrorMsg(null), 3000);
-      }
+             if (success) {
+         setSuccessMsg(`${player.name} has been added to the lineup!`);
+         setTimeout(() => setSuccessMsg(null), 3000);
+         // Debug: Check what's in the database
+         await debugLineup(currentTeamId!);
+       } else {
+         setErrorMsg('Could not save lineup to database. Please try again.');
+         setTimeout(() => setErrorMsg(null), 3000);
+       }
     } catch (error) {
       console.error('Error adding player to lineup:', error);
       setErrorMsg('Could not add player to lineup. Please try again.');
