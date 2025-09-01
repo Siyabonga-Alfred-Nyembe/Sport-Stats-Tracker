@@ -10,11 +10,19 @@
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.8s ease-out;
+  /* Fallback for older browsers */
+  -webkit-transition: all 0.8s ease-out;
+  -moz-transition: all 0.8s ease-out;
+  /* Ensure elements are visible during animation */
+  visibility: visible;
 }
 
 .fade-in-section.fade-in-visible {
   opacity: 1;
   transform: translateY(0);
+  /* Fallback for older browsers */
+  -webkit-transform: translateY(0);
+  -moz-transform: translateY(0);
 }
 
 /* Staggered animations for feature cards */
@@ -22,48 +30,72 @@
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.6s ease-out;
+  /* Fallback for older browsers */
+  -webkit-transition: all 0.6s ease-out;
+  -moz-transition: all 0.6s ease-out;
+  /* Ensure elements are visible during animation */
+  visibility: visible;
 }
 
 .features-grid .feature-card.fade-in-visible {
   opacity: 1;
   transform: translateY(0);
+  /* Fallback for older browsers */
+  -webkit-transform: translateY(0);
+  -moz-transform: translateY(0);
 }
 
-.features-grid .feature-card:nth-child(1) { transition-delay: 0.1s; }
-.features-grid .feature-card:nth-child(2) { transition-delay: 0.2s; }
-.features-grid .feature-card:nth-child(3) { transition-delay: 0.3s; }
-.features-grid .feature-card:nth-child(4) { transition-delay: 0.4s; }
+.features-grid .feature-card:nth-child(1) { transition-delay: 0.1s; -webkit-transition-delay: 0.1s; }
+.features-grid .feature-card:nth-child(2) { transition-delay: 0.2s; -webkit-transition-delay: 0.2s; }
+.features-grid .feature-card:nth-child(3) { transition-delay: 0.3s; -webkit-transition-delay: 0.3s; }
+.features-grid .feature-card:nth-child(4) { transition-delay: 0.4s; -webkit-transition-delay: 0.4s; }
 
 /* Staggered animations for role cards */
 .roles-grid .role-card {
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.6s ease-out;
+  /* Fallback for older browsers */
+  -webkit-transition: all 0.6s ease-out;
+  -moz-transition: all 0.6s ease-out;
+  /* Ensure elements are visible during animation */
+  visibility: visible;
 }
 
 .roles-grid .role-card.fade-in-visible {
   opacity: 1;
   transform: translateY(0);
+  /* Fallback for older browsers */
+  -webkit-transform: translateY(0);
+  -moz-transform: translateY(0);
 }
 
-.roles-grid .role-card:nth-child(1) { transition-delay: 0.1s; }
-.roles-grid .role-card:nth-child(2) { transition-delay: 0.2s; }
+.roles-grid .role-card:nth-child(1) { transition-delay: 0.1s; -webkit-transition-delay: 0.1s; }
+.roles-grid .role-card:nth-child(2) { transition-delay: 0.2s; -webkit-transition-delay: 0.2s; }
 
 /* Staggered animations for stat cards */
 .stats-dashboard-preview .stat-card {
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.5s ease-out;
+  /* Fallback for older browsers */
+  -webkit-transition: all 0.5s ease-out;
+  -moz-transition: all 0.5s ease-out;
+  /* Ensure elements are visible during animation */
+  visibility: visible;
 }
 
 .stats-dashboard-preview .stat-card.fade-in-visible {
   opacity: 1;
   transform: translateY(0);
+  /* Fallback for older browsers */
+  -webkit-transform: translateY(0);
+  -moz-transform: translateY(0);
 }
 
-.stats-dashboard-preview .stat-card:nth-child(1) { transition-delay: 0.1s; }
-.stats-dashboard-preview .stat-card:nth-child(2) { transition-delay: 0.2s; }
-.stats-dashboard-preview .stat-card:nth-child(3) { transition-delay: 0.3s; }
+.stats-dashboard-preview .stat-card:nth-child(1) { transition-delay: 0.1s; -webkit-transition-delay: 0.1s; }
+.stats-dashboard-preview .stat-card:nth-child(2) { transition-delay: 0.2s; -webkit-transition-delay: 0.2s; }
+.stats-dashboard-preview .stat-card:nth-child(3) { transition-delay: 0.3s; -webkit-transition-delay: 0.3s; }
 
 /* Navigation */
 .landing-nav {

@@ -20,41 +20,86 @@ function LandingPage() {
     checkAuth();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      setIsLoggedIn(false);
-      setUsername("");
-      navigate('/');
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
+
 
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
+    // Add a small delay to ensure DOM is fully rendered
+    const timer = setTimeout(() => {
+      console.log('Setting up animation observer...');
+      
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('fade-in-visible');
-        }
-      });
-    }, observerOptions);
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            console.log('Element intersecting:', entry.target, entry.target.className);
+            entry.target.classList.add('fade-in-visible');
+            // Add visual feedback
+            (entry.target as HTMLElement).style.border = '2px solid #48bb78';
+          }
+        });
+      }, observerOptions);
 
-    const sections = sectionsRef.current?.querySelectorAll('.fade-in-section');
-    sections?.forEach(section => {
-      observer.observe(section);
-    });
-
-    return () => {
+      // Observe main sections
+      const sections = sectionsRef.current?.querySelectorAll('.fade-in-section');
+      console.log('Found sections:', sections?.length);
       sections?.forEach(section => {
-        observer.unobserve(section);
+        observer.observe(section);
+        console.log('Observing section:', section.className);
+        // Add initial visual feedback
+        (section as HTMLElement).style.border = '1px solid #e2e8f0';
       });
-    };
+
+      // Observe individual feature cards for staggered animation
+      const featureCards = sectionsRef.current?.querySelectorAll('.features-grid .feature-card');
+      console.log('Found feature cards:', featureCards?.length);
+      featureCards?.forEach(card => {
+        observer.observe(card);
+        console.log('Observing feature card:', card.className);
+        // Add initial visual feedback
+        (card as HTMLElement).style.border = '1px solid #e2e8f0';
+      });
+
+      // Observe individual role cards for staggered animation
+      const roleCards = sectionsRef.current?.querySelectorAll('.roles-grid .role-card');
+      console.log('Found role cards:', roleCards?.length);
+      roleCards?.forEach(card => {
+        observer.observe(card);
+        console.log('Observing role card:', card.className);
+        // Add initial visual feedback
+        (card as HTMLElement).style.border = '1px solid #e2e8f0';
+      });
+
+      // Observe individual stat cards for staggered animation
+      const statCards = sectionsRef.current?.querySelectorAll('.stats-dashboard-preview .stat-card');
+      console.log('Found stat cards:', statCards?.length);
+      statCards?.forEach(card => {
+        observer.observe(card);
+        console.log('Observing stat card:', card.className);
+        // Add initial visual feedback
+        (card as HTMLElement).style.border = '1px solid #e2e8f0';
+      });
+
+      return () => {
+        sections?.forEach(section => {
+          observer.unobserve(section);
+        });
+        featureCards?.forEach(card => {
+          observer.unobserve(card);
+        });
+        roleCards?.forEach(card => {
+          observer.unobserve(card);
+        });
+        statCards?.forEach(card => {
+          observer.unobserve(card);
+        });
+      };
+    }, 100); // 100ms delay
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -72,9 +117,6 @@ function LandingPage() {
                 <span className="welcome-text">Welcome, {username}</span>
                 <button className="nav-btn secondary" onClick={() => navigate('/user-dashboard')}>
                   Dashboard
-                </button>
-                <button className="nav-btn danger" onClick={handleLogout}>
-                  Logout
                 </button>
               </>
             ) : (
