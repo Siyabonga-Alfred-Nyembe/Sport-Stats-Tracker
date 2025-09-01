@@ -13,11 +13,11 @@ import { fetchPlayersWithStats } from '../../../services/playerService';
 
 const MatchesPage: React.FC = () => {
   // Team resolution: replace with actual auth-bound team if available
-  const currentTeamId = getCurrentTeamId() || 'kaizer_chiefs';
+  const currentTeamId = getCurrentTeamId();
   const [matches, setMatches] = useState<Match[]>([]);
   const [matchEvents, setMatchEvents] = useState<MatchEvent[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [currentTeam, setCurrentTeam] = useState<Team>({ id: currentTeamId, name: 'Loading...', coachId: 'coach' });
+  const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [opponentName, setOpponentName] = useState('');
   const [teamScore, setTeamScore] = useState('');
@@ -30,6 +30,12 @@ const MatchesPage: React.FC = () => {
   // Load team data and other data from database
   useEffect(() => {
     const loadData = async () => {
+      if (!currentTeamId) {
+        setErrorMsg('No team found. Please set up your team first.');
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
         
@@ -67,6 +73,8 @@ const MatchesPage: React.FC = () => {
         const playersWithStats = await fetchPlayersWithStats(currentTeamId);
         setPlayers(playersWithStats);
 
+        // Removed automatic success notification - only show for user operations
+
       } catch (error) {
         console.error('Error loading data:', error);
         setErrorMsg('We could not load your data. Please refresh or try again later.');
@@ -80,9 +88,9 @@ const MatchesPage: React.FC = () => {
 
   const handleCreateMatch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!opponentName || !date || !currentTeam) return;
+    if (!opponentName || !date || !currentTeam || !currentTeamId) return;
     const payload = {
-      team_id: currentTeam.id,
+      team_id: currentTeamId,
       opponent_name: opponentName,
       team_score: Number(teamScore) || 0,
       opponent_score: Number(opponentScore) || 0,
@@ -186,11 +194,11 @@ const MatchesPage: React.FC = () => {
             const q = search.toLowerCase();
             if (!q) return true;
             return m.opponentName.toLowerCase().includes(q) || (m.date || '').includes(q);
-          }).map(match => (
+          }          ).map(match => (
             // We wrap the new MatchCard in a div to handle the click event
             <div key={match.id} onClick={() => setSelectedMatch(match)}>
               <MatchCard
-                teamA={currentTeam?.name || 'Loading...'}
+                teamA={currentTeam?.name || 'Team'}
                 teamB={match.opponentName}
                 scoreA={match.teamScore}
                 scoreB={match.opponentScore}
@@ -202,10 +210,10 @@ const MatchesPage: React.FC = () => {
       </section>
 
       {/* The modal functionality remains unchanged */}
-      {selectedMatch && currentTeam && (
+      {selectedMatch && currentTeam && currentTeamId && (
         <MatchDetailsModal 
           match={selectedMatch}
-          players={players.filter(p => p.teamId === currentTeam.id)}
+          players={players.filter(p => p.teamId === currentTeamId)}
           events={matchEvents.filter(e => e.matchId === selectedMatch.id)}
           onClose={() => setSelectedMatch(null)}
           onUpdateTeamStats={handleUpdateTeamStats}

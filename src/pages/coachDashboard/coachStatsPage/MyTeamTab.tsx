@@ -30,6 +30,7 @@ const MyTeamTab: React.FC = () => {
         setIsLoading(true);
         const teamMatches = await fetchTeamMatches(team.id);
         setMatches(teamMatches);
+        // Removed automatic success notification - only show for user operations
       } catch (err) {
         console.error('Error loading matches:', err);
         setError('Failed to load match data. Please try again.');
