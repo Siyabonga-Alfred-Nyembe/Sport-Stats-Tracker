@@ -1,7 +1,7 @@
 // pages/userDashboard/Chat.tsx
 import React, { useRef, useEffect, useState } from "react";
-import { fetchChatForMatch, sendChatMessage, deleteChatMessage } from "../../services/chatService.ts";
-import supabase from "../../../supabaseClient.ts";
+import { fetchChatForMatch, sendChatMessage, deleteChatMessage } from "../../services/chatService";
+import supabase from "../../../supabaseClient";
 
 interface Props { matchId: string; username: string; }
 const Chat: React.FC<Props> = ({ matchId, username }) => {
@@ -44,7 +44,7 @@ const Chat: React.FC<Props> = ({ matchId, username }) => {
     <aside className="rs-chat rs-card">
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{fontWeight:900,color:"var(--primary)"}}>Match Chat</div>
-        <div style={{fontSize:12,color:"var(--muted)"}}>Live demo</div>
+
       </div>
 
       <div ref={ref} className="rs-messages">
@@ -62,7 +62,6 @@ const Chat: React.FC<Props> = ({ matchId, username }) => {
         <input ref={inputRef} placeholder="Write a message..." onKeyDown={async e=>{ if(e.key==="Enter"){ const text=inputRef.current?.value||""; if(text.trim()){ await sendChatMessage(matchId, username || "Fan", text); if(inputRef.current) inputRef.current.value=""; const rows = await fetchChatForMatch(matchId); setMessages(rows.map(r=>({ id:r.id, author:r.author||"Fan", text:r.message, timestamp:new Date(r.inserted_at).getTime()}))); } } }} />
         <button className="rs-btn" onClick={async () => { const text=inputRef.current?.value||""; if(text.trim()){ await sendChatMessage(matchId, username || "Fan", text); if(inputRef.current) inputRef.current.value=""; const rows = await fetchChatForMatch(matchId); setMessages(rows.map(r=>({ id:r.id, author:r.author||"Fan", text:r.message, timestamp:new Date(r.inserted_at).getTime()}))); } }}>Send</button>
       </div>
-      <div style={{fontSize:12,color:"var(--muted)"}}>Messages are stored locally in this demo.</div>
     </aside>
   );
 };

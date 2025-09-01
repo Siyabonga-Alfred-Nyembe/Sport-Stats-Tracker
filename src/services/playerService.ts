@@ -94,6 +94,40 @@ export async function fetchPlayerStats(playerId: string): Promise<PlayerStats | 
   }
 }
 
+export async function fetchPlayerStatsByMatch(playerId: string): Promise<DbPlayerStatsRecord[]> {
+  try {
+    console.log('fetchPlayerStatsByMatch called with playerId:', playerId);
+    
+    // First, let's see what's in the player_stats table
+    const { data: allStats, error: allStatsError } = await supabase
+      .from('player_stats')
+      .select('*')
+      .limit(5);
+    
+    console.log('All stats in table (first 5):', allStats, 'error:', allStatsError);
+    
+    // Now try to fetch specific player stats
+    const { data, error } = await supabase
+      .from('player_stats')
+      .select('*')
+      .eq('player_id', playerId)
+      .order('created_at', { ascending: false });
+    
+    console.log('Supabase response for specific player - data:', data, 'error:', error);
+    
+    if (error) {
+      console.error('fetchPlayerStatsByMatch error:', error);
+      return [];
+    }
+
+    console.log('Returning stats:', data);
+    return (data ?? []) as DbPlayerStatsRecord[];
+  } catch (error) {
+    console.error('fetchPlayerStatsByMatch error:', error);
+    return [];
+  }
+}
+
 export async function createPlayer(playerData: Omit<DbPlayerRecord, 'id'>): Promise<string | null> {
   try {
     const { data, error } = await supabase

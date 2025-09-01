@@ -1,8 +1,8 @@
 // pages/userDashboard/MatchDetail.tsx
 import React from "react";
-import type { Match, Team, Player } from "./types";
+import type { UiMatch, UiTeam, UiPlayer } from "./hooks/useDbData";
 
-interface Props { match: Match; homeTeam?: Team|null; awayTeam?: Team|null; players: Player[]; }
+interface Props { match: UiMatch; homeTeam?: UiTeam|null; awayTeam?: UiTeam|null; players: UiPlayer[]; }
 const MatchDetail: React.FC<Props> = ({ match, homeTeam, awayTeam, players }) => {
   if (!match) return null;
   return (

@@ -35,6 +35,7 @@ function App() {
           <Route path="/overview" element={<RedesignedDashboard />} />
           <Route path="/teams" element={<RedesignedDashboard />} />
           <Route path="/players" element={<RedesignedDashboard />} />
+          <Route path="/players/:playerId" element={<RedesignedDashboard />} />
           <Route path="/matches" element={<RedesignedDashboard />} />
           <Route path="/matches/:id" element={<RedesignedDashboard />} />
           <Route path="/favorites" element={<RedesignedDashboard />} />

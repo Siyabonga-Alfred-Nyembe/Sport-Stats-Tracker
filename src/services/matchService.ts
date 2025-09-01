@@ -10,36 +10,46 @@ export interface DbMatchEventRecord {
 }
 
 export async function fetchMatches(): Promise<Match[]> {
-  const { data, error } = await supabase
-    .from('matches')
-    .select('*')
-    .order('date', { ascending: false });
-  
-  if (error) {
-    console.error('fetchMatches error', error);
-    return [];
+  try {
+    const { data, error } = await supabase
+      .from('matches')
+      .select('*')
+      .order('date', { ascending: false });
+    
+    if (error) {
+      console.error('fetchMatches error', error);
+      throw new Error(`Database error: ${error.message}`);
+    }
+    
+    console.log('Raw matches data:', data);
+    
+    // Transform database records to Match interface
+    const matches = (data ?? []).map((match: DbMatchRecord): Match => ({
+      id: match.id,
+      teamId: match.team_id,
+      opponentName: match.opponent_name,
+      teamScore: match.team_score,
+      opponentScore: match.opponent_score,
+      date: match.date,
+      status: match.status,
+      possession: match.possession,
+      shots: match.shots,
+      shotsOnTarget: match.shots_on_target,
+      corners: match.corners,
+      fouls: match.fouls,
+      offsides: match.offsides,
+      passes: match.passes,
+      passAccuracy: match.pass_accuracy,
+      tackles: match.tackles,
+      saves: match.saves,
+    }));
+    
+    console.log('Transformed matches:', matches);
+    return matches;
+  } catch (error) {
+    console.error('fetchMatches unexpected error:', error);
+    throw error;
   }
-  
-  // Transform database records to Match interface
-  return (data ?? []).map((match: DbMatchRecord): Match => ({
-    id: match.id,
-    teamId: match.team_id,
-    opponentName: match.opponent_name,
-    teamScore: match.team_score,
-    opponentScore: match.opponent_score,
-    date: match.date,
-    status: match.status,
-    possession: match.possession,
-    shots: match.shots,
-    shotsOnTarget: match.shots_on_target,
-    corners: match.corners,
-    fouls: match.fouls,
-    offsides: match.offsides,
-    passes: match.passes,
-    passAccuracy: match.pass_accuracy,
-    tackles: match.tackles,
-    saves: match.saves,
-  }));
 }
 
 export async function fetchMatchEvents(matchId: string): Promise<DbMatchEventRecord[]> {
