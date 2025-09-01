@@ -2,6 +2,18 @@
    User Dashboard Stylesheet - Cleaned & Fixed
    ========================================================================== */
 
+/* Notification Animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /* --- Variables --- */
 .rs-dashboard {
   --bg: #f8fafc;
@@ -402,6 +414,49 @@ body {
 .teams-table tr:hover,
 .players-table tr:hover {
   background: #f8fafc;
+}
+
+/* --- Player Stats Table --- */
+.player-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.player-stats-table th,
+.player-stats-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.player-stats-table th {
+  background: var(--bg);
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.player-stats-table th:first-child,
+.player-stats-table th:nth-child(2) {
+  text-align: left;
+}
+
+.player-stats-table td:first-child,
+.player-stats-table td:nth-child(2) {
+  text-align: left;
+}
+
+.player-stats-table tr:hover {
+  background: #f8fafc;
+}
+
+.player-stats-table tr:last-child td {
+  border-bottom: none;
 }
 
 /* --- Utility Classes --- */

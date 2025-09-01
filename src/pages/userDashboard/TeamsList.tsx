@@ -1,16 +1,25 @@
 import React from "react";
-import { useFavoriteTeams } from "./hooks/useFavorites";
 
 interface Team { id: string; name: string; isFavorite?: boolean }
 
-interface Props { teams: Team[] }
+interface Props { 
+  teams: Team[];
+  isFavorite: (teamId: string) => boolean;
+  toggleFavorite: (teamId: string) => Promise<void>;
+  loading: boolean;
+}
 
-const TeamsList: React.FC<Props> = ({ teams }) => {
-  const { isFavorite, toggleFavorite, loading } = useFavoriteTeams();
+const TeamsList: React.FC<Props> = ({ teams, isFavorite, toggleFavorite, loading }) => {
+  const [togglingTeamId, setTogglingTeamId] = React.useState<string | null>(null);
   
-  const handleStarClick = (teamId: string) => {
+  const handleStarClick = async (teamId: string) => {
     console.log('Star clicked for team:', teamId, 'Current favorite status:', isFavorite(teamId));
-    toggleFavorite(teamId);
+    setTogglingTeamId(teamId);
+    try {
+      await toggleFavorite(teamId);
+    } finally {
+      setTogglingTeamId(null);
+    }
   };
   
   return (
@@ -28,14 +37,16 @@ const TeamsList: React.FC<Props> = ({ teams }) => {
                 className="rs-btn ghost"
                 onClick={() => handleStarClick(t.id)}
                 title={isFavorite(t.id) ? "Unfavorite" : "Favorite"}
-                disabled={loading}
+                disabled={loading || togglingTeamId === t.id}
                 style={{ 
                   fontSize: '18px', 
                   color: isFavorite(t.id) ? '#ffd700' : '#ccc',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1
+                  cursor: (loading || togglingTeamId === t.id) ? 'not-allowed' : 'pointer',
+                  opacity: (loading || togglingTeamId === t.id) ? 0.6 : 1
                 }}
-              >{isFavorite(t.id) ? "★" : "☆"}</button>
+              >
+                {togglingTeamId === t.id ? "⏳" : (isFavorite(t.id) ? "★" : "☆")}
+              </button>
             </div>
           </div>
         ))}

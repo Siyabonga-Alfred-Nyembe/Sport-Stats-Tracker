@@ -49,6 +49,8 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/auth-callback" element={<AuthCallback />} />
+          <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route path="/players/:playerId" element={<RedesignedDashboard />} />
           <Route path="/overview" element={
             <ProtectedRoute requiredRole="Fan" redirectTo="/login">
               <RedesignedDashboard />
