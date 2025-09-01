@@ -177,5 +177,34 @@ export async function updatePlayerStats(statsId: string, statsData: Partial<DbPl
   return true;
 }
 
+export async function createMatchEvent(eventData: Omit<DbMatchEventRecord, 'id'>): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('match_events')
+    .insert([eventData])
+    .select('id')
+    .single();
+  
+  if (error) {
+    console.error('createMatchEvent error', error);
+    return null;
+  }
+  
+  return data?.id || null;
+}
+
+export async function deleteMatchEvent(eventId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('match_events')
+    .delete()
+    .eq('id', eventId);
+  
+  if (error) {
+    console.error('deleteMatchEvent error', error);
+    return false;
+  }
+  
+  return true;
+}
+
 
 

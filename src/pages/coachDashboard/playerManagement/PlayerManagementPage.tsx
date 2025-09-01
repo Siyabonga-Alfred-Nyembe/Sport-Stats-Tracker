@@ -3,102 +3,125 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../../../../supabaseClient';
 import { getCurrentTeamId } from '../../../services/teamService';
+import { fetchPlayersWithStats } from '../../../services/playerService';
 import RosterManagement from './RosterManagement';
 import LineupSelection from './LineupSelection';
 import PlayerStatsModal from './PlayerStatsModal';
 import './PlayerManagement.css';
 
-// 1. Import the Player and PlayerStats types from your central types file
+// Import the Player and PlayerStats types from your central types file
 import type { Player, PlayerStats } from "../../../types";
 
-// Helper function to create a default, complete stats object
-const createDefaultStats = (): PlayerStats => ({
-  goals: 0,
-  assists: 0,
-  shots: 0,
-  shotsOnTarget: 0,
-  chancesCreated: 0,
-  tackles: 0,
-  interceptions: 0,
-  clearances: 0,
-  saves: 0,
-  cleansheets: 0,
-  savePercentage: 0,
-  passCompletion: 0,
-  minutesPlayed: 0,
-  dribblesAttempted:2,
-  dribblesSuccessful:4,
-  offsides: 3,
-  yellowCards: 0,
-  redCards: 0,
-  performanceData: [0, 0, 0, 0, 0],
-});
-
 const PlayerManagementPage: React.FC = () => {
-  const currentTeamId = getCurrentTeamId() || 'kaizer_chiefs';
+  const currentTeamId = getCurrentTeamId();
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [lineup, setLineup] = useState<Player[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadPlayers = async () => {
-      const { data, error } = await supabase
-        .from('players')
-        .select('*')
-        .eq('team_id', currentTeamId)
-        .order('name');
-        
-      if (data) {
-        const mapped: Player[] = data.map((p: any) => ({
-          id: String(p.id),
-          jerseyNum: String(p.jersey_num ?? ''),
-          name: p.name,
-          teamId: p.team_id,
-          position: p.position ?? '',
-          // 2. IMPORTANT: Initialize the FULL stats object here
-          stats: createDefaultStats(), // In a real app, you would fetch these stats
-          imageUrl: p.image_url ?? `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(p.name)}`,
-        }));
-        setPlayers(mapped);
-      } else if (error) {
+      if (!currentTeamId) {
+        setErrorMsg('No team found. Please set up your team first.');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        // Use the service function that fetches players with real stats from database
+        const playersWithStats = await fetchPlayersWithStats(currentTeamId);
+        setPlayers(playersWithStats);
+        // Removed automatic success notification - only show for user operations
+      } catch (error) {
+        console.error('Error loading players:', error);
         setErrorMsg('We could not load your players. Please refresh or try again later.');
+      } finally {
+        setIsLoading(false);
       }
     };
     loadPlayers();
   }, [currentTeamId]);
 
   const handleAddPlayer = async (newPlayerData: Omit<Player, 'id' | 'stats' | 'imageUrl' | 'teamId'>) => {
-    const payload = {
-      name: newPlayerData.name,
-      position: newPlayerData.position,
-      jersey_num: newPlayerData.jerseyNum,
-      team_id: currentTeamId,
-      image_url: `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(newPlayerData.name)}`,
-    };
-    const { data, error } = await supabase.from('players').insert(payload).select().single();
-    if (!error && data) {
-      const saved: Player = {
-        id: String(data.id),
-        jerseyNum: String(data.jersey_num ?? ''),
-        name: data.name,
-        teamId: data.team_id,
-        position: data.position ?? '',
-        // 3. Also initialize the full stats object for new players
-        stats: createDefaultStats(),
-        imageUrl: data.image_url,
+    if (!currentTeamId) {
+      setErrorMsg('No team found. Please set up your team first.');
+      return;
+    }
+
+    try {
+      const payload = {
+        name: newPlayerData.name,
+        position: newPlayerData.position,
+        jersey_num: newPlayerData.jerseyNum,
+        team_id: currentTeamId,
+        image_url: `https://via.placeholder.com/280x250/8a2be2/FFF?text=${encodeURIComponent(newPlayerData.name)}`,
       };
-      setPlayers(prev => [...prev, saved]);
-    } else if (error) {
+      
+      const { data, error } = await supabase.from('players').insert(payload).select().single();
+      
+      if (!error && data) {
+        // Create a new player with empty stats (will be populated when they play matches)
+        const saved: Player = {
+          id: String(data.id),
+          jerseyNum: String(data.jersey_num ?? ''),
+          name: data.name,
+          teamId: data.team_id,
+          position: data.position ?? '',
+          stats: {
+            goals: 0,
+            assists: 0,
+            shots: 0,
+            shotsOnTarget: 0,
+            chancesCreated: 0,
+            tackles: 0,
+            interceptions: 0,
+            clearances: 0,
+            saves: 0,
+            cleansheets: 0,
+            savePercentage: 0,
+            passCompletion: 0,
+            minutesPlayed: 0,
+            dribblesAttempted: 0,
+            dribblesSuccessful: 0,
+            offsides: 0,
+            yellowCards: 0,
+            redCards: 0,
+            performanceData: [0, 0, 0, 0, 0],
+          },
+          imageUrl: data.image_url,
+        };
+        setPlayers(prev => [...prev, saved]);
+      } else if (error) {
+        setErrorMsg('We could not add that player. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error adding player:', error);
       setErrorMsg('We could not add that player. Please try again.');
     }
   };
 
   const handleRemovePlayer = async (playerId: string) => {
-    setLineup(prev => prev.filter(p => p.id !== playerId));
-    setPlayers(prev => prev.filter(p => p.id !== playerId));
-    await supabase.from('players').delete().eq('id', playerId);
+    try {
+      // Remove from lineup first
+      setLineup(prev => prev.filter(p => p.id !== playerId));
+      
+      // Remove from players list
+      setPlayers(prev => prev.filter(p => p.id !== playerId));
+      
+      // Delete from database
+      const { error } = await supabase.from('players').delete().eq('id', playerId);
+      
+      if (error) {
+        console.error('Error removing player:', error);
+        setErrorMsg('We could not remove that player. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error removing player:', error);
+      setErrorMsg('We could not remove that player. Please try again.');
+    }
   };
 
   const handleAddToLineup = (player: Player) => {
@@ -111,9 +134,43 @@ const PlayerManagementPage: React.FC = () => {
     setLineup(prev => prev.filter(p => p.id !== playerId));
   };
   
+  if (isLoading) {
+    return (
+      <main className="management-container">
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <p>Loading players...</p>
+        </div>
+      </main>
+    );
+  }
+  
   return (
     <main className="management-container">
-      {/* <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} /> */}
+      {errorMsg && (
+        <div style={{ 
+          background: 'rgba(255, 0, 0, 0.1)', 
+          color: 'red', 
+          padding: '1rem', 
+          margin: '1rem', 
+          borderRadius: '8px',
+          border: '1px solid red'
+        }}>
+          {errorMsg}
+          <button 
+            onClick={() => setErrorMsg(null)}
+            style={{ 
+              float: 'right', 
+              background: 'none', 
+              border: 'none', 
+              color: 'red', 
+              cursor: 'pointer',
+              fontSize: '1.2rem'
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
       <RosterManagement
         players={players}
         lineupIds={new Set(lineup.map(p => p.id))}
