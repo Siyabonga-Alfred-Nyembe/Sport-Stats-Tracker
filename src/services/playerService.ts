@@ -94,6 +94,41 @@ export async function fetchPlayerStats(playerId: string): Promise<PlayerStats | 
   }
 }
 
+// Fetch and aggregate stats for multiple players at once
+export async function fetchAggregatedStatsForPlayers(playerIds: string[]): Promise<Record<string, PlayerStats>> {
+  try {
+    if (!playerIds || playerIds.length === 0) return {};
+
+    const { data, error } = await supabase
+      .from('player_stats')
+      .select('*')
+      .in('player_id', playerIds);
+
+    if (error) {
+      console.error('fetchAggregatedStatsForPlayers error:', error);
+      return {};
+    }
+
+    const byPlayer: Record<string, DbPlayerStatsRecord[]> = {};
+    (data ?? []).forEach((stat: any) => {
+      const pid = stat.player_id as string;
+      if (!byPlayer[pid]) byPlayer[pid] = [] as unknown as DbPlayerStatsRecord[];
+      byPlayer[pid].push(stat as DbPlayerStatsRecord);
+    });
+
+    const result: Record<string, PlayerStats> = {};
+    playerIds.forEach(pid => {
+      const statsRecords = byPlayer[pid] || [];
+      result[pid] = aggregatePlayerStats(statsRecords);
+    });
+
+    return result;
+  } catch (error) {
+    console.error('fetchAggregatedStatsForPlayers unexpected error:', error);
+    return {};
+  }
+}
+
 export async function fetchPlayerStatsByMatch(playerId: string): Promise<DbPlayerStatsRecord[]> {
   try {
     console.log('fetchPlayerStatsByMatch called with playerId:', playerId);
