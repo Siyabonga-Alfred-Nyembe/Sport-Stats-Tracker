@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchMatches } from "../../../services/matchService.ts";
-import { fetchPlayers } from "../../../services/playerService.ts";
+import { fetchPlayers, fetchAggregatedStatsForPlayers } from "../../../services/playerService.ts";
 import { fetchTeamById } from "../../../services/teamService.ts";
 
 export interface UiTeam { id: string; name: string; isFavorite?: boolean; }
@@ -54,12 +54,18 @@ export function useDbData() {
         const uiTeamsMap = new Map<string, UiTeam>();
         teamResults.filter(Boolean).forEach(t => { uiTeamsMap.set(t!.id, { id: t!.id, name: t!.name }); });
 
+        // Aggregate real player stats for dashboard display
+        const aggregatedStats = await fetchAggregatedStatsForPlayers(dbPlayers.map(p => p.id));
         const uiPlayers: UiPlayer[] = dbPlayers.map(p => ({
           id: p.id,
           name: p.name,
           teamId: p.team_id,
           position: p.position ?? "",
-          stats: { goals: 0, assists: 0, minutesPlayed: 0 },
+          stats: {
+            goals: aggregatedStats[p.id]?.goals ?? 0,
+            assists: aggregatedStats[p.id]?.assists ?? 0,
+            minutesPlayed: aggregatedStats[p.id]?.minutesPlayed ?? 0
+          },
         }));
 
         // Map matches where "team" is the home team and opponent is away

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import type { Match, Player, MatchEvent } from "../../../types";
 import AdvancedStatsForm from "./PlayerStatsForm/AdvancedStatsForm";
-import { createPlayerStats, updatePlayerStats } from "../../../services/matchService";
+import { upsertPlayerStats } from "../../../services/matchService";
 import { updateMatch } from "../../../services/matchService";
 import InlineAlert from "../../components/InlineAlert";
 import "./MatchesPage.css"; // your modal + glassy styles
@@ -38,9 +38,6 @@ const MatchDetailsModal: React.FC<Props> = ({
   onRemovePlayerEvent,
 }) => {
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
-  const [playerAdvancedStats, setPlayerAdvancedStats] = useState<
-    Record<string, any>
-  >({});
   const [isSaving, setIsSaving] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -66,62 +63,70 @@ const MatchDetailsModal: React.FC<Props> = ({
     onAddPlayerEvent(eventId, match.id, selectedPlayerId, eventType);
   };
 
+  const normalizeStatsKeys = (raw: Record<string, number>) => {
+    // Normalize various form field casings to db field names used in services
+    return {
+      goals: raw.goals ?? raw.Goals ?? 0,
+      assists: raw.assists ?? raw.Assists ?? 0,
+      shots: raw.shots ?? raw.Shots ?? 0,
+      shotsOnTarget: raw.shotsOnTarget ?? raw.ShotsOnTarget ?? 0,
+      chancesCreated: raw.chancesCreated ?? raw.ChancesCreated ?? 0,
+      dribblesAttempted: raw.dribblesAttempted ?? raw.DribblesAttempted ?? 0,
+      dribblesSuccessful: raw.dribblesSuccessful ?? raw.DribblesSuccessful ?? 0,
+      offsides: raw.offsides ?? raw.Offsides ?? 0,
+      tackles: raw.tackles ?? raw.Tackles ?? 0,
+      interceptions: raw.interceptions ?? raw.Interceptions ?? 0,
+      clearances: raw.clearances ?? raw.Clearances ?? 0,
+      saves: raw.saves ?? raw.Saves ?? 0,
+      cleansheets: raw.cleansheets ?? raw.cleanSheets ?? raw.CleanSheets ?? 0,
+      savePercentage: raw.savePercentage ?? raw.SavePercentage ?? 0,
+      passCompletion: raw.passCompletion ?? raw.PassCompletion ?? 0,
+      minutesPlayed: raw.minutesPlayed ?? raw.MinutesPlayed ?? 0,
+      yellowCards: raw.yellowCards ?? raw.YellowCards ?? 0,
+      redCards: raw.redCards ?? raw.RedCards ?? 0,
+    };
+  };
+
   const handleSavePlayerStats = async (
     playerId: string,
-    stats: Record<string, number>
+    incomingStats: Record<string, number>
   ) => {
     try {
       setIsSaving(true);
-      
-      // Check if stats already exist for this player in this match
-      const existingStats = playerAdvancedStats[playerId];
-      
-      if (existingStats) {
-        // Update existing stats
-        const success = await updatePlayerStats(playerId, {
-          ...stats,
-          match_id: match.id,
-          player_id: playerId,
-        });
-        
-        if (!success) {
-          throw new Error('Failed to update player stats');
-        }
-        addNotification('Player stats updated successfully', 'success');
-      } else {
-        // Create new stats record
-        const statsId = await createPlayerStats({
-          match_id: match.id,
-          player_id: playerId,
-          goals: stats.goals || 0,
-          assists: stats.assists || 0,
-          shots: stats.shots || 0,
-          shots_on_target: stats.shotsOnTarget || 0,
-          chances_created: stats.chancesCreated || 0,
-          dribbles_attempted: stats.dribblesAttempted || 0,
-          dribbles_successful: stats.dribblesSuccessful || 0,
-          offsides: stats.offsides || 0,
-          tackles: stats.tackles || 0,
-          interceptions: stats.interceptions || 0,
-          clearances: stats.clearances || 0,
-          saves: stats.saves || 0,
-          clean_sheets: stats.cleansheets || 0,
-          save_percentage: stats.savePercentage || 0,
-          pass_completion: stats.passCompletion || 0,
-          minutes_played: stats.minutesPlayed || 0,
-          yellow_cards: stats.yellowCards || 0,
-          red_cards: stats.redCards || 0,
-        });
-        
-        if (!statsId) {
-          throw new Error('Failed to create player stats');
-        }
-        addNotification('Player stats saved successfully', 'success');
+      console.log('[MatchDetailsModal] handleSavePlayerStats called', { matchId: match.id, playerId, incomingStats });
+
+      const stats = normalizeStatsKeys(incomingStats);
+      console.log('[MatchDetailsModal] Normalized stats', stats);
+      // Upsert player stats by (match_id, player_id)
+      const statsId = await upsertPlayerStats(match.id, playerId, {
+        goals: stats.goals || 0,
+        assists: stats.assists || 0,
+        shots: stats.shots || 0,
+        shots_on_target: stats.shotsOnTarget || 0,
+        chances_created: stats.chancesCreated || 0,
+        dribbles_attempted: stats.dribblesAttempted || 0,
+        dribbles_successful: stats.dribblesSuccessful || 0,
+        offsides: stats.offsides || 0,
+        tackles: stats.tackles || 0,
+        interceptions: stats.interceptions || 0,
+        clearances: stats.clearances || 0,
+        saves: stats.saves || 0,
+        clean_sheets: stats.cleansheets || 0,
+        save_percentage: stats.savePercentage || 0,
+        pass_completion: stats.passCompletion || 0,
+        minutes_played: stats.minutesPlayed || 0,
+        yellow_cards: stats.yellowCards || 0,
+        red_cards: stats.redCards || 0,
+      });
+
+      if (!statsId) {
+        throw new Error('Failed to save player stats');
       }
+
+      console.log('[MatchDetailsModal] Player stats saved successfully', { statsId, matchId: match.id, playerId });
+      addNotification('Player stats saved', 'success');
       
-      // Update local state
-      setPlayerAdvancedStats((prev) => ({ ...prev, [playerId]: stats }));
-      
+      // No local cache required; data will be fetched fresh where needed
     } catch (error) {
       console.error('Error saving player stats:', error);
       addNotification('Failed to save player stats. Please try again.', 'error');

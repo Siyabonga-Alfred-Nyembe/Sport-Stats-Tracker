@@ -225,6 +225,9 @@ const LineupSelection: React.FC<Props> = ({ lineup, onRemoveFromLineup, onPositi
                     <span className="jersey-number">{player.jerseyNum}</span>
                     <span className="player-name">{player.name}</span>
                     <button 
+                      type="button"
+                      onMouseDown={(e) => { e.stopPropagation(); }}
+                      onMouseUp={(e) => { e.stopPropagation(); }}
                       onClick={(e) => {
                         e.stopPropagation();
                         onRemoveFromLineup(player.id);

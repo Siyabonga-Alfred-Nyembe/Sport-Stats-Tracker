@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import supabase from '../../../../supabaseClient';
 import { getCurrentTeamId } from '../../../services/teamService';
 import { fetchPlayersWithStats } from '../../../services/playerService';
-import { loadLineup, saveLineup, updatePlayerPosition, debugLineup } from '../../../services/lineupService';
+import { loadLineup, saveLineup, updatePlayerPosition, debugLineup, removePlayerFromLineup } from '../../../services/lineupService';
 import RosterManagement from './RosterManagement';
 import LineupSelection from './LineupSelection';
 import PlayerStatsModal from './PlayerStatsModal';
@@ -80,7 +80,7 @@ const PlayerManagementPage: React.FC = () => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('players')
         .insert([
           {
@@ -91,8 +91,7 @@ const PlayerManagementPage: React.FC = () => {
             image_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=80&bold=true`
           }
         ])
-        .select()
-        .single();
+        .select();
 
       if (error) {
         console.error('Error adding player:', error);
@@ -165,14 +164,16 @@ const PlayerManagementPage: React.FC = () => {
       })));
 
              if (success) {
-         setSuccessMsg(`${player.name} has been added to the lineup!`);
-         setTimeout(() => setSuccessMsg(null), 3000);
-         // Debug: Check what's in the database
-         await debugLineup(currentTeamId!);
-       } else {
-         setErrorMsg('Could not save lineup to database. Please try again.');
-         setTimeout(() => setErrorMsg(null), 3000);
-       }
+        console.log('[PlayerManagement] Added to lineup and saved', { teamId: currentTeamId, playerId: player.id });
+        setSuccessMsg(`${player.name} has been added to the lineup!`);
+        setTimeout(() => setSuccessMsg(null), 3000);
+        // Debug: Check what's in the database
+        await debugLineup(currentTeamId!);
+      } else {
+        console.error('[PlayerManagement] Failed to save lineup after add', { teamId: currentTeamId });
+        setErrorMsg('Could not save lineup to database. Please try again.');
+        setTimeout(() => setErrorMsg(null), 3000);
+      }
     } catch (error) {
       console.error('Error adding player to lineup:', error);
       setErrorMsg('Could not add player to lineup. Please try again.');
@@ -183,23 +184,21 @@ const PlayerManagementPage: React.FC = () => {
   const handleRemoveFromLineup = async (playerId: string) => {
     try {
       const playerToRemove = lineup.find(p => p.id === playerId);
-      const newLineup = lineup.filter(p => p.id !== playerId);
-      
-      // Update local state
-      setLineup(newLineup);
+      if (!playerToRemove) return;
 
-      // Save to database
-      const success = await saveLineup(currentTeamId!, newLineup.map(p => ({
-        playerId: p.id,
-        positionX: 50, // Default center position
-        positionY: 50,
-      })));
+      // Optimistically update local state
+      setLineup(prev => prev.filter(p => p.id !== playerId));
 
-      if (success && playerToRemove) {
+      // Directly delete from DB to avoid full overwrite race conditions
+      const success = await removePlayerFromLineup(currentTeamId!, playerId);
+
+      if (success) {
+        console.log('[PlayerManagement] Removed from lineup', { teamId: currentTeamId, playerId });
         setSuccessMsg(`${playerToRemove.name} has been removed from the lineup.`);
         setTimeout(() => setSuccessMsg(null), 3000);
       } else {
-        setErrorMsg('Could not save lineup to database. Please try again.');
+        console.error('[PlayerManagement] Failed to remove from lineup', { teamId: currentTeamId, playerId });
+        setErrorMsg('Could not update lineup in database. Please try again.');
         setTimeout(() => setErrorMsg(null), 3000);
       }
     } catch (error) {

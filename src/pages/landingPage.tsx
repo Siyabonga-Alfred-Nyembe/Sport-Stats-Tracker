@@ -149,7 +149,7 @@ function LandingPage() {
               {!isLoggedIn ? (
                 <>
                   <button className="cta-btn primary" onClick={() => navigate('/signup')}>
-                    Start Free Trial
+                    Sign Up
                   </button>
                   <button className="cta-btn secondary" onClick={() => navigate('/login')}>
                     Sign In
@@ -172,7 +172,7 @@ function LandingPage() {
               <div className="stat-card">
                 <div className="stat-icon">⚽</div>
                 <div className="stat-value">24/7</div>
-                <div className="stat-label">Live Updates</div>
+                <div className="stat-label">Post Match Analysis</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon">🏆</div>
@@ -196,8 +196,8 @@ function LandingPage() {
             </div>
             <div className="feature-card">
               <div className="feature-icon">📱</div>
-              <h3>Real-time Updates</h3>
-              <p>Live match statistics, instant notifications, and up-to-the-minute performance data.</p>
+              <h3>Post Match Analysis</h3>
+              <p>Post match statistics, instant notifications, and up-to-the-minute performance data.</p>
             </div>
             <div className="feature-card">
               <div className="feature-icon">👥</div>
@@ -282,11 +282,6 @@ function LandingPage() {
             <p className="footer-tagline">
               Empowering football success through data-driven insights
             </p>
-          </div>
-          <div className="footer-links">
-            <a href="#" className="footer-link">Privacy Policy</a>
-            <a href="#" className="footer-link">Terms of Service</a>
-            <a href="#" className="footer-link">Support</a>
           </div>
         </div>
       </footer>
