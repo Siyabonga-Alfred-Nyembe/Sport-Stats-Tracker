@@ -2,7 +2,7 @@
 
 A React + TypeScript + Vite web application for tracking football statistics with user authentication powered by Supabase.
 
-**Live Demo:** [https://sport-stats-dab7d6aaf0cqeyef.southafricanorth-01.azurewebsites.net/]([https://sport-stats-dab7d6aaf0cqeyef.southafricanorth-01.azurewebsites.net/])
+**Live Demo:** [https://sport-stats-dab7d6aaf0cqeyef.southafricanorth-01.azurewebsites.net/](https://sport-stats-dab7d6aaf0cqeyef.southafricanorth-01.azurewebsites.net/)
 
 ## Table of Contents
 
