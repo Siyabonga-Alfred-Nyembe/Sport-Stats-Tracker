@@ -42,66 +42,242 @@ body {
 
 .coach-dashboard {
   min-height: 100vh;
-  padding-top: 2.3rem;
+  padding-top: 80px; /* Space for hamburger menu */
   background: linear-gradient(to right, #0077B6, #0096C7, #48CAE4);
   
 }
 
-/* --- Fixed Top Navigation --- */
-.coach-sidebar {
+/* --- Dashboard Header --- */
+.dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 3rem;
-  background: linear-gradient(to right, #0077B6, #0096C7, #48CAE4);
-  border-bottom: 2px solid var(--border-color);
-  box-shadow: var(--shadow);
+  height: 80px;
+  background: linear-gradient(135deg, #0077B6 0%, #0096C7 50%, #48CAE4 100%);
   z-index: 1000;
-  transition: height 0.3s ease;
-  overflow: hidden;
   display: flex;
   align-items: center;
-  padding: 0 24px;
-  transition: 0.5s ease;
+  padding: 0 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.coach-sidebar:hover {
-  height: auto;
-  min-height: 2.3rem;
-  padding: 16px 24px;
-  align-items: flex-start;
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.username {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.app-title {
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Classic Sidebar with Hamburger Menu --- */
+.hamburger-menu {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  display: flex;
   flex-direction: column;
+  gap: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+  align-items: center;
+}
+
+.hamburger-menu:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.hamburger-line {
+  width: 24px;
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100vh;
+  background: linear-gradient(135deg, #0077B6 0%, #0096C7 50%, #48CAE4 100%);
+  z-index: 1000;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-title {
   font-weight: 700;
   color: white;
-  font-size: 18px;
+  font-size: 20px;
   margin: 0;
-  white-space: nowrap;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .sidebar-nav {
-  position:fixed;
-  top: -20%;
+  flex: 1;
+  padding: 20px 0;
   display: flex;
   flex-direction: column;
-
-  height: 0;
-  opacity: 0;
-  margin-top: 16px;
   gap: 8px;
-  width: 100%;
-  transition: 1s ease;
 }
 
-.coach-sidebar:hover .sidebar-nav {
-  position: relative;
-  height: fit-content;
-  opacity: 0.7;
+.sidebar-nav button {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 16px;
+  text-align: left;
+  transition: all 0.2s ease;
+  border-radius: 0;
+  width: 100%;
+}
+
+.sidebar-nav button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(5px);
+}
+
+.sidebar-nav button:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.nav-icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+}
+
+/* Animation for hamburger menu */
+.hamburger-menu:hover .hamburger-line:nth-child(1) {
+  transform: translateY(2px);
+}
+
+.hamburger-menu:hover .hamburger-line:nth-child(3) {
+  transform: translateY(-2px);
+}
+
+/* Sidebar scrollbar styling */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .sidebar-nav button {
@@ -408,11 +584,29 @@ body {
     grid-template-columns: 1fr;
   }
   
-  .coach-sidebar {
-    padding: 0 16px;
+  .dashboard-header {
+    height: 70px;
+    padding: 0 15px;
   }
   
-  .coach-sidebar:hover {
-    padding: 16px;
+  .app-title {
+    font-size: 20px;
+  }
+  
+  .hamburger-menu {
+    padding: 10px;
+  }
+  
+  .hamburger-line {
+    width: 20px;
+    height: 2px;
+  }
+  
+  .sidebar {
+    width: 280px;
+  }
+  
+  .coach-dashboard {
+    padding-top: 70px;
   }
 }

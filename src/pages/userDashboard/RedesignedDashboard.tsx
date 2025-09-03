@@ -8,8 +8,8 @@ import MatchesList from "./MatchList.tsx";
 import TeamsList from "./TeamsList";
 import PlayersList from "./PlayersList";
 import { useFavoriteTeams } from "./hooks/useFavorites.ts";
-import MatchDetail from "./MatchDetail.tsx";
-import Chat from "./Chat.tsx";
+import PlayerDetails from "./PlayerDetails.tsx";
+import MatchDetailsPage from "./MatchDetailsPage.tsx";
 // Types kept for reference; UI types are derived via useDbData
 import { useLocalStorage } from "./hooks/useLocalStorage.ts";
 import { useDbData } from "./hooks/useDbData.ts";
@@ -24,13 +24,47 @@ const RedesignedDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { teams, players, matches, loading, error } = useDbData();
-  const { favoriteTeamIds, loading: favoritesLoading } = useFavoriteTeams();
+  const { teams, players, matches, loading, error, debugData } = useDbData();
+  const { favoriteTeamIds, isFavorite, toggleFavorite, loading: favoritesLoading } = useFavoriteTeams();
+
+  // Enhanced toggle favorite with notification
+  const handleToggleFavorite = async (teamId: string) => {
+    try {
+      await toggleFavorite(teamId);
+      const team = teams.find(t => t.id === teamId);
+      const isNowFavorite = !favoriteTeamIds.includes(teamId);
+      setNotification({
+        message: `${team?.name || 'Team'} ${isNowFavorite ? 'added to' : 'removed from'} favorites`,
+        type: 'success'
+      });
+      // Clear notification after 3 seconds
+      setTimeout(() => setNotification(null), 3000);
+    } catch (error) {
+      setNotification({
+        message: 'Failed to update favorites',
+        type: 'error'
+      });
+      setTimeout(() => setNotification(null), 3000);
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<"overview"|"teams"|"players"|"matches"|"favorites">("overview");
   const [selectedMatchId, setSelectedMatchId] = useState<string|null>(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string|null>(null);
   const [query, setQuery] = useState("");
   const [username, setUsername] = useLocalStorage(USERNAME_KEY, "Fan");
+  const [notification, setNotification] = useState<{message: string; type: 'success' | 'error'} | null>(null);
+
+  // Check environment variables
+  const envCheck = useMemo(() => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    return {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseKey,
+      isConfigured: !!supabaseUrl && !!supabaseKey
+    };
+  }, []);
 
   const filteredMatches = useMemo(()=> {
     if (!query.trim()) return matches;
@@ -44,7 +78,7 @@ const RedesignedDashboard: React.FC = () => {
 
   const recentMatches = useMemo(()=> matches.slice(0, 5), [matches]);
 
-  // sync tab and selected match with URL
+  // sync tab and selected match/player with URL
   React.useEffect(() => {
     const path = location.pathname.replace(/^\//, "");
     const [segment, maybeId] = path.split("/");
@@ -55,8 +89,13 @@ const RedesignedDashboard: React.FC = () => {
     }
     if (segment === "matches" && maybeId) {
       setSelectedMatchId(maybeId);
-    } else if (segment !== "matches") {
+      setSelectedPlayerId(null);
+    } else if (segment === "players" && maybeId) {
+      setSelectedPlayerId(maybeId);
       setSelectedMatchId(null);
+    } else if (segment !== "matches" && segment !== "players") {
+      setSelectedMatchId(null);
+      setSelectedPlayerId(null);
     }
   }, [location.pathname]);
 
@@ -75,36 +114,99 @@ const RedesignedDashboard: React.FC = () => {
            
        
         <main className="rs-main">
+          {/* Notification */}
+          {notification && (
+            <div style={{
+              position: 'fixed',
+              top: '20px',
+              right: '20px',
+              padding: '12px 20px',
+              borderRadius: '8px',
+              backgroundColor: notification.type === 'success' ? '#4caf50' : '#f44336',
+              color: 'white',
+              zIndex: 1000,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              animation: 'slideIn 0.3s ease-out'
+            }}>
+              {notification.message}
+            </div>
+          )}
           <div className="rs-card">
-            {loading && <div style={{color:"var(--muted)"}}>Loading...</div>}
-            {error && <div style={{color:"var(--danger)"}}>{error}</div>}
-            {activeTab === "overview" && (
+            {loading && (
+              <div style={{textAlign: "center", padding: "40px", color:"var(--muted)"}}>
+                <div>Loading matches and teams...</div>
+                <div style={{fontSize: "14px", marginTop: "8px"}}>Please wait while we fetch your data</div>
+              </div>
+            )}
+            {error && (
+              <div style={{textAlign: "center", padding: "20px", color:"var(--danger)", backgroundColor: "var(--danger-bg)", borderRadius: "8px", margin: "10px 0"}}>
+                <div style={{fontWeight: "bold", marginBottom: "8px"}}>Error Loading Data</div>
+                <div>{error}</div>
+                {!envCheck.isConfigured && (
+                  <div style={{marginTop: "10px", padding: "10px", backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "4px", fontSize: "14px"}}>
+                    <div style={{fontWeight: "bold", marginBottom: "5px"}}>Configuration Issue:</div>
+                    <div>Missing Supabase credentials. Please check your .env file.</div>
+                    <div>Required: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY</div>
+                  </div>
+                )}
+                <div style={{marginTop: "10px", display: "flex", gap: "10px", justifyContent: "center"}}>
+                  <button 
+                    style={{padding: "8px 16px", backgroundColor: "var(--primary)", color: "white", border: "none", borderRadius: "4px", cursor: "pointer"}}
+                    onClick={() => window.location.reload()}
+                  >
+                    Retry
+                  </button>
+                  <button 
+                    style={{padding: "8px 16px", backgroundColor: "var(--secondary)", color: "white", border: "none", borderRadius: "4px", cursor: "pointer"}}
+                    onClick={() => debugData()}
+                  >
+                    Debug Data
+                  </button>
+                </div>
+              </div>
+            )}
+            {!loading && !error && activeTab === "overview" && (
               <>
                 <StatsCards teams={teams.length} players={players.length} matches={matches.length} />
                 <MatchesList matches={recentMatches} teams={teams} query={query} setQuery={setQuery} onOpen={(id)=>{ setSelectedMatchId(id); navigate(`/matches/${id}`); setActiveTab("matches"); }} />
               </>
             )}
-            {activeTab === "matches" && (
+            {!loading && !error && activeTab === "matches" && (
               <>
-                <MatchesList matches={filteredMatches} teams={teams} query={query} setQuery={setQuery} onOpen={(id)=>{ setSelectedMatchId(id); navigate(`/matches/${id}`); }} />
-                {selectedMatch && (
-                  <div style={{marginTop:14}} className="rs-detail-wrapper">
-                    <MatchDetail match={selectedMatch} homeTeam={homeTeam} awayTeam={awayTeam} players={players} />
-                    <Chat matchId={selectedMatch.id} username={username} />
-                  </div>
+                {selectedMatch ? (
+                  <MatchDetailsPage onBack={() => { setSelectedMatchId(null); navigate("/matches"); }} username={username} teams={teams} />
+                ) : (
+                  <MatchesList matches={filteredMatches} teams={teams} query={query} setQuery={setQuery} onOpen={(id)=>{ setSelectedMatchId(id); navigate(`/matches/${id}`); }} />
                 )}
               </>
             )}
-            {activeTab === "teams" && (
-              <TeamsList teams={teams} />
+            {!loading && !error && activeTab === "teams" && (
+              <TeamsList 
+                teams={teams} 
+                isFavorite={isFavorite}
+                toggleFavorite={handleToggleFavorite}
+                loading={favoritesLoading}
+              />
             )}
-            {activeTab === "players" && (
-              <PlayersList players={players} teams={teams} />
+            {!loading && !error && activeTab === "players" && (
+              <>
+                {selectedPlayerId ? (
+                  <PlayerDetails onBack={() => setSelectedPlayerId(null)} />
+                ) : (
+                  <PlayersList players={players} teams={teams} />
+                )}
+              </>
             )}
-            {activeTab === "favorites" && (
+            {!loading && !error && activeTab === "favorites" && (
               <>
                 {favoritesLoading && <div style={{color:"var(--muted)"}}>Loading favorites...</div>}
-                <TeamsList teams={teams.filter(t => favoriteTeamIds.includes(t.id))} />
+                <TeamsList 
+                  key={`favorites-${favoriteTeamIds.length}`}
+                  teams={teams.filter(t => favoriteTeamIds.includes(t.id))} 
+                  isFavorite={isFavorite}
+                  toggleFavorite={handleToggleFavorite}
+                  loading={favoritesLoading}
+                />
               </>
             )}
           </div>

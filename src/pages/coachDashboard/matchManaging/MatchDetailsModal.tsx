@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import type { Match, Player, MatchEvent } from "../../../types";
 import AdvancedStatsForm from "./PlayerStatsForm/AdvancedStatsForm";
+import { upsertPlayerStats } from "../../../services/matchService";
+import { updateMatch } from "../../../services/matchService";
+import InlineAlert from "../../components/InlineAlert";
 import "./MatchesPage.css"; // your modal + glassy styles
 
 interface Props {
@@ -19,6 +22,12 @@ interface Props {
   onRemovePlayerEvent: (eventId: string) => void;
 }
 
+interface Notification {
+  message: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+  id: string;
+}
+
 const MatchDetailsModal: React.FC<Props> = ({
   match,
   players,
@@ -29,22 +38,135 @@ const MatchDetailsModal: React.FC<Props> = ({
   onRemovePlayerEvent,
 }) => {
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
-  const [playerAdvancedStats, setPlayerAdvancedStats] = useState<
-    Record<string, any>
-  >({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  const addNotification = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+    const id = Date.now().toString();
+    setNotifications(prev => [...prev, { message, type, id }]);
+    // Auto-remove notification after 5 seconds
+    setTimeout(() => {
+      removeNotification(id);
+    }, 5000);
+  };
+
+  const removeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
 
   const handleAddEvent = (eventType: MatchEvent["eventType"]) => {
-    if (!selectedPlayerId) return;
+    if (!selectedPlayerId) {
+      addNotification('Please select a player first', 'warning');
+      return;
+    }
     const eventId = `evt-${Date.now()}`;
     onAddPlayerEvent(eventId, match.id, selectedPlayerId, eventType);
   };
 
-  const handleSavePlayerStats = (
+  const normalizeStatsKeys = (raw: Record<string, number>) => {
+    // Normalize various form field casings to db field names used in services
+    return {
+      goals: raw.goals ?? raw.Goals ?? 0,
+      assists: raw.assists ?? raw.Assists ?? 0,
+      shots: raw.shots ?? raw.Shots ?? 0,
+      shotsOnTarget: raw.shotsOnTarget ?? raw.ShotsOnTarget ?? 0,
+      chancesCreated: raw.chancesCreated ?? raw.ChancesCreated ?? 0,
+      dribblesAttempted: raw.dribblesAttempted ?? raw.DribblesAttempted ?? 0,
+      dribblesSuccessful: raw.dribblesSuccessful ?? raw.DribblesSuccessful ?? 0,
+      offsides: raw.offsides ?? raw.Offsides ?? 0,
+      tackles: raw.tackles ?? raw.Tackles ?? 0,
+      interceptions: raw.interceptions ?? raw.Interceptions ?? 0,
+      clearances: raw.clearances ?? raw.Clearances ?? 0,
+      saves: raw.saves ?? raw.Saves ?? 0,
+      cleansheets: raw.cleansheets ?? raw.cleanSheets ?? raw.CleanSheets ?? 0,
+      savePercentage: raw.savePercentage ?? raw.SavePercentage ?? 0,
+      passCompletion: raw.passCompletion ?? raw.PassCompletion ?? 0,
+      minutesPlayed: raw.minutesPlayed ?? raw.MinutesPlayed ?? 0,
+      yellowCards: raw.yellowCards ?? raw.YellowCards ?? 0,
+      redCards: raw.redCards ?? raw.RedCards ?? 0,
+    };
+  };
+
+  const handleSavePlayerStats = async (
     playerId: string,
-    stats: Record<string, number>
+    incomingStats: Record<string, number>
   ) => {
-    setPlayerAdvancedStats((prev) => ({ ...prev, [playerId]: stats }));
-    console.log("Mock saved stats:", playerId, stats);
+    try {
+      setIsSaving(true);
+      console.log('[MatchDetailsModal] handleSavePlayerStats called', { matchId: match.id, playerId, incomingStats });
+
+      const stats = normalizeStatsKeys(incomingStats);
+      console.log('[MatchDetailsModal] Normalized stats', stats);
+      // Upsert player stats by (match_id, player_id)
+      const statsId = await upsertPlayerStats(match.id, playerId, {
+        goals: stats.goals || 0,
+        assists: stats.assists || 0,
+        shots: stats.shots || 0,
+        shots_on_target: stats.shotsOnTarget || 0,
+        chances_created: stats.chancesCreated || 0,
+        dribbles_attempted: stats.dribblesAttempted || 0,
+        dribbles_successful: stats.dribblesSuccessful || 0,
+        offsides: stats.offsides || 0,
+        tackles: stats.tackles || 0,
+        interceptions: stats.interceptions || 0,
+        clearances: stats.clearances || 0,
+        saves: stats.saves || 0,
+        clean_sheets: stats.cleansheets || 0,
+        save_percentage: stats.savePercentage || 0,
+        pass_completion: stats.passCompletion || 0,
+        minutes_played: stats.minutesPlayed || 0,
+        yellow_cards: stats.yellowCards || 0,
+        red_cards: stats.redCards || 0,
+      });
+
+      if (!statsId) {
+        throw new Error('Failed to save player stats');
+      }
+
+      console.log('[MatchDetailsModal] Player stats saved successfully', { statsId, matchId: match.id, playerId });
+      addNotification('Player stats saved', 'success');
+      
+      // No local cache required; data will be fetched fresh where needed
+    } catch (error) {
+      console.error('Error saving player stats:', error);
+      addNotification('Failed to save player stats. Please try again.', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdateTeamStats = async (matchId: string, stats: Partial<Match>) => {
+    try {
+      setIsSaving(true);
+      
+      // Update match in database
+      const success = await updateMatch(matchId, {
+        possession: stats.possession,
+        shots: stats.shots,
+        shots_on_target: stats.shotsOnTarget,
+        corners: stats.corners,
+        fouls: stats.fouls,
+        offsides: stats.offsides,
+        passes: stats.passes,
+        pass_accuracy: stats.passAccuracy,
+        tackles: stats.tackles,
+        saves: stats.saves,
+      });
+      
+      if (!success) {
+        throw new Error('Failed to update team stats');
+      }
+      
+      // Update local state
+      onUpdateTeamStats(matchId, stats);
+      addNotification('Team stats updated successfully', 'success');
+      
+    } catch (error) {
+      console.error('Error updating team stats:', error);
+      addNotification('Failed to update team stats. Please try again.', 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getPlayerName = (playerId: string) =>
@@ -62,6 +184,29 @@ const MatchDetailsModal: React.FC<Props> = ({
           {players[0]?.teamId} vs {match.opponentName} ({match.teamScore} -{" "}
           {match.opponentScore})
         </h3>
+
+        {/* Display all notifications */}
+        {notifications.map(notification => (
+          <InlineAlert
+            key={notification.id}
+            message={notification.message}
+            type={notification.type}
+            onClose={() => removeNotification(notification.id)}
+          />
+        ))}
+
+        {isSaving && (
+          <div style={{ 
+            background: 'rgba(0, 255, 0, 0.1)', 
+            color: 'green', 
+            padding: '1rem', 
+            margin: '1rem 0', 
+            borderRadius: '8px',
+            border: '1px solid green'
+          }}>
+            Saving...
+          </div>
+        )}
 
         {/* --- Player Events Section --- */}
         <section className="stat-section">
@@ -140,7 +285,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.possession}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { possession: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { possession: Number(e.target.value) })
               }
             />
             <label>Total Shots</label>
@@ -149,7 +294,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.shots}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { shots: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { shots: Number(e.target.value) })
               }
             />
             <label>Shots on Target</label>
@@ -158,7 +303,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.shotsOnTarget}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { shotsOnTarget: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { shotsOnTarget: Number(e.target.value) })
               }
             />
             <label>Corners</label>
@@ -167,7 +312,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.corners}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { corners: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { corners: Number(e.target.value) })
               }
             />
             <label>Fouls</label>
@@ -176,7 +321,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.fouls}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { fouls: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { fouls: Number(e.target.value) })
               }
             />
             <label>Offsides</label>
@@ -185,7 +330,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.offsides}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { offsides: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { offsides: Number(e.target.value) })
               }
             />
             <label>Passes</label>
@@ -194,7 +339,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.passes}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { passes: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { passes: Number(e.target.value) })
               }
             />
             <label>Pass Accuracy (%)</label>
@@ -203,7 +348,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.passAccuracy}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { passAccuracy: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { passAccuracy: Number(e.target.value) })
               }
             />
             <label>Tackles</label>
@@ -212,7 +357,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.tackles}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { tackles: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { tackles: Number(e.target.value) })
               }
             />
             <label>Saves</label>
@@ -221,7 +366,7 @@ const MatchDetailsModal: React.FC<Props> = ({
               min="0"
               defaultValue={match.saves}
               onBlur={(e) =>
-                onUpdateTeamStats(match.id, { saves: Number(e.target.value) })
+                handleUpdateTeamStats(match.id, { saves: Number(e.target.value) })
               }
             />
           </div>

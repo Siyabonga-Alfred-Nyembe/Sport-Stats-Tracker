@@ -1,24 +1,109 @@
 import React from 'react';
 
 interface InlineAlertProps {
-  message?: string | null;
-  onClose?: () => void;
-  tone?: 'error' | 'info' | 'success' | 'warning';
+  message: string | null;
+  type?: 'success' | 'error' | 'info' | 'warning';
+  onClose: () => void;
+  autoClose?: boolean;
+  duration?: number;
 }
 
-const InlineAlert: React.FC<InlineAlertProps> = ({ message, onClose, tone = 'error' }) => {
+const InlineAlert: React.FC<InlineAlertProps> = ({ 
+  message, 
+  type = 'info', 
+  onClose, 
+  autoClose = true, 
+  duration = 5000 
+}) => {
+  React.useEffect(() => {
+    if (autoClose && message) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [message, autoClose, duration, onClose]);
+
   if (!message) return null;
-  const bg = tone === 'error' ? '#fdecea' : tone === 'success' ? '#e8f5e9' : tone === 'warning' ? '#fff3e0' : '#e3f2fd';
-  const color = tone === 'error' ? '#b00020' : tone === 'success' ? '#1b5e20' : tone === 'warning' ? '#e65100' : '#0d47a1';
-  const border = tone === 'error' ? '#f5c6cb' : tone === 'success' ? '#c8e6c9' : tone === 'warning' ? '#ffe0b2' : '#bbdefb';
+
+  const getAlertStyles = () => {
+    switch (type) {
+      case 'success':
+        return {
+          background: 'rgba(34, 197, 94, 0.1)',
+          color: '#16a34a',
+          border: '1px solid #16a34a'
+        };
+      case 'error':
+        return {
+          background: 'rgba(239, 68, 68, 0.1)',
+          color: '#dc2626',
+          border: '1px solid #dc2626'
+        };
+      case 'warning':
+        return {
+          background: 'rgba(245, 158, 11, 0.1)',
+          color: '#d97706',
+          border: '1px solid #d97706'
+        };
+      default:
+        return {
+          background: 'rgba(59, 130, 246, 0.1)',
+          color: '#2563eb',
+          border: '1px solid #2563eb'
+        };
+    }
+  };
+
+  const getIcon = () => {
+    switch (type) {
+      case 'success':
+        return '✓';
+      case 'error':
+        return '✕';
+      case 'warning':
+        return '⚠';
+      default:
+        return 'ℹ';
+    }
+  };
+
   return (
-    <div style={{ background: bg, color, border: `1px solid ${border}`, padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '8px 0' }}>
-      <span style={{ lineHeight: 1.4 }}>{message}</span>
-      {onClose && (
-        <button onClick={onClose} aria-label="Close" style={{ background: 'transparent', border: 'none', color, fontSize: 18, cursor: 'pointer' }}>
-          ×
-        </button>
-      )}
+    <div 
+      style={{
+        padding: '1rem',
+        margin: '1rem 0',
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        fontSize: '0.875rem',
+        fontWeight: '500',
+        ...getAlertStyles()
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <span style={{ fontSize: '1.1rem' }}>{getIcon()}</span>
+        <span>{message}</span>
+      </div>
+      <button 
+        onClick={onClose}
+        style={{ 
+          background: 'none', 
+          border: 'none', 
+          color: 'inherit', 
+          cursor: 'pointer',
+          fontSize: '1.2rem',
+          padding: '0',
+          marginLeft: '1rem',
+          opacity: '0.7',
+          transition: 'opacity 0.2s'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+      >
+        ×
+      </button>
     </div>
   );
 };

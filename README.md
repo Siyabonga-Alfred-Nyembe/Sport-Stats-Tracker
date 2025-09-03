@@ -2,7 +2,7 @@
 
 A React + TypeScript + Vite web application for tracking football statistics with user authentication powered by Supabase.
 
-**Live Demo:** [https://sport-stats-tracker-five.vercel.app/](https://sport-stats-tracker-five.vercel.app/)
+**Live Demo:** [https://sport-stats-dab7d6aaf0cqeyef.southafricanorth-01.azurewebsites.net/](https://sport-stats-dab7d6aaf0cqeyef.southafricanorth-01.azurewebsites.net/)
 
 ## Table of Contents
 
@@ -110,15 +110,11 @@ sporty.com/
 ## Features
 
 ### Authentication System
-- **Custom Username/Password Authentication**
-  - Secure password hashing using SHA-256
+- **Custom Username Authentication**
   - Custom user table in Supabase
 - **Google OAuth Integration**
   - One-click Google sign-in
   - Automatic user profile creation
-- **Password Reset Flow**
-  - Email-based password reset
-  - Secure password update process
 
 ### User Interface
 - **Landing Page**: Marketing page with call-to-action buttons
@@ -157,9 +153,9 @@ Example test file is included in `src/__test__/mock.test.js`.
 
 ## Deployment
 
-### Vercel (Recommended)
-1. Connect your GitHub repository to Vercel
-2. Add environment variables in Vercel dashboard
+### Microsoft Azure (Recommended)
+1. Connect your GitHub repository to Microsoft Azure
+2. Add environment variables in Microsoft Azure dashboard
 3. Deploy automatically on push to main branch
 
 ### Manual Deployment
@@ -184,7 +180,6 @@ Example test file is included in `src/__test__/mock.test.js`.
 ### Authentication
 - **Supabase Auth** - User management
 - **Google OAuth** - Social login
-- **Crypto-JS** - Password hashing
 
 ### Development Tools
 - **TypeScript ESLint** - Code linting
