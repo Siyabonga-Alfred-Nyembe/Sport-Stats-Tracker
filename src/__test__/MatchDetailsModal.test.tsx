@@ -1,4 +1,3 @@
-// src/__tests__/MatchDetailsModal.test.tsx
 import { render, screen, fireEvent } from "@testing-library/react";
 import { vi } from "vitest";
 import MatchDetailsModal from "../pages/coachDashboard/matchManaging/MatchDetailsModal";

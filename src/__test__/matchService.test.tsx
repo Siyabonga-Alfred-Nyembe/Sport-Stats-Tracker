@@ -1,8 +1,7 @@
-// src/__tests__/matchService.test.ts
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as matchService from "../services/matchService";
 
-// Vitest requires mocks to be defined inside vi.mock or after it
 vi.mock("../../supabaseClient", () => {
   // Define chainable mocks inside the factory
   const mockSelect = vi.fn().mockResolvedValue({ data: [], error: null });

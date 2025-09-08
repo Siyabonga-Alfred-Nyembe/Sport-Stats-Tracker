@@ -1,4 +1,3 @@
-// src/__tests__/lineupService.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   saveLineup,

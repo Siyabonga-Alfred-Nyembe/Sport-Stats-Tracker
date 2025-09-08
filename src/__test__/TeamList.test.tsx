@@ -1,4 +1,3 @@
-// src/__tests__/TeamsList.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import TeamsList from "../pages/userDashboard/TeamsList";

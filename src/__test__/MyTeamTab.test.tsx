@@ -4,12 +4,12 @@ import MyTeamTab from "../pages/coachDashboard/coachStatsPage/MyTeamTab";
 import { useTeamData } from "../pages/coachDashboard/hooks/useTeamData";
 import { fetchTeamMatches } from "../services/matchService";
 
-// Mock the useTeamData hook
+
 vi.mock("../pages/coachDashboard/hooks/useTeamData", () => ({
   useTeamData: vi.fn(),
 }));
 
-// Mock fetchTeamMatches service
+
 vi.mock("../services/matchService", () => ({
   fetchTeamMatches: vi.fn(),
 }));

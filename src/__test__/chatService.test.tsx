@@ -1,4 +1,3 @@
-// src/__tests__/chatService.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   fetchChatForMatch,
@@ -7,7 +6,6 @@ import {
   type DbChatRecord,
 } from "../services/chatService";
 
-// --- Mock supabaseClient properly inside vi.mock ---
 const mockSelect = vi.fn();
 const mockEq = vi.fn();
 const mockOrder = vi.fn();
