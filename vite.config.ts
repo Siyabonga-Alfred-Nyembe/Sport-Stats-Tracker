@@ -9,9 +9,8 @@ export default defineConfig({
         "src/pages/**/*.tsx",
         "src/components/**/*.tsx",
         "src/services/**/*.ts",
-        "src/**/*.ts",                   // include other TS files like types, services, utils
       ],
-      exclude: ["node_modules/", "dist/"],  // exclude external folders
+      exclude: ["node_modules/", "dist/","src/__test__/**"],  // exclude external folders
     },
   },
 });
