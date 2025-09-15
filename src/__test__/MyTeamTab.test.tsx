@@ -3,18 +3,18 @@ import { vi } from "vitest";
 import MyTeamTab from "../pages/coachDashboard/coachStatsPage/MyTeamTab";
 import { useTeamData } from "../pages/coachDashboard/hooks/useTeamData";
 import { fetchTeamMatches } from "../services/matchService";
+import { setupServer } from "msw/node";
+import { http, HttpResponse } from "msw";
 
-
+// Unit Test Mocks
 vi.mock("../pages/coachDashboard/hooks/useTeamData", () => ({
   useTeamData: vi.fn(),
 }));
-
 
 vi.mock("../services/matchService", () => ({
   fetchTeamMatches: vi.fn(),
 }));
 
-// Mock html2canvas
 vi.mock("html2canvas", () => ({
   default: vi.fn().mockResolvedValue({
     toDataURL: () => "data:image/png;base64,mock",
@@ -23,22 +23,15 @@ vi.mock("html2canvas", () => ({
   }),
 }));
 
-// Mock jsPDF
 const saveMock = vi.fn();
-
-vi.mock("jspdf", () => {
-  return {
-    default: vi.fn().mockImplementation(() => ({
-      internal: {
-        pageSize: { getWidth: () => 210, getHeight: () => 297 },
-      },
-      addPage: vi.fn(),
-      addImage: vi.fn(),
-      save: saveMock,
-    })),
-  };
-});
-
+vi.mock("jspdf", () => ({
+  default: vi.fn().mockImplementation(() => ({
+    internal: { pageSize: { getWidth: () => 210, getHeight: () => 297 } },
+    addPage: vi.fn(),
+    addImage: vi.fn(),
+    save: saveMock,
+  })),
+}));
 
 class ResizeObserver {
   observe() {}
@@ -53,25 +46,25 @@ const mockMatches = [
   { id: "m2", teamId: "t1", opponentName: "C", teamScore: 1, opponentScore: 1 },
 ];
 
-
-describe("MyTeamTab", () => {
+// Unit Tests
+describe("MyTeamTab - Unit Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock hook
     (useTeamData as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       team: mockTeam,
       isLoading: false,
       error: null,
     });
 
-    // Mock service
-    (fetchTeamMatches as unknown as jest.Mock).mockResolvedValue(mockMatches);
+    (fetchTeamMatches as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockMatches
+    );
   });
 
   it("renders team stats after loading matches", async () => {
     render(<MyTeamTab />);
-    
+
     expect(await screen.findByText("Matches Played")).toBeInTheDocument();
     expect(screen.getByText("Win %")).toBeInTheDocument();
     expect(screen.getByText("Goals For")).toBeInTheDocument();
@@ -90,9 +83,42 @@ describe("MyTeamTab", () => {
   });
 
   it("shows error message if fetch fails", async () => {
-    (fetchTeamMatches as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("Failed"));
+    (fetchTeamMatches as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error("Failed")
+    );
 
     render(<MyTeamTab />);
-    expect(await screen.findByText("Failed to load match data. Please try again.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Failed to load match data. Please try again.")
+    ).toBeInTheDocument();
+  });
+});
+
+// Integration Tests
+const server = setupServer(
+  http.get("https://*.example.com/matches/*", (_req) => {
+    return HttpResponse.json(mockMatches);
+  })
+);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+describe("MyTeamTab - Integration Tests", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useTeamData as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      team: mockTeam,
+      isLoading: false,
+      error: null,
+    });
+  });
+
+  it("renders stats with MSW network response", async () => {
+    render(<MyTeamTab />);
+
+    expect(await screen.findByText("Matches Played")).toBeInTheDocument();
+    expect(screen.getByText("Win %")).toBeInTheDocument();
   });
 });

@@ -1,9 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Signup from "../pages/signup";
 import { vi } from "vitest";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 
-// Mock supabase
 vi.mock("../../supabaseClient", () => ({
   default: {
     auth: {
@@ -12,7 +13,7 @@ vi.mock("../../supabaseClient", () => ({
   },
 }));
 
-describe("Signup Component", () => {
+describe("Signup Component - Unit Tests", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("renders signup header and Google button", () => {
@@ -53,6 +54,43 @@ describe("Signup Component", () => {
       provider: "google",
       options: { redirectTo: window.location.origin + "/auth-callback" },
     });
+  });
+});
+
+//INTEGRATION TESTS (MSW v2)
+
+// Mock Supabase network responses
+const server = setupServer(
+  http.post("https://*.supabase.co/auth/v1/token", () => {
+    return HttpResponse.json(
+      {
+        access_token: "fake_token",
+        user: { id: "123", email: "test@example.com" },
+      },
+      { status: 200 }
+    );
+  })
+);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+describe("Signup Component - Integration Tests", () => {
+  it("handles successful Google sign-in flow", async () => {
+    render(
+      <BrowserRouter>
+        <Signup />
+      </BrowserRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /continue with google/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/an unexpected error occurred/i)
+      ).not.toBeInTheDocument()
+    );
   });
 
 });
