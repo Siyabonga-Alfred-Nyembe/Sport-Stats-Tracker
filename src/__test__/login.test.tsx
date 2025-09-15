@@ -1,9 +1,13 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Login from "../pages/login";
 import { vi } from "vitest";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 
-// Mock supabase
+/* -------------------------
+   UNIT TESTS (mocked Supabase)
+-------------------------- */
 vi.mock("../../supabaseClient", () => ({
   default: {
     auth: {
@@ -12,7 +16,7 @@ vi.mock("../../supabaseClient", () => ({
   },
 }));
 
-describe("Login Component", () => {
+describe("Login Component - Unit Tests", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("renders login header and Google button", () => {
@@ -43,15 +47,50 @@ describe("Login Component", () => {
       </BrowserRouter>
     );
 
-    const googleButton = screen.getByRole("button", {
-      name: /continue with google/i,
-    });
-
-    fireEvent.click(googleButton);
+    fireEvent.click(screen.getByRole("button", { name: /continue with google/i }));
 
     expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
       provider: "google",
       options: { redirectTo: window.location.origin + "/auth-callback" },
     });
   });
+});
+
+/* -------------------------
+   INTEGRATION TESTS (MSW v2)
+-------------------------- */
+
+const server = setupServer(
+  http.post("https://*.supabase.co/auth/v1/token", () => {
+    return HttpResponse.json(
+      {
+        access_token: "fake_token",
+        user: { id: "123", email: "test@example.com" },
+      },
+      { status: 200 }
+    );
+  })
+);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+describe("Login Component - Integration Tests", () => {
+  it("handles successful Google sign-in flow", async () => {
+    render(
+      <BrowserRouter>
+        <Login />
+      </BrowserRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /continue with google/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/an unexpected error occurred/i)
+      ).not.toBeInTheDocument()
+    );
+  });
+
 });

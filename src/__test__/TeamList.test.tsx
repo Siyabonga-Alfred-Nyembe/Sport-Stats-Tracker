@@ -5,7 +5,7 @@ import TeamsList from "../pages/userDashboard/TeamsList";
 
 describe("TeamsList Component", () => {
   const teams = [
-    { id: "t1", name: "Team A" },
+    { id: "t1", name: "Team A" }, 
     { id: "t2", name: "Team B" },
   ];
 

@@ -1,10 +1,8 @@
-// src/__tests__/PlayersList.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import PlayersList from "../pages/userDashboard/PlayersList";
 import { BrowserRouter } from "react-router-dom";
 
-// --- Mock useNavigate ---
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
