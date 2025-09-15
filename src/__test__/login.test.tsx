@@ -5,9 +5,6 @@ import { vi } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 
-/* -------------------------
-   UNIT TESTS (mocked Supabase)
--------------------------- */
 vi.mock("../../supabaseClient", () => ({
   default: {
     auth: {
@@ -56,9 +53,7 @@ describe("Login Component - Unit Tests", () => {
   });
 });
 
-/* -------------------------
-   INTEGRATION TESTS (MSW v2)
--------------------------- */
+//INTEGRATION TESTS
 
 const server = setupServer(
   http.post("https://*.supabase.co/auth/v1/token", () => {

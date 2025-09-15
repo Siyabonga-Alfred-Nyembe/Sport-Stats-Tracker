@@ -5,9 +5,6 @@ import { vi } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 
-/* -------------------------
-   UNIT TESTS (your original)
--------------------------- */
 vi.mock("../../supabaseClient", () => ({
   default: {
     auth: {
@@ -60,9 +57,7 @@ describe("Signup Component - Unit Tests", () => {
   });
 });
 
-/* -------------------------
-   INTEGRATION TESTS (MSW v2)
--------------------------- */
+//INTEGRATION TESTS (MSW v2)
 
 // Mock Supabase network responses
 const server = setupServer(

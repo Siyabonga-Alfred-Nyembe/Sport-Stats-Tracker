@@ -1,4 +1,3 @@
-// src/pages/userDashboard/__tests__/Sidebar.test.tsx
 import { render, screen, fireEvent } from "@testing-library/react";
 import Sidebar from "../pages/userDashboard/Sidebar";
 import { describe, it, expect, vi } from "vitest";
@@ -40,7 +39,7 @@ describe("Sidebar Component", () => {
     expect(screen.getByText("Teams")).not.toHaveClass("active");
   });
 
-  // --- UI / INTERACTION TESTS ---
+  //UI / INTERACTION TESTS
   it("calls goToTab with correct tab when a button is clicked", () => {
     render(<Sidebar activeTab="overview" goToTab={mockGoToTab} />);
     fireEvent.click(screen.getByText("Matches"));

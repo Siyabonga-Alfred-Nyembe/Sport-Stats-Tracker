@@ -1,10 +1,9 @@
-// src/__tests__/RedesignedDashboard.test.tsx
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent} from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
 import RedesignedDashboard from "../pages/userDashboard/RedesignedDashboard";
 
-// --- Mock services and hooks ---
+// Mock services and hooks
 const mockNavigate = vi.fn();
 const mockLocation = { pathname: "/user-dashboard" };
 
@@ -108,7 +107,7 @@ vi.mock("../pages/userDashboard/StatsCards.tsx", () => ({
 }));
 
 vi.mock("../pages/userDashboard/MatchList.tsx", () => ({
-  default: ({ matches, teams, query, setQuery, onOpen }: any) => (
+  default: ({ matches, query, setQuery, onOpen }: any) => (
     <div data-testid="matches-list">
       <input 
         data-testid="search-input"
@@ -146,7 +145,7 @@ vi.mock("../pages/userDashboard/TeamsList.tsx", () => ({
 }));
 
 vi.mock("../pages/userDashboard/PlayersList.tsx", () => ({
-  default: ({ players, teams }: any) => (
+  default: ({ players}: any) => (
     <div data-testid="players-list">
       {players.map((player: any) => (
         <div key={player.id} data-testid={`player-${player.id}`}>
@@ -167,7 +166,7 @@ vi.mock("../pages/userDashboard/PlayerDetails.tsx", () => ({
 }));
 
 vi.mock("../pages/userDashboard/MatchDetailsPage.tsx", () => ({
-  default: ({ onBack, username, teams }: any) => (
+  default: ({ onBack, username}: any) => (
     <div data-testid="match-details">
       <button onClick={onBack}>Back to Matches</button>
       <div>Match Details for {username}</div>
@@ -175,7 +174,7 @@ vi.mock("../pages/userDashboard/MatchDetailsPage.tsx", () => ({
   ),
 }));
 
-// -------------------- UNIT TESTS --------------------
+//UNIT TESTS
 describe("RedesignedDashboard - Unit Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -218,7 +217,7 @@ describe("RedesignedDashboard - Unit Tests", () => {
   });
 });
 
-// -------------------- INTEGRATION TESTS --------------------
+// INTEGRATION TESTS
 describe("RedesignedDashboard - Integration Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -278,7 +277,6 @@ describe("RedesignedDashboard - Integration Tests", () => {
   it("should open match details when match is selected", () => {
     render(<RedesignedDashboard />, { wrapper: MemoryRouter });
     
-    // Click the first "View Details" button (for match with id "1")
     const viewDetailsButtons = screen.getAllByText("View Details");
     fireEvent.click(viewDetailsButtons[0]);
     
@@ -311,7 +309,7 @@ describe("RedesignedDashboard - Integration Tests", () => {
   });
 });
 
-// -------------------- EDGE CASE TESTS --------------------
+//EDGE CASE TESTS
 describe("RedesignedDashboard - Edge Case Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();

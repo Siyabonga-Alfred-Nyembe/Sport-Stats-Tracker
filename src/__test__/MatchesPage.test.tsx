@@ -1,12 +1,11 @@
-// src/components/Matches/__tests__/MatchesPage.test.tsx
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import MatchesPage from '../pages/coachDashboard/matchManaging/MatchesPage';
 import * as teamService from '../services/teamService';
 import * as matchService from '../services/matchService';
 import { vi } from 'vitest';
-import type { Match } from '../types'; // <-- import your Match type
+import type { Match } from '../types';
 
-// --- Supabase Mocks ---
+//  Supabase Mocks
 const mockSelect = vi.fn().mockReturnThis();
 const mockEq = vi.fn().mockReturnThis();
 const mockSingle = vi.fn();

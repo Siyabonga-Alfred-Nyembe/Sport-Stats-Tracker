@@ -1,10 +1,9 @@
-// src/__tests__/CoachDashboard.test.tsx
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
 import CoachDashboard from "../pages/coachDashboard/CoachDashboard";
 
-// --- Mock services ---
+//Mock services
 const mockNavigate = vi.fn();
 
 vi.mock("react-router-dom", async () => {
@@ -31,7 +30,7 @@ vi.mock("../services/teamService", () => ({
   getCurrentTeamId: vi.fn(() => "team-123"),
 }));
 
-// --- Mock child components for UNIT tests ---
+// Mock child components for UNIT tests
 vi.mock("../pages/coachDashboard/DashboardHeader", () => ({
   default: ({ setActiveTab, username, onProfileClick, onReportIssue }: any) => (
     <div>
@@ -67,7 +66,7 @@ vi.mock("../pages/coachDashboard/playerManagement/PlayerManagementPage", () => (
   default: () => <div data-testid="player-management-page">PlayerManagementPage Component</div>,
 }));
 
-// -------------------- UNIT TESTS --------------------
+//UNIT TESTS
 describe("CoachDashboard - Unit Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -133,7 +132,7 @@ describe("CoachDashboard - Unit Tests", () => {
   });
 });
 
-// -------------------- EDGE CASES --------------------
+//EDGE CASES
 describe("CoachDashboard - Edge Cases", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -164,22 +163,19 @@ describe("CoachDashboard - Edge Cases", () => {
       },
     }));
 
-    // Re-import the component to get the updated mock
     const { default: CoachDashboardTest } = await import("../pages/coachDashboard/CoachDashboard");
     
     render(<CoachDashboardTest />, { wrapper: MemoryRouter });
     
-    // Should still render without crashing
     expect(screen.getByTestId("matches-page")).toBeInTheDocument();
   });
 });
 
-// -------------------- INTEGRATION TESTS --------------------
+// INTEGRATION TESTS
 describe("CoachDashboard - Integration Tests", () => {
   let CoachDashboardReal: any;
 
   beforeAll(async () => {
-    // Unmock components for integration tests
     vi.doUnmock("../pages/coachDashboard/DashboardHeader");
     vi.doUnmock("../pages/coachDashboard/DashboardSidebar");
     vi.doUnmock("../pages/coachDashboard/coachStatsPage/MyTeamTab");
@@ -200,7 +196,7 @@ describe("CoachDashboard - Integration Tests", () => {
       </MemoryRouter>
     );
 
-    // Open sidebar (assumes there's a toggle button)
+    // Open sidebar
     const toggleButton = await screen.findByRole("button", { name: /toggle navigation menu/i });
     fireEvent.click(toggleButton);
 
@@ -219,7 +215,6 @@ it("navigates to Teams (MyTeam) via sidebar with real components", async () => {
       </MemoryRouter>
     );
 
-    // Open sidebar (assumes there's a toggle button)
     const toggleButton = await screen.findByRole("button", { name: /toggle navigation menu/i });
     fireEvent.click(toggleButton);
 

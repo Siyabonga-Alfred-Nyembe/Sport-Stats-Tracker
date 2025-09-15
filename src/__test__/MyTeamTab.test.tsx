@@ -6,9 +6,7 @@ import { fetchTeamMatches } from "../services/matchService";
 import { setupServer } from "msw/node";
 import { http, HttpResponse } from "msw";
 
-// -----------------------------
 // Unit Test Mocks
-// -----------------------------
 vi.mock("../pages/coachDashboard/hooks/useTeamData", () => ({
   useTeamData: vi.fn(),
 }));
@@ -48,9 +46,7 @@ const mockMatches = [
   { id: "m2", teamId: "t1", opponentName: "C", teamScore: 1, opponentScore: 1 },
 ];
 
-// -----------------------------
 // Unit Tests
-// -----------------------------
 describe("MyTeamTab - Unit Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -98,11 +94,9 @@ describe("MyTeamTab - Unit Tests", () => {
   });
 });
 
-// -----------------------------
-// Integration Tests with MSW
-// -----------------------------
+// Integration Tests
 const server = setupServer(
-  http.get("https://*.example.com/matches/*", (req) => {
+  http.get("https://*.example.com/matches/*", (_req) => {
     return HttpResponse.json(mockMatches);
   })
 );
