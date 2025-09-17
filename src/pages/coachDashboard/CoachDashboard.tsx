@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "./DashboardSidebar";
-import DashboardHeader from "./DashboardHeader";
 import MyTeamTab from "./coachStatsPage/MyTeamTab";
 // Updated import to use the correct name for clarity
 import MatchesPage from "./matchManaging/MatchesPage";
@@ -40,7 +39,7 @@ export interface Match {
 
 const CoachDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("myTeam"); // Default to matches to see it working
+  const [activeTab, setActiveTab] = useState("players"); // Default to matches to see it working
   const [username, setUsername] = useState<string>("");
   
   // These states are no longer used by their respective pages but may be used by other tabs.
@@ -74,12 +73,6 @@ const CoachDashboard: React.FC = () => {
 
   return (
     <section className="dashboard coach-dashboard">
-      <DashboardHeader 
-        onProfileClick={handleProfileClick}
-        setActiveTab={setActiveTab}
-        onReportIssue={handleReportIssue}
-        username={username}
-      />
       <DashboardSidebar onNavigate={setActiveTab} />
       <section className="dashboard-content">
         {activeTab === "myTeam" && (

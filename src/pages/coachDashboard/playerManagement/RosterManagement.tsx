@@ -8,7 +8,6 @@ interface Props {
   onAddPlayer: (player: Omit<Player, 'id' | 'stats' | 'imageUrl' | 'teamId'>) => void;
   onRemovePlayer: (playerId: string) => void;
   onAddToLineup: (player: Player) => void;
-  onPlayerClick: (player: Player) => void; // New prop to handle clicks
 }
 
 // Helper function to get position category and display name
@@ -41,8 +40,7 @@ const RosterManagement: React.FC<Props> = ({
   lineupIds, 
   onAddPlayer, 
   onRemovePlayer, 
-  onAddToLineup, 
-  onPlayerClick // Destructure the new prop
+  onAddToLineup
 }) => {
   const [name, setName] = useState('');
   const [position, setPosition] = useState('');
@@ -118,11 +116,7 @@ const RosterManagement: React.FC<Props> = ({
               <h3 className="position-group-title">{displayName} ({categoryPlayers.length})</h3>
               <div className="card-grid">
                 {categoryPlayers.map(player => (
-                  <div 
-                    key={player.id} 
-                    className="player-card-wrapper" 
-                    onClick={() => onPlayerClick(player)}
-                  >
+                  <div key={player.id} className="player-card-wrapper">
                     <PlayerCard 
                       name={player.name} 
                       position={player.position} 
@@ -130,13 +124,13 @@ const RosterManagement: React.FC<Props> = ({
                       imageUrl={player.imageUrl}
                     >
                       <button
-                        onClick={(e) => { e.stopPropagation(); onAddToLineup(player); }}
+                        onClick={() => onAddToLineup(player)}
                         disabled={lineupIds.has(player.id)}
                       >
                         Add to Lineup
                       </button>
                       <button 
-                        onClick={(e) => { e.stopPropagation(); onRemovePlayer(player.id); }}
+                        onClick={() => onRemovePlayer(player.id)}
                         className="remove-btn"
                       >
                         Remove

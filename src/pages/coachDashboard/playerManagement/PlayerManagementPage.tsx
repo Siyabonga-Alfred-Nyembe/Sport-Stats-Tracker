@@ -7,11 +7,10 @@ import { fetchPlayersWithStats } from '../../../services/playerService';
 import { loadLineup, saveLineup, updatePlayerPosition, debugLineup, removePlayerFromLineup } from '../../../services/lineupService';
 import RosterManagement from './RosterManagement';
 import LineupSelection from './LineupSelection';
-import PlayerStatsModal from './PlayerStatsModal';
 import InlineAlert from '../../components/InlineAlert';
 import './PlayerManagement.css';
 
-// Import the Player and PlayerStats types from your central types file
+// Import the Player type from your central types file
 import type { Player } from "../../../types";
 
 const PlayerManagementPage: React.FC = () => {
@@ -21,7 +20,6 @@ const PlayerManagementPage: React.FC = () => {
   const [lineup, setLineup] = useState<Player[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -163,7 +161,7 @@ const PlayerManagementPage: React.FC = () => {
         positionY: 50,
       })));
 
-             if (success) {
+      if (success) {
         console.log('[PlayerManagement] Added to lineup and saved', { teamId: currentTeamId, playerId: player.id });
         setSuccessMsg(`${player.name} has been added to the lineup!`);
         setTimeout(() => setSuccessMsg(null), 3000);
@@ -253,7 +251,6 @@ const PlayerManagementPage: React.FC = () => {
         onAddPlayer={handleAddPlayer}
         onRemovePlayer={handleRemovePlayer}
         onAddToLineup={handleAddToLineup}
-        onPlayerClick={setSelectedPlayer}
       />
 
       <LineupSelection
@@ -261,13 +258,6 @@ const PlayerManagementPage: React.FC = () => {
         onRemoveFromLineup={handleRemoveFromLineup}
         onPositionUpdate={handlePlayerPositionUpdate}
       />
-
-      {selectedPlayer && (
-        <PlayerStatsModal
-          player={selectedPlayer}
-          onClose={() => setSelectedPlayer(null)}
-        />
-      )}
     </main>
   );
 };

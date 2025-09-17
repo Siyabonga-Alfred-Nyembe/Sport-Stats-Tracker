@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import LandingPage from "./pages/landingPage";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
-import ForgotPassword from "./pages/forgot";
+
 import ResetPassword from "./pages/reset";
-import Land from "./pages/land";
+
 import CoachDashboard from "./pages/coachDashboard/CoachDashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import AuthCallback from "./pages/authCallback";
@@ -22,10 +22,9 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage/>} />
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot" element={<ForgotPassword />} />
+
           <Route path="/reset" element={<ResetPassword />} />
-          <Route path="/land" element={<Land />} />
+
           
           {/* Protected Routes */}
           <Route path="/coach-dashboard" element={

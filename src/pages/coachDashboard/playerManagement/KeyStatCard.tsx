@@ -8,10 +8,10 @@ interface Props {
 
 const KeyStatCard: React.FC<Props> = ({ label, value }) => {
   return (
-    <div className="rs-card key-stat-card">
-      <div className="stat-value">{value}</div>
-      <div className="stat-label">{label}</div>
-    </div>
+    <article className="rs-card key-stat-card">
+      <section className="stat-value">{value}</section>
+      <section className="stat-label">{label}</section>
+    </article>
   );
 };
 
