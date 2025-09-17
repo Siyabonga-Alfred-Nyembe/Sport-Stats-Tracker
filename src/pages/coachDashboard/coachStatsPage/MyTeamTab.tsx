@@ -7,11 +7,14 @@ import { fetchTeamMatches } from '../../../services/matchService';
 import { useTeamData } from '../hooks/useTeamData';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
 import StatCard from './StatCard';
 import TeamPerformanceChart from './TeamPerformanceChart.tsx';
 import TeamFormGuide from './TeamFormGuide.tsx';
 import './MyTeamTab.css';
+import TeamShotsChart from "./Charts/TeamShotsChart";
+import BarChart from "./Charts/BarChart.tsx";
+import PiChart from "./Charts/PiChart.tsx";
+
 
 const MyTeamTab: React.FC = () => {
   const { team, isLoading: teamLoading, error: teamError } = useTeamData();
@@ -107,37 +110,24 @@ const MyTeamTab: React.FC = () => {
       <header className="stats-header pdf-capture">
         <div className="team-info">
           <h1>{team.name}</h1>
-          <p>Season Performance Report</p>
+          <p>Performance Report</p>
           <p className="stats-summary">
-            Based on {stats.totalMatches} matches from database
+            Based on {stats.totalMatches} matches
           </p>
         </div>
+        <div className="filter-by-date">
+      <label htmlFor="start-date">From</label>
+      <input type="date" id="start-date" name="start-date" />
+      <label htmlFor="end-date">To</label>
+      <input type="date" id="end-date" name="end-date" />
+      <button className="rs-btn filter-btn">Apply</button>
+    </div>
         <button className="rs-btn" onClick={handleExportPdf} disabled={isExporting}>
           {isExporting ? 'Exporting...' : 'Export as PDF'}
         </button>
       </header>
 
-      <div className="stats-report" ref={reportRef}>
-        <section className="rs-stats pdf-capture">
-          <StatCard label="Matches Played" value={stats.totalMatches} />
-          <StatCard label="Win %" value={`${stats.winPercentage}%`} />
-          <StatCard label="Goals For" value={stats.goalsFor} />
-          <StatCard label="Goals Against" value={stats.goalsAgainst} />
-          <StatCard label="Goal Difference" value={stats.goalDifference} />
-        </section>
-
-        <section className="rs-card pdf-capture">
-          <h3>Recent Form (Last 5)</h3>
-          <TeamFormGuide form={stats.form} />
-        </section>
-
-        <div className="charts-grid">
-          <section className="rs-card pdf-capture">
-            <h3>Goals For vs. Against per Match</h3>
-            <TeamPerformanceChart matches={matches} />
-          </section>
-          
-          <section className="rs-card pdf-capture">
+      <section className="rs-card pdf-capture">
             <h3>Team Performance Averages</h3>
             <div className="avg-stats-list">
               <p><strong>Avg. Possession:</strong> {stats.avgPossession}%</p>
@@ -151,7 +141,55 @@ const MyTeamTab: React.FC = () => {
               <p><strong>Avg. Saves:</strong> {stats.avgSaves}</p>
             </div>
           </section>
-        </div>
+
+      <div className="stats-report" ref={reportRef}>
+        <h1>General</h1>
+        <section className="rs-stats pdf-capture">
+          
+          <StatCard label="Matches Played" value={stats.totalMatches} />
+          <BarChart title="goals" label={["Goals For","Goals Against","Goal Difference"]} values={[stats.goalsFor,stats.goalsAgainst,stats.goalDifference]}/>
+          <PiChart title="%" label={["Win%","Loss/Draw%"]} values={[stats.winPercentage,100-stats.winPercentage]}/>
+          <PiChart title="games" label={["Wins","Losses","Draws"]} values={[stats.wins,stats.losses,stats.draws]}/>
+
+        </section>
+
+        <h1>Attacking</h1>
+        <section className="rs-stats pdf-capture">
+      
+          <BarChart title="Shooting" label={["Shots","Shots on Target","Goals"]} values={[stats.totalShots,stats.totalShotsOnTarget,stats.goalsFor]}/>
+          <PiChart title="Passing" label={["Succesfull Passes","Unsuccessfull Passes"]} values={[Number(stats.avgPassAccuracy),100-Number(stats.avgPassAccuracy)]}/>
+          
+
+        </section>
+        <h1>Defending</h1>
+        <section className="rs-stats pdf-capture">
+          {/* Interceptions and clearances are mocks */}
+          <BarChart title="General" label={["Tackles","Interceptions","Clearances"]} values={[stats.totalTackles,50,16]}/>
+          <BarChart title="Discipline" label={["Fouls","Yellow Cards","Red Cards"]} values={[13,9,1]}/>
+          
+
+        </section>
+        
+        
+
+        <section className="rs-card pdf-capture">
+          <h3>Recent Form (Last 5)</h3>
+          <TeamFormGuide form={stats.form} />
+        </section>
+
+
+        <div className="charts-grid">
+  <section className="rs-card pdf-capture">
+    <h3>Goals For vs. Against per Match</h3>
+    <TeamPerformanceChart matches={matches} />
+  </section>
+
+  <section className="rs-card pdf-capture">
+    <h3>Shots vs. Shots on Target per Match</h3>
+    <TeamShotsChart matches={matches} />
+  </section>
+</div>
+        
       </div>
     </section>
   );

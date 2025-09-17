@@ -40,7 +40,7 @@ export interface Match {
 
 const CoachDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("matches"); // Default to matches to see it working
+  const [activeTab, setActiveTab] = useState("myTeam"); // Default to matches to see it working
   const [username, setUsername] = useState<string>("");
   
   // These states are no longer used by their respective pages but may be used by other tabs.
