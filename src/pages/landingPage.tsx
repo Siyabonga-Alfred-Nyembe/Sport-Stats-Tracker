@@ -8,6 +8,7 @@ function LandingPage() {
   const sectionsRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
+  const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -15,6 +16,17 @@ function LandingPage() {
       if (session?.user) {
         setIsLoggedIn(true);
         setUsername(session.user.email || 'User');
+        
+        // Get user role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (profile) {
+          setUserRole(profile.role);
+        }
       }
     };
     checkAuth();
@@ -60,6 +72,15 @@ function LandingPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleAdminNavigation = () => {
+    if (userRole === 'admin') {
+      navigate('/admin-dashboard');
+    } else {
+      // Optionally show a message or redirect to unauthorized page
+      navigate('/');
+    }
+  };
+
   return (
     <section className="landing-page" ref={sectionsRef}>
       <nav className="landing-nav fade-in-section">
@@ -75,8 +96,13 @@ function LandingPage() {
                 <button className="nav-btn secondary" onClick={() => navigate('/user-dashboard')}>
                   Dashboard
                 </button>
-                <button className="nav-btn admin" onClick={() => navigate('/admin-dashboard')}>
-                  Admin
+                {userRole === 'admin' && (
+                  <button className="nav-btn admin" onClick={handleAdminNavigation}>
+                    Admin
+                  </button>
+                )}
+                <button className="nav-btn secondary" onClick={() => supabase.auth.signOut().then(() => navigate('/'))}>
+                  Sign Out
                 </button>
               </>
             ) : (
@@ -207,6 +233,22 @@ function LandingPage() {
                 Start Following
               </button>
             </section>
+            <section className="role-card admin">
+              <section className="role-header">
+                <section className="role-icon">🛠️</section>
+                <h3>For Administrators</h3>
+              </section>
+              <ul className="role-features">
+                <li>User management system</li>
+                <li>Coach application approval</li>
+                <li>System analytics and reports</li>
+                <li>Platform moderation tools</li>
+                <li>Performance monitoring</li>
+              </ul>
+              <button className="role-cta" onClick={() => navigate('/signup')}>
+                Admin Portal
+              </button>
+            </section>
           </section>
         </section>
       </section>
@@ -214,7 +256,7 @@ function LandingPage() {
       <section className="cta-section fade-in-section">
         <section className="cta-container">
           <h2>Ready to Transform Your Football Experience?</h2>
-          <p>Join thousands of coaches and fans who trust SportStats for their football analytics needs.</p>
+          <p>Join thousands of coaches, fans, and administrators who trust SportStats for their football analytics needs.</p>
           {!isLoggedIn ? (
             <button className="cta-btn primary large" onClick={() => navigate('/signup')}>
               Get Started Today
@@ -243,5 +285,4 @@ function LandingPage() {
     </section>
   );
 }
-
 export default LandingPage;

@@ -100,6 +100,15 @@ const AdminDashboard: React.FC = () => {
           coach.id === coachId ? { ...coach, status: 'approved' } : coach
         ));
         setStats({...stats, pendingCoaches: stats.pendingCoaches - 1});
+        
+        // Also update the user's role to coach in profiles table
+        const coach = coaches.find(c => c.id === coachId);
+        if (coach) {
+          await supabase
+            .from('profiles')
+            .update({ role: 'coach' })
+            .eq('email', coach.email);
+        }
       }
     } catch (error) {
       console.error('Error approving coach:', error);
@@ -150,7 +159,7 @@ const AdminDashboard: React.FC = () => {
       <header className="admin-header">
         <h1>Admin Dashboard</h1>
         <button className="back-btn" onClick={() => navigate('/')}>
-          Back to Site
+          Back to Home
         </button>
       </header>
 

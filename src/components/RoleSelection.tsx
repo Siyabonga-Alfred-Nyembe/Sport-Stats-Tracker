@@ -6,16 +6,22 @@ import './RoleSelection.css';
 interface RoleSelectionProps {
   userId: string;
   userEmail: string;
-  onRoleSelected: (role: 'Fan' | 'Coach') => void;
+  onRoleSelected: (role: 'Fan' | 'Coach' | 'Admin') => void;
+  includeAdminOption?: boolean;
 }
 
-const RoleSelection: React.FC<RoleSelectionProps> = ({ userId, userEmail, onRoleSelected }) => {
-  const [selectedRole, setSelectedRole] = useState<'Fan' | 'Coach' | null>(null);
+const RoleSelection: React.FC<RoleSelectionProps> = ({ 
+  userId, 
+  userEmail, 
+  onRoleSelected,
+  includeAdminOption = false
+}) => {
+  const [selectedRole, setSelectedRole] = useState<'Fan' | 'Coach' | 'Admin' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleRoleSelect = async (role: 'Fan' | 'Coach') => {
+  const handleRoleSelect = async (role: 'Fan' | 'Coach' | 'Admin') => {
     setSelectedRole(role);
     setIsLoading(true);
     setError(null);
@@ -26,6 +32,8 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({ userId, userEmail, onRole
         onRoleSelected(role);
         if (role === 'Coach') {
           navigate('/team-setup');
+        } else if (role === 'Admin') {
+          navigate('/admin-dashboard');
         } else {
           navigate('/user-dashboard');
         }
@@ -40,19 +48,19 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({ userId, userEmail, onRole
   };
 
   return (
-    <div className="role-selection">
-      <div className="role-selection-container">
-        <div className="role-selection-header">
+    <section className="role-selection">
+      <section className="role-selection-container">
+        <section className="role-selection-header">
           <h1>Welcome to Sport Stats Tracker!</h1>
           <p>Hi {userEmail}, please select your role to get started:</p>
-        </div>
+        </section>
 
-        <div className="role-options">
-          <div 
+        <section className="role-options">
+          <section 
             className={`role-option ${selectedRole === 'Fan' ? 'selected' : ''}`}
             onClick={() => setSelectedRole('Fan')}
           >
-            <div className="role-icon">👥</div>
+            <section className="role-icon">👥</section>
             <h3>Fan</h3>
             <p>Track your favorite teams, view match statistics, and stay updated with the latest football news.</p>
             <ul>
@@ -61,13 +69,13 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({ userId, userEmail, onRole
               <li>Save favorite teams and players</li>
               <li>Access comprehensive football analytics</li>
             </ul>
-          </div>
+          </section>
 
-          <div 
+          <section 
             className={`role-option ${selectedRole === 'Coach' ? 'selected' : ''}`}
             onClick={() => setSelectedRole('Coach')}
           >
-            <div className="role-icon">⚽</div>
+            <section className="role-icon">⚽</section>
             <h3>Coach</h3>
             <p>Manage your team, track player performance, and analyze match data to improve your team's strategy.</p>
             <ul>
@@ -76,11 +84,28 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({ userId, userEmail, onRole
               <li>Analyze team performance metrics</li>
               <li>Manage match lineups and tactics</li>
             </ul>
-          </div>
-        </div>
+          </section>
+
+          {includeAdminOption && (
+            <section 
+              className={`role-option ${selectedRole === 'Admin' ? 'selected' : ''}`}
+              onClick={() => setSelectedRole('Admin')}
+            >
+              <section className="role-icon">🛠️</section>
+              <h3>Admin</h3>
+              <p>Manage the platform, approve coach applications, and oversee system operations and user management.</p>
+              <ul>
+                <li>User management and moderation</li>
+                <li>Coach application approval</li>
+                <li>System analytics and reports</li>
+                <li>Platform configuration and settings</li>
+              </ul>
+            </section>
+          )}
+        </section>
 
         {selectedRole && (
-          <div className="role-selection-actions">
+          <section className="role-selection-actions">
             <button
               className="continue-btn"
               onClick={() => handleRoleSelect(selectedRole)}
@@ -88,16 +113,16 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({ userId, userEmail, onRole
             >
               {isLoading ? 'Setting up...' : `Continue as ${selectedRole}`}
             </button>
-          </div>
+          </section>
         )}
 
         {error && (
-          <div className="error-message">
+          <section className="error-message">
             {error}
-          </div>
+          </section>
         )}
-      </div>
-    </div>
+      </section>
+    </section>
   );
 };
 
