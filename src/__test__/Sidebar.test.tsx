@@ -39,7 +39,7 @@ describe("Sidebar Component", () => {
     expect(screen.getByText("Teams")).not.toHaveClass("active");
   });
 
-  //UI / INTERACTION TESTS
+  //UI TESTS
   it("calls goToTab with correct tab when a button is clicked", () => {
     render(<Sidebar activeTab="overview" goToTab={mockGoToTab} />);
     fireEvent.click(screen.getByText("Matches"));
@@ -48,7 +48,7 @@ describe("Sidebar Component", () => {
   });
 
 
-  // --- INTEGRATION TEST ---
+  //INTEGRATION TEST
   it("integration: switching tabs updates active tab visually", () => {
     const Wrapper = () => {
       const [active, setActive] = React.useState<"overview" | "teams" | "players" | "matches" | "favorites">("overview");

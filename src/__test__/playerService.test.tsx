@@ -11,7 +11,6 @@ const mockInsert = vi.fn();
 const mockUpdate = vi.fn();
 const mockDelete = vi.fn();
 
-// Each from() returns a fresh object with chainable mocks
 vi.mock("../../supabaseClient", () => ({
   default: {
     from: vi.fn(() => ({
