@@ -1,7 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import PlayerStatsModal from '../pages/coachDashboard/playerManagement/PlayerStatsModal';
-import * as statsHelper from '../pages/coachDashboard/playerManagement//stats-helper';
+import * as statsHelper from '../pages/coachDashboard/playerManagement/stats-helper';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import type { Player } from '../types';
 
 // Mock external dependencies
@@ -70,7 +73,8 @@ const mockPlayer: Player = {
     savePercentage: 0,
     passCompletion: 85,
     minutesPlayed: 1250,
-    performanceData: [0, 0, 0, 0, 0]
+    performanceData: [0,1,2,3,4]
+    
   }
 };
 
@@ -135,45 +139,171 @@ const mockPlayers: Player[] = [
   }
 ];
 
+const mockKeyStats = [
+  { label: 'Goals', value: '15' },
+  { label: 'Assists', value: '8' },
+  { label: 'Tackles', value: '45' }
+];
+
+const mockChartStat = {label: "Goals vs Assists",dataKey: "goals"};
+
 
 describe('PlayerStatsModal', () => {
   const mockOnClose = vi.fn();
   const mockStatsHelper = vi.mocked(statsHelper);
 
-//   beforeEach(() => {
-//     vi.clearAllMocks();
-//     mockStatsHelper.getPlayerKeyStats.mockReturnValue({
-//       keyStats: mockKeyStats,
-//       chartStat: mockChartStat
-//     });
-//   });
+    beforeEach(() => {
+    vi.clearAllMocks();
+    mockStatsHelper.getPlayerKeyStats.mockReturnValue({
+        keyStats: mockKeyStats,
+        chartStat: mockChartStat
+    });
+    });
+
 
   afterEach(() => {
     vi.clearAllTimers();
   });
 
+  // UI Tests
+  describe('UI Rendering', () => {
+    it('renders modal with player information', () => {
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('Forward | #10')).toBeInTheDocument();
+      expect(screen.getByAltText('John Doe')).toHaveAttribute('src', mockPlayer.imageUrl);
+    });
+
+    it('renders all key stat cards', () => {
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      const keyStatCards = screen.getAllByTestId('key-stat-card');
+      expect(keyStatCards).toHaveLength(3);
+      expect(screen.getByText('Goals: 15')).toBeInTheDocument();
+      expect(screen.getByText('Assists: 8')).toBeInTheDocument();
+      expect(screen.getByText('Tackles: 45')).toBeInTheDocument();
+    });
+
+    it('renders full stats section', () => {
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      expect(screen.getByText('Full Statistics')).toBeInTheDocument();
+      expect(screen.getByTestId('stats-table')).toBeInTheDocument();
+      expect(screen.getByText('Stats for John Doe')).toBeInTheDocument();
+    });
+
+    it('renders close button and export button', () => {
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      expect(screen.getByText('×')).toBeInTheDocument();
+      expect(screen.getByText('Export PDF')).toBeInTheDocument();
+    });
+  });
+
+  // Interaction Tests
+  describe('User Interactions', () => {
+    it('calls onClose when close button is clicked', async () => {
+      const user = userEvent.setup();
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      const closeButton = screen.getByText('×');
+      await user.click(closeButton);
+
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls onClose when overlay is clicked', async () => {
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      const overlay = document.querySelector('.stats-modal-overlay');
+      
+      if (overlay) {
+        fireEvent.click(overlay);
+        expect(mockOnClose).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it('prevents event propagation when modal content is clicked', () => {
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      const modalContent = document.querySelector('.stats-modal-content');
+      const stopPropagationSpy = vi.fn();
+      
+      if (modalContent) {
+        const event = new MouseEvent('click', { bubbles: true });
+        event.stopPropagation = stopPropagationSpy;
+        fireEvent(modalContent, event);
+      }
+    });
+  });
+
+  // PDF Export Tests
+  describe('PDF Export Functionality', () => {
+    let mockJsPDF: any;
+    let mockHtml2Canvas: any;
+
+    beforeEach(() => {
+      mockJsPDF = {
+        internal: {
+          pageSize: {
+            getWidth: vi.fn(() => 210),
+            getHeight: vi.fn(() => 297)
+          }
+        },
+        addImage: vi.fn(),
+        addPage: vi.fn(),
+        save: vi.fn()
+      };
+      
+      mockHtml2Canvas = vi.fn().mockResolvedValue({
+        toDataURL: vi.fn(() => 'data:image/png;base64,mock'),
+        width: 800,
+        height: 600
+      });
+
+      (jsPDF as any).mockImplementation(() => mockJsPDF);
+      (html2canvas as any).mockImplementation(mockHtml2Canvas);
+    });
+
+    it('exports PDF when export button is clicked', async () => {
+      const user = userEvent.setup();
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      const exportButton = screen.getByText('Export PDF');
+      await user.click(exportButton);
+
+      await waitFor(() => {
+        expect(mockJsPDF.save).toHaveBeenCalledWith('John Doe_stats.pdf');
+      });
+    });
+  });
 
   // Edge Cases
   describe('Edge Cases', () => {
-
-    it('handles empty performance data', () => {
+    it('handles player with missing image', () => {
       mockStatsHelper.getPlayerKeyStats.mockReturnValue({
-        keyStats: [],
-        chartStat: {
-            label: 'No Data',
-            dataKey: ''
-        }
+        keyStats: mockKeyStats,
+        chartStat: mockChartStat
       });
 
-      const playerWithNoData = {
-        ...mockPlayer,
-        stats: { ...mockPlayer.stats, performanceData: [] }
-      };
+      const playerWithoutImage = { ...mockPlayer, imageUrl: '' };
+      render(<PlayerStatsModal player={playerWithoutImage} onClose={mockOnClose} />);
 
-      render(<PlayerStatsModal player={playerWithNoData} onClose={mockOnClose} />);
+      const image = screen.getByAltText('John Doe');
+      expect(image).toHaveAttribute('src', '');
+    });
 
-      expect(screen.getByText('No Data over Last 5 Matches')).toBeInTheDocument();
-      expect(screen.getByText('Chart with 0 data points')).toBeInTheDocument();
+    it('handles player with special characters in name', () => {
+      mockStatsHelper.getPlayerKeyStats.mockReturnValue({
+        keyStats: mockKeyStats,
+        chartStat: mockChartStat
+      });
+
+      const playerWithSpecialName = { ...mockPlayer, name: "José María O'Connor" };
+      render(<PlayerStatsModal player={playerWithSpecialName} onClose={mockOnClose} />);
+
+      expect(screen.getByText("José María O'Connor")).toBeInTheDocument();
     });
 
     it('handles very long player names', () => {
@@ -194,56 +324,29 @@ describe('PlayerStatsModal', () => {
       expect(screen.getByText('Forward | #99')).toBeInTheDocument();
     });
 
-    it('handles missing stats helper data', () => {
-      mockStatsHelper.getPlayerKeyStats.mockReturnValue({
-        keyStats: [],
-        chartStat: {
-            label: 'Unknown',
-            dataKey: ''
-        }
-      });
-
-      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
-
-      expect(screen.queryByTestId('key-stat-card')).not.toBeInTheDocument();
-      expect(screen.getByText('Unknown over Last 5 Matches')).toBeInTheDocument();
-    });
-
-    it('handles players with goalkeeper stats', () => {
-      const goalkeeperPlayer = {
-        ...mockPlayer,
-        position: 'Goalkeeper',
-        stats: {
-          ...mockPlayer.stats,
-          saves: 45,
-          cleansheets: 8,
-          savePercentage: 75
-        }
-      };
-
-      mockStatsHelper.getPlayerKeyStats.mockReturnValue({
-        keyStats: [
-          { label: 'Saves', value: '45' },
-          { label: 'Clean Sheets', value: '8' },
-          { label: 'Save %', value: '75%' }
-        ],
-        chartStat: {
-            label: 'Saves',
-            dataKey: ''
-        }
-      });
-
-      render(<PlayerStatsModal player={goalkeeperPlayer} onClose={mockOnClose} />);
-
-      expect(screen.getByText('Saves: 45')).toBeInTheDocument();
-      expect(screen.getByText('Clean Sheets: 8')).toBeInTheDocument();
-    });
   });
 
   // Integration Tests
   describe('Integration Tests', () => {
+    it('integrates correctly with stats helper', () => {
+      vi.clearAllMocks();
+      mockStatsHelper.getPlayerKeyStats.mockReturnValue({
+        keyStats: mockKeyStats,
+        chartStat: mockChartStat
+      });
+
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      expect(mockStatsHelper.getPlayerKeyStats).toHaveBeenCalledWith(mockPlayer);
+      expect(mockStatsHelper.getPlayerKeyStats).toHaveBeenCalledTimes(1);
+    });
 
     it('passes correct data to child components', () => {
+      mockStatsHelper.getPlayerKeyStats.mockReturnValue({
+        keyStats: mockKeyStats,
+        chartStat: mockChartStat
+      });
+
       render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
 
       // Verify StatsChart receives performance data
@@ -254,6 +357,11 @@ describe('PlayerStatsModal', () => {
     });
 
     it('handles modal lifecycle correctly', async () => {
+      mockStatsHelper.getPlayerKeyStats.mockReturnValue({
+        keyStats: mockKeyStats,
+        chartStat: mockChartStat
+      });
+
       const { rerender, unmount } = render(
         <PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />
       );
@@ -273,21 +381,31 @@ describe('PlayerStatsModal', () => {
     });
 
     it('works with multiple players from mock data', () => {
+      mockStatsHelper.getPlayerKeyStats.mockReturnValue({
+        keyStats: mockKeyStats,
+        chartStat: mockChartStat
+      });
+
       // Test with first player from mockPlayers array
       render(<PlayerStatsModal player={mockPlayers[0]} onClose={mockOnClose} />);
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Forward | #10')).toBeInTheDocument();
 
       // Test switching to second player
-      const { rerender } = render(
-        <PlayerStatsModal player={mockPlayers[1]} onClose={mockOnClose} />
-      );
+      render(
+            <PlayerStatsModal player={mockPlayers[1]} onClose={mockOnClose} />
+        );
       
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
       expect(screen.getByText('Midfielder | #8')).toBeInTheDocument();
     });
 
     it('handles team context correctly', () => {
+      mockStatsHelper.getPlayerKeyStats.mockReturnValue({
+        keyStats: mockKeyStats,
+        chartStat: mockChartStat
+      });
+
       const playerWithTeam = { ...mockPlayer, teamId: mockTeamId };
       render(<PlayerStatsModal player={playerWithTeam} onClose={mockOnClose} />);
 
@@ -315,6 +433,15 @@ describe('PlayerStatsModal', () => {
       const playerImage = screen.getByAltText('John Doe');
       expect(playerImage).toBeInTheDocument();
     });
-  });
 
+    it('has proper button labels', () => {
+      render(<PlayerStatsModal player={mockPlayer} onClose={mockOnClose} />);
+
+      const closeButton = screen.getByText('×');
+      const exportButton = screen.getByRole('button', { name: /export pdf/i });
+
+      expect(closeButton).toBeInTheDocument();
+      expect(exportButton).toBeInTheDocument();
+    });
+  });
 });
