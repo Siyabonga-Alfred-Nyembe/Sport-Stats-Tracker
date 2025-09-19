@@ -17,6 +17,7 @@ import './MyTeamTab.css';
 import TeamShotsChart from "./Charts/TeamShotsChart";
 import BarChart from "./Charts/BarChart.tsx";
 import PiChart from "./Charts/PiChart.tsx";
+import TeamStatsReport from '../../components/teamStatsReport.tsx';
 
 
 const MyTeamTab: React.FC = () => {
@@ -244,6 +245,17 @@ const MyTeamTab: React.FC = () => {
           onClose={() => setSelectedPlayer(null)}
         />
       )}
+
+      <TeamStatsReport
+  team={team}
+  matches={matches}
+  stats={stats}
+  players={players}
+  selectedPlayer={selectedPlayer}
+  onPlayerSelect={handlePlayerSelect}
+  showPlayerSelector
+/>
+
     </section>
   );
 };

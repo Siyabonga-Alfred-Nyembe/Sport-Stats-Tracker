@@ -94,7 +94,7 @@ const MatchDetailsPage: React.FC<MatchDetailsPageProps> = ({ onBack, username, t
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
         <div>
           <h2 style={{ margin: 0, color: "var(--text-primary)" }}>
-            Match Details
+            Match Details For {teams.find(t => t.id === match.teamId)?.name || `Team ${match.teamId}`}
           </h2>
           <div style={{ color: "var(--muted)", fontSize: "14px" }}>
             {formatDate(match.date)} at {formatTime(match.date)}
