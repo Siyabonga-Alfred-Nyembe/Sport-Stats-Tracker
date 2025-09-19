@@ -59,7 +59,7 @@ describe("useDbData hook", () => {
     expect(match.status).toBe("finished");
   });
 
-  it("handles errors gracefully", async () => {
+  it("handles errors correctly", async () => {
     (matchService.fetchMatches as any).mockRejectedValue(new Error("Failed to fetch matches"));
     (playerService.fetchPlayers as any).mockResolvedValue(mockPlayers);
 

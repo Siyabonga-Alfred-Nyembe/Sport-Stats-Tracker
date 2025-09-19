@@ -257,7 +257,7 @@ describe('LineupSelection Component', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle empty lineup gracefully', () => {
+    it('should handle empty lineup correctly', () => {
       render(<LineupSelection {...defaultProps} lineup={[]} />);
       expect(screen.getByText('Add players from the roster to build your lineup.')).toBeInTheDocument();
     });

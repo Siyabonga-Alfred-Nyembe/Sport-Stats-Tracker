@@ -161,12 +161,12 @@ describe("DashboardHeader - Edge Cases", () => {
     vi.clearAllMocks();
   });
 
-  it("handles empty username gracefully", () => {
+  it("handles empty username correctly", () => {
     renderComponent({ username: "" });
     expect(screen.queryByText(/welcome,/i)).not.toBeInTheDocument();
   });
 
-  it("handles null username gracefully", () => {
+  it("handles null username correctly", () => {
     renderComponent({ username: null as any });
     expect(screen.queryByText(/welcome,/i)).not.toBeInTheDocument();
   });
@@ -178,7 +178,7 @@ describe("DashboardHeader - Edge Cases", () => {
   });
 
 
-  it("handles missing prop functions gracefully", () => {
+  it("handles missing prop functions correctly", () => {
     const minimalProps = {
       onProfileClick: vi.fn(),
       setActiveTab: vi.fn(),

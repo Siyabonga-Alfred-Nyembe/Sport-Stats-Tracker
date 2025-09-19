@@ -333,7 +333,7 @@ describe("RedesignedDashboard - Edge Case Tests", () => {
     expect(screen.queryByTestId("match-details")).not.toBeInTheDocument();
   });
 
-  it("should handle empty pathname gracefully", () => {
+  it("should handle empty pathname correctly", () => {
     mockLocation.pathname = "";
     render(<RedesignedDashboard />, { wrapper: MemoryRouter });
     
