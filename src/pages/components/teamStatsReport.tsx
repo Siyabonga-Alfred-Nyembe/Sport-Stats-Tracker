@@ -37,6 +37,15 @@ const TeamStatsReport: React.FC<Props> = ({
   const reportRef = useRef<HTMLElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
+  // Early return if stats is null or undefined
+  if (!stats) {
+    return (
+      <main className="team-stats-container">
+        <div className="loading">Loading team statistics...</div>
+      </main>
+    );
+  }
+
   const handleExportPdf = async () => {
     if (!reportRef.current) return;
     setIsExporting(true);
@@ -75,8 +84,16 @@ const TeamStatsReport: React.FC<Props> = ({
         <section>
           <h1>{team.name}</h1>
           <p>Performance Report</p>
-          <p className="stats-summary">Based on {stats.totalMatches} matches</p>
+          <p className="stats-summary">Based on {stats.totalMatches || 0} matches</p>
         </section>
+
+        <div className="filter-by-date">
+            <label htmlFor="start-date">From</label>
+            <input type="date" id="start-date" name="start-date" />
+            <label htmlFor="end-date">To</label>
+            <input type="date" id="end-date" name="end-date" />
+            <button className="rs-btn filter-btn">Apply</button>
+          </div>
 
         <nav className="header-controls">
           {showBackButton && (
@@ -110,41 +127,69 @@ const TeamStatsReport: React.FC<Props> = ({
         <section className="rs-card pdf-capture">
           <h2>Team Performance Averages</h2>
           <ul>
-            <li><strong>Avg. Possession:</strong> {stats.avgPossession}%</li>
-            <li><strong>Avg. Shots:</strong> {stats.avgShots}</li>
-            <li><strong>Avg. Shots on Target:</strong> {stats.avgShotsOnTarget}</li>
-            <li><strong>Avg. Fouls:</strong> {stats.avgFouls}</li>
-            <li><strong>Avg. Corners:</strong> {stats.avgCorners}</li>
-            <li><strong>Avg. Passes:</strong> {stats.avgPasses}</li>
-            <li><strong>Avg. Pass Accuracy:</strong> {stats.avgPassAccuracy}%</li>
-            <li><strong>Avg. Tackles:</strong> {stats.avgTackles}</li>
-            <li><strong>Avg. Saves:</strong> {stats.avgSaves}</li>
+            <li><strong>Avg. Possession:</strong> {stats.avgPossession || 0}%</li>
+            <li><strong>Avg. Shots:</strong> {stats.avgShots || 0}</li>
+            <li><strong>Avg. Shots on Target:</strong> {stats.avgShotsOnTarget || 0}</li>
+            <li><strong>Avg. Fouls:</strong> {stats.avgFouls || 0}</li>
+            <li><strong>Avg. Corners:</strong> {stats.avgCorners || 0}</li>
+            <li><strong>Avg. Passes:</strong> {stats.avgPasses || 0}</li>
+            <li><strong>Avg. Pass Accuracy:</strong> {stats.avgPassAccuracy || 0}%</li>
+            <li><strong>Avg. Tackles:</strong> {stats.avgTackles || 0}</li>
+            <li><strong>Avg. Saves:</strong> {stats.avgSaves || 0}</li>
           </ul>
         </section>
 
         <section className="rs-stats pdf-capture">
           <h2>General</h2>
-          <StatCard label="Matches Played" value={stats.totalMatches} />
-          <BarChart title="Goals" label={["Goals For","Goals Against","Goal Difference"]} values={[stats.goalsFor, stats.goalsAgainst, stats.goalDifference]} />
-          <PiChart title="Results %" label={["Win%","Loss/Draw%"]} values={[stats.winPercentage, 100 - stats.winPercentage]} />
-          <PiChart title="Results" label={["Wins","Losses","Draws"]} values={[stats.wins, stats.losses, stats.draws]} />
+          <StatCard label="Matches Played" value={stats.totalMatches || 0} />
+          <BarChart 
+            title="Goals" 
+            label={["Goals For","Goals Against","Goal Difference"]} 
+            values={[stats.goalsFor || 0, stats.goalsAgainst || 0, stats.goalDifference || 0]} 
+          />
+          <PiChart 
+            title="Results %" 
+            label={["Win%","Loss/Draw%"]} 
+            values={[stats.winPercentage || 0, 100 - (stats.winPercentage || 0)]} 
+          />
+          <PiChart 
+            title="Results" 
+            label={["Wins","Losses","Draws"]} 
+            values={[stats.wins || 0, stats.losses || 0, stats.draws || 0]} 
+          />
         </section>
 
         <section className="rs-stats pdf-capture">
           <h2>Attacking</h2>
-          <BarChart title="Shooting" label={["Shots","Shots on Target","Goals"]} values={[stats.totalShots, stats.totalShotsOnTarget, stats.goalsFor]} />
-          <PiChart title="Passing" label={["Successful Passes","Unsuccessful Passes"]} values={[Number(stats.avgPassAccuracy), 100 - Number(stats.avgPassAccuracy)]} />
+          <BarChart 
+            title="Shooting" 
+            label={["Shots","Shots on Target","Goals"]} 
+            values={[stats.totalShots || 0, stats.totalShotsOnTarget || 0, stats.goalsFor || 0]} 
+          />
+          <PiChart 
+            title="Passing" 
+            label={["Successful Passes","Unsuccessful Passes"]} 
+            values={[Number(stats.avgPassAccuracy) || 0, 100 - (Number(stats.avgPassAccuracy) || 0)]} 
+          />
         </section>
 
         <section className="rs-stats pdf-capture">
           <h2>Defending</h2>
-          <BarChart title="General" label={["Tackles","Interceptions","Clearances"]} values={[stats.totalTackles, 50, 16]} />
-          <BarChart title="Discipline" label={["Fouls","Yellow Cards","Red Cards"]} values={[13, 9, 1]} />
+          <BarChart 
+            title="General" 
+            label={["Tackles","Interceptions","Clearances"]} 
+            values={[stats.totalTackles || 0, 50, 16]} 
+          />
+          <BarChart 
+            title="Discipline" 
+            label={["Fouls","Yellow Cards","Red Cards"]} 
+            values={[13, 9, 1]} 
+          />
         </section>
 
         <section className="rs-card pdf-capture">
           <h2>Recent Form (Last 5)</h2>
-          <TeamFormGuide form={stats.form} />
+          <TeamFormGuide form={stats.form || []} />
         </section>
 
         <section className="charts-grid">

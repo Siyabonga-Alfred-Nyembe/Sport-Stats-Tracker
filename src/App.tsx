@@ -12,6 +12,7 @@ import RedesignedDashboard from "./pages/userDashboard/RedesignedDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
+import TeamStatsPage from "./pages/userDashboard/TeamStatsPage";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
       >
         <Routes>
+          <Route path="/teams/:teamId/stats" element={<TeamStatsPage />} />
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
