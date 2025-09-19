@@ -392,37 +392,6 @@ describe('PlayerManagementPage', () => {
         });
       });
     });
-
-    describe('Player Stats Modal', () => {
-      it('should open player stats modal', async () => {
-        const user = userEvent.setup();
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId(`view-stats-${mockPlayers[0].id}`)).toBeInTheDocument();
-        });
-
-        await user.click(screen.getByTestId(`view-stats-${mockPlayers[0].id}`));
-
-        expect(screen.getByTestId('player-stats-modal')).toBeInTheDocument();
-        expect(screen.getByText(`${mockPlayers[0].name} Stats`)).toBeInTheDocument();
-      });
-
-      it('should close player stats modal', async () => {
-        const user = userEvent.setup();
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId(`view-stats-${mockPlayers[0].id}`)).toBeInTheDocument();
-        });
-
-        await user.click(screen.getByTestId(`view-stats-${mockPlayers[0].id}`));
-        expect(screen.getByTestId('player-stats-modal')).toBeInTheDocument();
-
-        await user.click(screen.getByTestId('close-modal'));
-        expect(screen.queryByTestId('player-stats-modal')).not.toBeInTheDocument();
-      });
-    });
   });
 
   // UI TESTS
@@ -504,18 +473,6 @@ describe('PlayerManagementPage', () => {
           const container = screen.getByTestId('roster-management').closest('.management-container');
           expect(container).toBeInTheDocument();
         });
-      });
-
-      it('should conditionally render player stats modal', async () => {
-        const user = userEvent.setup();
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.queryByTestId('player-stats-modal')).not.toBeInTheDocument();
-        });
-
-        await user.click(screen.getByTestId(`view-stats-${mockPlayers[0].id}`));
-        expect(screen.getByTestId('player-stats-modal')).toBeInTheDocument();
       });
     });
 

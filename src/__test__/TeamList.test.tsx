@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import TeamsList from "../pages/userDashboard/TeamsList";
-
 
 describe("TeamsList Component", () => {
   const teams = [
-    { id: "t1", name: "Team A" }, 
+    { id: "t1", name: "Team A" },
     { id: "t2", name: "Team B" },
   ];
 
@@ -18,8 +18,12 @@ describe("TeamsList Component", () => {
     mockToggleFavorite = vi.fn(async () => Promise.resolve());
   });
 
+  // Helper to render with router context
+  const renderWithRouter = (ui: React.ReactElement) =>
+    render(<MemoryRouter>{ui}</MemoryRouter>);
+
   it("renders team names and favorite stars correctly", () => {
-    render(
+    renderWithRouter(
       <TeamsList
         teams={teams}
         isFavorite={mockIsFavorite}
@@ -40,7 +44,7 @@ describe("TeamsList Component", () => {
   });
 
   it("calls toggleFavorite when star is clicked", async () => {
-    render(
+    renderWithRouter(
       <TeamsList
         teams={teams}
         isFavorite={mockIsFavorite}
@@ -56,7 +60,7 @@ describe("TeamsList Component", () => {
   });
 
   it("disables star button while loading", () => {
-    render(
+    renderWithRouter(
       <TeamsList
         teams={teams}
         isFavorite={mockIsFavorite}
@@ -75,12 +79,11 @@ describe("TeamsList Component", () => {
   it("shows toggling state when star is clicked", async () => {
     // Override toggleFavorite to delay for a short time
     mockToggleFavorite = vi.fn(
-      async (): Promise<void> => {
-        return new Promise<void>((resolve) => setTimeout(resolve, 50));
-      }
+      async (): Promise<void> =>
+        new Promise<void>((resolve) => setTimeout(resolve, 50))
     );
 
-    render(
+    renderWithRouter(
       <TeamsList
         teams={teams}
         isFavorite={mockIsFavorite}
