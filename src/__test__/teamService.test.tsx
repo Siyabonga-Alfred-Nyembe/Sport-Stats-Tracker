@@ -450,7 +450,7 @@ describe('Team Service', () => {
       expect(mockLocalStorage.setItem).not.toHaveBeenCalled();
     });
 
-    it('should handle logo upload failure gracefully', async () => {
+    it('should handle logo upload failure correctly', async () => {
       const teamName = 'Golden Warriors';
       const logoFile = new File(['logo'], 'logo.jpg', { type: 'image/jpeg' });
       const expectedTeamId = 'golden-warriors';

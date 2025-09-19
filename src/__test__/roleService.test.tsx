@@ -85,7 +85,7 @@ describe('User Role Service', () => {
         expect(consoleSpy.error).toHaveBeenCalledWith('Error fetching user role:', { message: 'User not found' });
       });
 
-      it('should handle database errors gracefully', async () => {
+      it('should handle database errors correctly', async () => {
         const userId = 'user-123';
         const error = { message: 'Database connection error' };
 

@@ -43,7 +43,7 @@ export async function uploadTeamLogo(teamId: string, file: File): Promise<string
   const path = `${teamId}/${Date.now()}_${file.name}`;
   const { data, error } = await supabase.storage.from(TEAM_LOGO_BUCKET).upload(path, file, { upsert: true });
   if (error) {
-    // Gracefully continue if bucket missing; caller will save team without logo
+    // correctly continue if bucket missing; caller will save team without logo
     console.warn('uploadTeamLogo warning:', error?.message || error);
     return null;
   }
