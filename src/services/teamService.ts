@@ -43,7 +43,7 @@ export async function uploadTeamLogo(teamId: string, file: File): Promise<string
   const path = `${teamId}/${Date.now()}_${file.name}`;
   const { data, error } = await supabase.storage.from(TEAM_LOGO_BUCKET).upload(path, file, { upsert: true });
   if (error) {
-    // Gracefully continue if bucket missing; caller will save team without logo
+    // correctly continue if bucket missing; caller will save team without logo
     console.warn('uploadTeamLogo warning:', error?.message || error);
     return null;
   }
@@ -70,6 +70,19 @@ export async function createTeam(teamName: string, logoFile?: File | null, coach
   }
   setCurrentTeamId(teamId);
   return data as unknown as TeamRecord;
+}
+
+export async function fetchTeamByCoachId(coachId: string): Promise<TeamRecord | null> {
+  const { data, error } = await supabase
+    .from('teams')
+    .select('*')
+    .eq('coach_id', coachId)
+    .maybeSingle();
+  if (error) {
+    console.error('fetchTeamByCoachId error', error);
+    return null;
+  }
+  return data as unknown as TeamRecord | null;
 }
 
 

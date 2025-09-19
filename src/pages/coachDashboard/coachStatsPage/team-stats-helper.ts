@@ -25,6 +25,7 @@ export const calculateTeamStats = (matches: Match[]) => {
   const totalTackles = matches.reduce((sum, m) => sum + (m.tackles || 0), 0);
   const totalSaves = matches.reduce((sum, m) => sum + (m.saves || 0), 0);
 
+
   // Form is the result of the last 5 matches (W, D, L)
   const form = matches.slice(0, 5).map(m => {
     if (m.teamScore > m.opponentScore) return 'W';
@@ -33,7 +34,12 @@ export const calculateTeamStats = (matches: Match[]) => {
   });
 
   return {
+    totalTackles,
+    totalFouls,
+    totalPasses,
     totalMatches,
+    totalShots,
+    totalShotsOnTarget,
     wins,
     draws,
     losses,

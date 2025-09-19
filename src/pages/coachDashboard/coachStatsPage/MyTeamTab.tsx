@@ -1,46 +1,61 @@
 // src/pages/coachDashboard/MyTeamTab.tsx
 
 import React, { useState, useRef, useEffect } from 'react';
-import type { Match } from '../../../types';
+import type { Match, Player } from '../../../types';
 import { calculateTeamStats } from './team-stats-helper';
 import { fetchTeamMatches } from '../../../services/matchService';
+import { fetchPlayersWithStats } from '../../../services/playerService';
 import { useTeamData } from '../hooks/useTeamData';
+import { getCurrentTeamId } from '../../../services/teamService';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
 import StatCard from './StatCard';
 import TeamPerformanceChart from './TeamPerformanceChart.tsx';
 import TeamFormGuide from './TeamFormGuide.tsx';
+import PlayerStatsModal from '../playerManagement/PlayerStatsModal.tsx';
 import './MyTeamTab.css';
+import TeamShotsChart from "./Charts/TeamShotsChart";
+import BarChart from "./Charts/BarChart.tsx";
+import PiChart from "./Charts/PiChart.tsx";
+
 
 const MyTeamTab: React.FC = () => {
   const { team, isLoading: teamLoading, error: teamError } = useTeamData();
+  const currentTeamId = getCurrentTeamId();
   const [matches, setMatches] = useState<Match[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   
-  // Fetch matches from database
+  // Fetch matches and players from database
   useEffect(() => {
-    const loadMatches = async () => {
-      if (!team) return;
+    const loadData = async () => {
+      if (!team || !currentTeamId) return;
       
       try {
         setIsLoading(true);
+        
+        // Load matches
         const teamMatches = await fetchTeamMatches(team.id);
         setMatches(teamMatches);
-        // Removed automatic success notification - only show for user operations
+        
+        // Load players with stats
+        const playersWithStats = await fetchPlayersWithStats(currentTeamId);
+        setPlayers(playersWithStats);
+        
       } catch (err) {
-        console.error('Error loading matches:', err);
-        setError('Failed to load match data. Please try again.');
+        console.error('Error loading data:', err);
+        setError('Failed to load team data. Please try again.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadMatches();
-  }, [team]);
+    loadData();
+  }, [team, currentTeamId]);
 
   const stats = calculateTeamStats(matches);
 
@@ -82,6 +97,18 @@ const MyTeamTab: React.FC = () => {
     }
   };
 
+  const handlePlayerSelect = (playerId: string) => {
+    if (playerId === '') {
+      setSelectedPlayer(null);
+      return;
+    }
+    
+    const player = players.find(p => p.id === playerId);
+    if (player) {
+      setSelectedPlayer(player);
+    }
+  };
+
   if (teamLoading) {
     return <div className="loading">Loading team data...</div>;
   }
@@ -107,37 +134,45 @@ const MyTeamTab: React.FC = () => {
       <header className="stats-header pdf-capture">
         <div className="team-info">
           <h1>{team.name}</h1>
-          <p>Season Performance Report</p>
+          <p>Performance Report</p>
           <p className="stats-summary">
-            Based on {stats.totalMatches} matches from database
+            Based on {stats.totalMatches} matches
           </p>
         </div>
-        <button className="rs-btn" onClick={handleExportPdf} disabled={isExporting}>
-          {isExporting ? 'Exporting...' : 'Export as PDF'}
-        </button>
+        
+        <div className="header-controls">
+          <div className="filter-by-date">
+            <label htmlFor="start-date">From</label>
+            <input type="date" id="start-date" name="start-date" />
+            <label htmlFor="end-date">To</label>
+            <input type="date" id="end-date" name="end-date" />
+            <button className="rs-btn filter-btn">Apply</button>
+          </div>
+          
+          <div className="player-selector">
+            <label htmlFor="player-select">View Player Stats:</label>
+            <select 
+              id="player-select" 
+              className="player-dropdown"
+              onChange={(e) => handlePlayerSelect(e.target.value)}
+              value={selectedPlayer?.id || ''}
+            >
+              <option value="">Select a player...</option>
+              {players.map(player => (
+                <option key={player.id} value={player.id}>
+                  {player.name} - {player.position}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <button className="rs-btn" onClick={handleExportPdf} disabled={isExporting}>
+            {isExporting ? 'Exporting...' : 'Export as PDF'}
+          </button>
+        </div>
       </header>
 
-      <div className="stats-report" ref={reportRef}>
-        <section className="rs-stats pdf-capture">
-          <StatCard label="Matches Played" value={stats.totalMatches} />
-          <StatCard label="Win %" value={`${stats.winPercentage}%`} />
-          <StatCard label="Goals For" value={stats.goalsFor} />
-          <StatCard label="Goals Against" value={stats.goalsAgainst} />
-          <StatCard label="Goal Difference" value={stats.goalDifference} />
-        </section>
-
-        <section className="rs-card pdf-capture">
-          <h3>Recent Form (Last 5)</h3>
-          <TeamFormGuide form={stats.form} />
-        </section>
-
-        <div className="charts-grid">
-          <section className="rs-card pdf-capture">
-            <h3>Goals For vs. Against per Match</h3>
-            <TeamPerformanceChart matches={matches} />
-          </section>
-          
-          <section className="rs-card pdf-capture">
+      <section className="rs-card pdf-capture">
             <h3>Team Performance Averages</h3>
             <div className="avg-stats-list">
               <p><strong>Avg. Possession:</strong> {stats.avgPossession}%</p>
@@ -151,8 +186,64 @@ const MyTeamTab: React.FC = () => {
               <p><strong>Avg. Saves:</strong> {stats.avgSaves}</p>
             </div>
           </section>
-        </div>
+
+      <div className="stats-report" ref={reportRef}>
+        <h1>General</h1>
+        <section className="rs-stats pdf-capture">
+          
+          <StatCard label="Matches Played" value={stats.totalMatches} />
+          <BarChart title="goals" label={["Goals For","Goals Against","Goal Difference"]} values={[stats.goalsFor,stats.goalsAgainst,stats.goalDifference]}/>
+          <PiChart title="%" label={["Win%","Loss/Draw%"]} values={[stats.winPercentage,100-stats.winPercentage]}/>
+          <PiChart title="games" label={["Wins","Losses","Draws"]} values={[stats.wins,stats.losses,stats.draws]}/>
+
+        </section>
+
+        <h1>Attacking</h1>
+        <section className="rs-stats pdf-capture">
+      
+          <BarChart title="Shooting" label={["Shots","Shots on Target","Goals"]} values={[stats.totalShots,stats.totalShotsOnTarget,stats.goalsFor]}/>
+          <PiChart title="Passing" label={["Succesfull Passes","Unsuccessfull Passes"]} values={[Number(stats.avgPassAccuracy),100-Number(stats.avgPassAccuracy)]}/>
+          
+
+        </section>
+        <h1>Defending</h1>
+        <section className="rs-stats pdf-capture">
+          {/* Interceptions and clearances are mocks */}
+          <BarChart title="General" label={["Tackles","Interceptions","Clearances"]} values={[stats.totalTackles,50,16]}/>
+          <BarChart title="Discipline" label={["Fouls","Yellow Cards","Red Cards"]} values={[13,9,1]}/>
+          
+
+        </section>
+        
+        
+
+        <section className="rs-card pdf-capture">
+          <h3>Recent Form (Last 5)</h3>
+          <TeamFormGuide form={stats.form} />
+        </section>
+
+
+        <div className="charts-grid">
+  <section className="rs-card pdf-capture">
+    <h3>Goals For vs. Against per Match</h3>
+    <TeamPerformanceChart matches={matches} />
+  </section>
+
+  <section className="rs-card pdf-capture">
+    <h3>Shots vs. Shots on Target per Match</h3>
+    <TeamShotsChart matches={matches} />
+  </section>
+</div>
+        
       </div>
+
+      {/* Player Stats Modal */}
+      {selectedPlayer && (
+        <PlayerStatsModal
+          player={selectedPlayer}
+          onClose={() => setSelectedPlayer(null)}
+        />
+      )}
     </section>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import supabase from "../../supabaseClient";
+import supabase from "../supabaseClient";
 
 const googleColors = ["#4285F4", "#EA4335", "#FBBC05", "#34A853"];
 

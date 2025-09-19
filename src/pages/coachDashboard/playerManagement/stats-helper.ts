@@ -3,9 +3,9 @@ import type { Player } from '../../../types';
 
 const positionGroups = {
   GK: ['GK'],
-  DEF: ['DEF', 'RB', 'LB'],
-  MID: ['MID'],
-  STR: ['STR']
+  DEF: ['CB', 'RB', 'LB','RWB','LWB'],
+  MID: ['CDM',"CM","CAM","LM","RM"],
+  STR: ['ST',"CF","LW","RW"]
 };
 
 export const getPlayerKeyStats = (player: Player) => {
@@ -33,7 +33,7 @@ export const getPlayerKeyStats = (player: Player) => {
       { label: 'Assists', value: stats.assists },
       { label: 'Pass %', value: `${stats.passCompletion}%` }
     ];
-    chartStat = { label: 'Pass Completion', dataKey: 'passCompletion' };
+    chartStat = { label: 'Assists', dataKey: 'assists' };
   } else if (positionGroups.STR.includes(position)) {
     const shotAccuracy = stats.shots > 0 
       ? Math.round((stats.shotsOnTarget / stats.shots) * 100) 
@@ -96,6 +96,7 @@ export const getPositionSpecificStats = (player: Player) => {
       ? Math.round((stats.dribblesSuccessful / stats.dribblesAttempted) * 100) 
       : 0;
     positionStats = [
+      { label: 'Assists', value: stats.assists },
       { label: 'Pass Completion', value: `${stats.passCompletion}%` },
       { label: 'Dribbles Attempted', value: stats.dribblesAttempted },
       { label: 'Dribbles Successful', value: stats.dribblesSuccessful },

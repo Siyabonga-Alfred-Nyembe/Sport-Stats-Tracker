@@ -96,18 +96,26 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
       setIsExporting(false);
     }
   };
+  console.log(player.stats)
 
   return (
-    <div className="stats-modal-overlay" onClick={onClose}>
-      <div className="stats-modal-content" ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
+    <section className="stats-modal-overlay" onClick={onClose}>
+      <section className="stats-modal-content" ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
         <button className="modal-close-btn" onClick={onClose}>&times;</button>
-        
+        <div className="date-filters">
+          <label>
+            From: <input type="date"  />
+          </label>
+          <label>
+            To: <input type="date" />
+          </label>
+        </div>
         <header className="modal-header">
           <img src={player.imageUrl} alt={player.name} className="player-avatar" />
-          <div className="player-info">
+          <section className="player-info">
             <h1>{player.name}</h1>
             <p>{player.position} | #{player.jerseyNum}</p>
-          </div>
+          </section>
           {/* Update button to show loading state */}
           <button 
             className="rs-btn export-btn" 
@@ -125,7 +133,7 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
         </section>
         
         <section className="rs-card chart-container">
-          <h3>{chartStat.label} over Last 5 Matches</h3>
+          <h3>{chartStat.label} over Time</h3>
           <StatsChart data={player.stats.performanceData} />
         </section>
 
@@ -134,8 +142,8 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
           <h3>Full Statistics</h3>
           <StatsTable player={player} />
         </section>
-      </div>
-    </div>
+      </section>
+    </section>
   );
 };
 
