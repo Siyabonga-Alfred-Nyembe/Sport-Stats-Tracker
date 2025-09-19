@@ -59,7 +59,7 @@ const TeamSetup: React.FC = () => {
   return (
     <main className="auth-container" style={{ maxWidth: 520, margin: '40px auto' }}>
       <h2>Create your team</h2>
-      <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} tone="error" />
+      <InlineAlert message={errorMsg} onClose={() => setErrorMsg(null)} type="error" />
       <form onSubmit={handleSubmit} className="add-player-form">
         <label style={{ fontWeight: 600, marginBottom: 4 }}>Enter team name</label>
         <input

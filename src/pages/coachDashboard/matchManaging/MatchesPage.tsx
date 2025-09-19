@@ -1,14 +1,14 @@
 // src/components/Matches/MatchesPage.tsx
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MatchDetailsModal from './MatchDetailsModal';
 import './MatchesPage.css';
 import supabase from '../../../../supabaseClient';
 import InlineAlert from '../../components/InlineAlert';
-import type {Team,PlayerStats,Player,MatchEvent,Match} from '../../../types'
+import type {Team,Player,MatchEvent,Match} from '../../../types'
 import MatchCard from '../../components/matchCard'; // Import the new MatchCard component
 import { getCurrentTeamId, fetchTeamById } from '../../../services/teamService';
-import { fetchTeamMatches, fetchMatchEvents, fetchPlayerStatsForMatch } from '../../../services/matchService';
+import { fetchTeamMatches, fetchMatchEvents} from '../../../services/matchService';
 import { fetchPlayersWithStats } from '../../../services/playerService';
 
 const MatchesPage: React.FC = () => {
