@@ -121,8 +121,18 @@ export interface DbPlayerStatsRecord {
   updated_at: string;
 }
 
+// Add missing DbMatchEventRecord interface
+export interface DbMatchEventRecord {
+  id: string;
+  match_id: string;
+  player_id: string;
+  event_type: 'goal' | 'assist' | 'yellow_card' | 'red_card';
+  minute?: number;
+  created_at: string;
+}
+
 // Helper function to create default stats for any position
-export const createPositionDefaultStats = (position: string): PlayerStats => {
+export const createPositionDefaultStats = (_position: string): PlayerStats => {
   return {
     // Attacking
     goals: 0,
