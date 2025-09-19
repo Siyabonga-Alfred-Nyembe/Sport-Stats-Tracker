@@ -13,7 +13,7 @@
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   padding: 40px;
-  max-width: 900px;
+  max-width: 1200px;
   width: 100%;
   text-align: center;
 }
@@ -33,7 +33,7 @@
 
 .role-options {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
   margin-bottom: 40px;
 }
@@ -58,6 +58,22 @@
   border-color: #667eea;
   background: linear-gradient(135deg, #f0f4ff 0%, #e6f3ff 100%);
   box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+}
+
+.role-option.admin {
+  background: linear-gradient(135deg, #fff5f5 0%, #fef5e7 100%);
+  border-color: #ed8936;
+}
+
+.role-option.admin.selected {
+  border-color: #ed8936;
+  background: linear-gradient(135deg, #fff5f5 0%, #fef5e7 100%);
+  box-shadow: 0 10px 25px rgba(237, 137, 54, 0.2);
+}
+
+.role-option.admin:hover {
+  border-color: #ed8936;
+  box-shadow: 0 10px 25px rgba(237, 137, 54, 0.15);
 }
 
 .role-icon {
@@ -137,16 +153,17 @@
   border: 1px solid #feb2b2;
 }
 
-/* Responsive design */
+@media (max-width: 1024px) {
+  .role-options {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
 @media (max-width: 768px) {
   .role-selection-container {
     padding: 20px;
     margin: 10px;
-  }
-  
-  .role-options {
-    grid-template-columns: 1fr;
-    gap: 20px;
   }
   
   .role-selection-header h1 {

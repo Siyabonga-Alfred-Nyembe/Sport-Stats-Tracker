@@ -72,4 +72,17 @@ export async function createTeam(teamName: string, logoFile?: File | null, coach
   return data as unknown as TeamRecord;
 }
 
+export async function fetchTeamByCoachId(coachId: string): Promise<TeamRecord | null> {
+  const { data, error } = await supabase
+    .from('teams')
+    .select('*')
+    .eq('coach_id', coachId)
+    .maybeSingle();
+  if (error) {
+    console.error('fetchTeamByCoachId error', error);
+    return null;
+  }
+  return data as unknown as TeamRecord | null;
+}
+
 

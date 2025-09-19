@@ -21,9 +21,9 @@ const AdvancedStatsForm: React.FC<Props> = ({ player, onSave }) => {
 
   let form = null;
   if (player.position === "GK") form = <GKStatsForm onSave={handleSave} />;
-  else if (player.position === "MID") form = <MidStatsForm onSave={handleSave} />;
-  else if (player.position === "STR") form = <StrStatsForm onSave={handleSave} />;
-  else if (["DEF", "RB", "LB"].includes(player.position))
+  else if (["CAM","CDM","CAM", "CM", "LM","RM"].includes(player.position)) form = <MidStatsForm onSave={handleSave} />;
+  else if (["CF","ST","LW", "RW"].includes(player.position)) form = <StrStatsForm onSave={handleSave} />;
+  else if (["LWB","RWB","CB", "RB", "LB"].includes(player.position))
     form = <DefStatsForm onSave={handleSave} />;
 
   return (

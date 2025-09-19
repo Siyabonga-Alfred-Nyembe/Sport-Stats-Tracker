@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
@@ -22,11 +21,9 @@ const AuthCallback: React.FC = () => {
 
       if (session?.user) {
         try {
-          // Check if user exists in our users table
           const userRole = await getUserRole(session.user.id);
           
           if (!userRole) {
-            // New user - show role selection
             setUserData({
               id: session.user.id,
               email: session.user.email || 'Unknown'
@@ -35,9 +32,16 @@ const AuthCallback: React.FC = () => {
             return;
           }
 
-          // Existing user - redirect based on role
           if (userRole.role === "Coach") {
             navigate("/coach-dashboard", {
+              state: { 
+                username: session.user.email, 
+                userId: session.user.id,
+                isGoogleUser: true 
+              },
+            });
+          } else if (userRole.role === "Admin") {
+            navigate("/admin-dashboard", {
               state: { 
                 username: session.user.email, 
                 userId: session.user.id,
@@ -65,16 +69,17 @@ const AuthCallback: React.FC = () => {
     handleAuthCallback();
   }, [navigate]);
 
-  const handleRoleSelected = async (role: 'Fan' | 'Coach') => {
+  const handleRoleSelected = async (role: 'Fan' | 'Coach' | 'Admin') => {
     if (!userData) return;
 
     try {
-      // Create user profile with selected role
       const success = await createUserProfile(userData.id, userData.email, role);
       
       if (success) {
         if (role === 'Coach') {
           navigate('/team-setup');
+        } else if (role === 'Admin') {
+          navigate('/admin-dashboard');
         } else {
           navigate('/user-dashboard');
         }
@@ -94,12 +99,13 @@ const AuthCallback: React.FC = () => {
         userId={userData.id}
         userEmail={userData.email}
         onRoleSelected={handleRoleSelected}
+        includeAdminOption={true}
       />
     );
   }
 
   return (
-    <div style={{
+    <section style={{
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -108,7 +114,7 @@ const AuthCallback: React.FC = () => {
       color: '#666'
     }}>
       Loading...
-    </div>
+    </section>
   );
 };
 
