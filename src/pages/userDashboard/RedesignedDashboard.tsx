@@ -131,7 +131,7 @@ const RedesignedDashboard: React.FC = () => {
               {notification.message}
             </div>
           )}
-          <div className="rs-card">
+          <div className="contentContainer">
             {loading && (
               <div style={{textAlign: "center", padding: "40px", color:"var(--muted)"}}>
                 <div>Loading matches and teams...</div>

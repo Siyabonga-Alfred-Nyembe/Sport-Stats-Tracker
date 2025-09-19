@@ -3,9 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import LandingPage from "./pages/landingPage";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
-import ForgotPassword from "./pages/forgot";
-import ResetPassword from "./pages/reset";
-import Land from "./pages/land";
 import CoachDashboard from "./pages/coachDashboard/CoachDashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import AuthCallback from "./pages/authCallback";
@@ -15,6 +12,7 @@ import RedesignedDashboard from "./pages/userDashboard/RedesignedDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
+import TeamStatsPage from "./pages/userDashboard/TeamStatsPage";
 
 function App() {
   return (
@@ -24,13 +22,11 @@ function App() {
         style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
       >
         <Routes>
+          <Route path="/teams/:teamId/stats" element={<TeamStatsPage />} />
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot" element={<ForgotPassword />} />
-          <Route path="/reset" element={<ResetPassword />} />
-          <Route path="/land" element={<Land />} />
           <Route path="/auth-callback" element={<AuthCallback />} />
 
           {/* Fan Routes */}

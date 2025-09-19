@@ -17,6 +17,7 @@ import './MyTeamTab.css';
 import TeamShotsChart from "./Charts/TeamShotsChart";
 import BarChart from "./Charts/BarChart.tsx";
 import PiChart from "./Charts/PiChart.tsx";
+import TeamStatsReport from '../../components/teamStatsReport.tsx';
 
 
 const MyTeamTab: React.FC = () => {
@@ -131,111 +132,8 @@ const MyTeamTab: React.FC = () => {
 
   return (
     <section className="team-stats-container">
-      <header className="stats-header pdf-capture">
-        <div className="team-info">
-          <h1>{team.name}</h1>
-          <p>Performance Report</p>
-          <p className="stats-summary">
-            Based on {stats.totalMatches} matches
-          </p>
-        </div>
-        
-        <div className="header-controls">
-          <div className="filter-by-date">
-            <label htmlFor="start-date">From</label>
-            <input type="date" id="start-date" name="start-date" />
-            <label htmlFor="end-date">To</label>
-            <input type="date" id="end-date" name="end-date" />
-            <button className="rs-btn filter-btn">Apply</button>
-          </div>
-          
-          <div className="player-selector">
-            <label htmlFor="player-select">View Player Stats:</label>
-            <select 
-              id="player-select" 
-              className="player-dropdown"
-              onChange={(e) => handlePlayerSelect(e.target.value)}
-              value={selectedPlayer?.id || ''}
-            >
-              <option value="">Select a player...</option>
-              {players.map(player => (
-                <option key={player.id} value={player.id}>
-                  {player.name} - {player.position}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <button className="rs-btn" onClick={handleExportPdf} disabled={isExporting}>
-            {isExporting ? 'Exporting...' : 'Export as PDF'}
-          </button>
-        </div>
-      </header>
-
-      <section className="rs-card pdf-capture">
-            <h3>Team Performance Averages</h3>
-            <div className="avg-stats-list">
-              <p><strong>Avg. Possession:</strong> {stats.avgPossession}%</p>
-              <p><strong>Avg. Shots:</strong> {stats.avgShots}</p>
-              <p><strong>Avg. Shots on Target:</strong> {stats.avgShotsOnTarget}</p>
-              <p><strong>Avg. Fouls:</strong> {stats.avgFouls}</p>
-              <p><strong>Avg. Corners:</strong> {stats.avgCorners}</p>
-              <p><strong>Avg. Passes:</strong> {stats.avgPasses}</p>
-              <p><strong>Avg. Pass Accuracy:</strong> {stats.avgPassAccuracy}%</p>
-              <p><strong>Avg. Tackles:</strong> {stats.avgTackles}</p>
-              <p><strong>Avg. Saves:</strong> {stats.avgSaves}</p>
-            </div>
-          </section>
-
-      <div className="stats-report" ref={reportRef}>
-        <h1>General</h1>
-        <section className="rs-stats pdf-capture">
-          
-          <StatCard label="Matches Played" value={stats.totalMatches} />
-          <BarChart title="goals" label={["Goals For","Goals Against","Goal Difference"]} values={[stats.goalsFor,stats.goalsAgainst,stats.goalDifference]}/>
-          <PiChart title="%" label={["Win%","Loss/Draw%"]} values={[stats.winPercentage,100-stats.winPercentage]}/>
-          <PiChart title="games" label={["Wins","Losses","Draws"]} values={[stats.wins,stats.losses,stats.draws]}/>
-
-        </section>
-
-        <h1>Attacking</h1>
-        <section className="rs-stats pdf-capture">
       
-          <BarChart title="Shooting" label={["Shots","Shots on Target","Goals"]} values={[stats.totalShots,stats.totalShotsOnTarget,stats.goalsFor]}/>
-          <PiChart title="Passing" label={["Succesfull Passes","Unsuccessfull Passes"]} values={[Number(stats.avgPassAccuracy),100-Number(stats.avgPassAccuracy)]}/>
-          
 
-        </section>
-        <h1>Defending</h1>
-        <section className="rs-stats pdf-capture">
-          {/* Interceptions and clearances are mocks */}
-          <BarChart title="General" label={["Tackles","Interceptions","Clearances"]} values={[stats.totalTackles,50,16]}/>
-          <BarChart title="Discipline" label={["Fouls","Yellow Cards","Red Cards"]} values={[13,9,1]}/>
-          
-
-        </section>
-        
-        
-
-        <section className="rs-card pdf-capture">
-          <h3>Recent Form (Last 5)</h3>
-          <TeamFormGuide form={stats.form} />
-        </section>
-
-
-        <div className="charts-grid">
-  <section className="rs-card pdf-capture">
-    <h3>Goals For vs. Against per Match</h3>
-    <TeamPerformanceChart matches={matches} />
-  </section>
-
-  <section className="rs-card pdf-capture">
-    <h3>Shots vs. Shots on Target per Match</h3>
-    <TeamShotsChart matches={matches} />
-  </section>
-</div>
-        
-      </div>
 
       {/* Player Stats Modal */}
       {selectedPlayer && (
@@ -244,6 +142,17 @@ const MyTeamTab: React.FC = () => {
           onClose={() => setSelectedPlayer(null)}
         />
       )}
+
+      <TeamStatsReport
+  team={team}
+  matches={matches}
+  stats={stats}
+  players={players}
+  selectedPlayer={selectedPlayer}
+  onPlayerSelect={handlePlayerSelect}
+  showPlayerSelector
+/>
+
     </section>
   );
 };
