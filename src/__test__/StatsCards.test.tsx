@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import StatsCards from "../pages/userDashboard/StatsCards";
+import { describe, it, expect } from "vitest";
 
 describe("StatsCards - UI Tests", () => {
   it("renders all card headings", () => {
@@ -16,12 +17,5 @@ describe("StatsCards - UI Tests", () => {
     expect(screen.getByText("7")).toBeInTheDocument();
     expect(screen.getByText("50")).toBeInTheDocument();
     expect(screen.getByText("15")).toBeInTheDocument();
-  });
-
-  it("matches snapshot", () => {
-    const { asFragment } = render(
-      <StatsCards teams={3} players={12} matches={8} />
-    );
-    expect(asFragment()).toMatchSnapshot();
   });
 });

@@ -1,208 +1,306 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-import { vi } from "vitest";
-import CoachDashboard from "../pages/coachDashboard/CoachDashboard";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import CoachDashboard from '../pages/coachDashboard/CoachDashboard';
+import { getCurrentTeamId, setCurrentTeamId, fetchTeamByCoachId } from '../services/teamService';
+import supabase from '../../supabaseClient';
 
-//Mock services
+// Create mock navigate function
 const mockNavigate = vi.fn();
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
-});
+// Mock React Router
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mockNavigate,
+}));
 
-vi.mock("../../supabaseClient", () => ({
+// Mock child components
+vi.mock('../pages/coachDashboard/DashboardSidebar', () => ({
+  default: ({ onNavigate }: { onNavigate: (tab: string) => void }) => (
+    <div data-testid="dashboard-sidebar">
+      <button data-testid="players-btn" onClick={() => onNavigate('players')}>Players</button>
+      <button data-testid="matches-btn" onClick={() => onNavigate('matches')}>Matches</button>
+      <button data-testid="myteam-btn" onClick={() => onNavigate('myTeam')}>My Team</button>
+    </div>
+  ),
+}));
+
+vi.mock('../pages/coachDashboard/coachStatsPage/MyTeamTab', () => ({
+  default: () => <div data-testid="my-team-tab">My Team Content</div>,
+}));
+
+vi.mock('../pages/coachDashboard/matchManaging/MatchesPage', () => ({
+  default: () => <div data-testid="matches-page">Matches Content</div>,
+}));
+
+vi.mock('../pages/coachDashboard/playerManagement/PlayerManagementPage', () => ({
+  default: () => <div data-testid="player-management-page">Player Management Content</div>,
+}));
+
+// Mock services
+vi.mock('../services/teamService', () => ({
+  getCurrentTeamId: vi.fn(),
+  setCurrentTeamId: vi.fn(),
+  fetchTeamByCoachId: vi.fn(),
+}));
+
+vi.mock('../../supabaseClient', () => ({
   default: {
     auth: {
-      getSession: vi.fn(() =>
-        Promise.resolve({
-          data: { session: { user: { email: "coach@test.com" } } },
-        })
-      ),
+      getSession: vi.fn(),
     },
   },
 }));
 
-vi.mock("../services/teamService", () => ({
-  getCurrentTeamId: vi.fn(() => "team-123"),
-}));
 
-// Mock child components for UNIT tests
-vi.mock("../pages/coachDashboard/DashboardHeader", () => ({
-  default: ({ setActiveTab, username, onProfileClick, onReportIssue }: any) => (
-    <div>
-      <p data-testid="username">{username}</p>
-      <button onClick={() => setActiveTab("myTeam")}>Go My Team</button>
-      <button onClick={() => setActiveTab("matches")}>Go Matches</button>
-      <button onClick={() => setActiveTab("players")}>Go Players</button>
-      <button onClick={onProfileClick}>Profile</button>
-      <button onClick={onReportIssue}>Report Issue</button>
-    </div>
-  ),
-}));
+// Mock CSS import
+vi.mock('../Styles/coach-dashboard.css', () => ({}));
 
-vi.mock("../pages/coachDashboard/DashboardSidebar", () => ({
-  default: ({ onNavigate }: any) => (
-    <div data-testid="sidebar">
-      <button onClick={() => onNavigate("myTeam")}>Teams</button>
-      <button onClick={() => onNavigate("matches")}>Matches</button>
-      <button onClick={() => onNavigate("players")}>Players</button>
-    </div>
-  ),
-}));
-
-vi.mock("../pages/coachDashboard/coachStatsPage/MyTeamTab", () => ({
-  default: () => <div data-testid="my-team-tab">MyTeamTab Component</div>,
-}));
-
-vi.mock("../pages/coachDashboard/matchManaging/MatchesPage", () => ({
-  default: () => <div data-testid="matches-page">MatchesPage Component</div>,
-}));
-
-vi.mock("../pages/coachDashboard/playerManagement/PlayerManagementPage", () => ({
-  default: () => <div data-testid="player-management-page">PlayerManagementPage Component</div>,
-}));
-
-//UNIT TESTS
-describe("CoachDashboard - Unit Tests", () => {
+describe('CoachDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  // it("renders default Matches tab", () => {
-  //   render(<CoachDashboard />, { wrapper: MemoryRouter });
-  //   expect(screen.getByTestId("matches-page")).toBeInTheDocument();
-  // });
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
 
-  it("displays username from session", async () => {
-    render(<CoachDashboard />, { wrapper: MemoryRouter });
-    await waitFor(() => {
-      expect(screen.getByTestId("username")).toHaveTextContent("coach@test.com");
+  const renderCoachDashboard = () => {
+    return render(<CoachDashboard />);
+  };
+
+  describe('Component Rendering', () => {
+    it('renders the dashboard structure correctly', () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+      
+      renderCoachDashboard();
+      
+      expect(screen.getByTestId('dashboard-sidebar')).toBeInTheDocument();
+      expect(document.querySelector('.dashboard-content')).toBeInTheDocument();
+    });
+
+    it('renders PlayerManagementPage by default', () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+      
+      renderCoachDashboard();
+      
+      expect(screen.getByTestId('player-management-page')).toBeInTheDocument();
+      expect(screen.queryByTestId('matches-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('my-team-tab')).not.toBeInTheDocument();
     });
   });
 
-  it("switches to MyTeam tab via header", () => {
-    render(<CoachDashboard />, { wrapper: MemoryRouter });
-    fireEvent.click(screen.getByText("Go My Team"));
-    expect(screen.getByTestId("my-team-tab")).toBeInTheDocument();
-    expect(screen.queryByTestId("matches-page")).not.toBeInTheDocument();
-  });
+  describe('Tab Navigation', () => {
+    it('switches to matches tab when sidebar navigates to matches', async () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+      
+      renderCoachDashboard();
+      
+      const matchesButton = screen.getByTestId('matches-btn');
+      fireEvent.click(matchesButton);
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('matches-page')).toBeInTheDocument();
+      });
+      
+      expect(screen.queryByTestId('player-management-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('my-team-tab')).not.toBeInTheDocument();
+    });
 
-  it("switches to Players tab via header", () => {
-    render(<CoachDashboard />, { wrapper: MemoryRouter });
-    fireEvent.click(screen.getByText("Go Players"));
-    expect(screen.getByTestId("player-management-page")).toBeInTheDocument();
-    expect(screen.queryByTestId("matches-page")).not.toBeInTheDocument();
-  });
+    it('switches to myTeam tab when sidebar navigates to myTeam', async () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+      
+      renderCoachDashboard();
+      
+      const myTeamButton = screen.getByTestId('myteam-btn');
+      fireEvent.click(myTeamButton);
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('my-team-tab')).toBeInTheDocument();
+      });
+      
+      expect(screen.queryByTestId('player-management-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('matches-page')).not.toBeInTheDocument();
+    });
 
-  it("switches tabs via sidebar", () => {
-    render(<CoachDashboard />, { wrapper: MemoryRouter });
-    
-    // Test sidebar navigation
-    fireEvent.click(screen.getByText("Teams"));
-    expect(screen.getByTestId("my-team-tab")).toBeInTheDocument();
-    
-    fireEvent.click(screen.getByText("Players"));
-    expect(screen.getByTestId("player-management-page")).toBeInTheDocument();
-    
-    fireEvent.click(screen.getByText("Matches"));
-    expect(screen.getByTestId("matches-page")).toBeInTheDocument();
-  });
-
-  it("navigates to profile settings when profile button is clicked", () => {
-    render(<CoachDashboard />, { wrapper: MemoryRouter });
-    fireEvent.click(screen.getByText("Profile"));
-    expect(mockNavigate).toHaveBeenCalledWith('/profile-settings');
-  });
-
-  it("handles report issue click", () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      render(<CoachDashboard />, { wrapper: MemoryRouter });
-      fireEvent.click(screen.getByText("Report Issue"));
-      expect(consoleSpy).toHaveBeenCalledWith('Report issue clicked');
-      consoleSpy.mockRestore();
-  });
-
-  it("renders sidebar component", () => {
-    render(<CoachDashboard />, { wrapper: MemoryRouter });
-    expect(screen.getByTestId("sidebar")).toBeInTheDocument();
-  });
-});
-
-//EDGE CASES
-describe("CoachDashboard - Edge Cases", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("redirects to team setup when no team ID exists", async () => {
-    const { getCurrentTeamId } = await import("../services/teamService");
-    vi.mocked(getCurrentTeamId).mockReturnValue(null);
-
-    render(<CoachDashboard />, { wrapper: MemoryRouter });
-    
-    await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/team-setup');
+    it('switches back to players tab', async () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+      
+      renderCoachDashboard();
+      
+      // First switch to matches
+      const matchesButton = screen.getByTestId('matches-btn');
+      fireEvent.click(matchesButton);
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('matches-page')).toBeInTheDocument();
+      });
+      
+      // Then switch back to players
+      const playersButton = screen.getByTestId('players-btn');
+      fireEvent.click(playersButton);
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('player-management-page')).toBeInTheDocument();
+      });
+      
+      expect(screen.queryByTestId('matches-page')).not.toBeInTheDocument();
     });
   });
 
-});
+  describe('Team Management Logic', () => {
+    it('does nothing when team ID already exists', async () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('existing-team-123');
+      
+      renderCoachDashboard();
+      
+      await waitFor(() => {
+        expect(getCurrentTeamId).toHaveBeenCalled();
+      });
+      
+      expect(supabase.auth.getSession).not.toHaveBeenCalled();
+      expect(fetchTeamByCoachId).not.toHaveBeenCalled();
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
 
-// INTEGRATION TESTS
-describe("CoachDashboard - Integration Tests", () => {
-  let CoachDashboardReal: any;
+    it('redirects to login when no user session exists', async () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue(null);
+      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+        data: { session: null },
+        error: null,
+      } as any);
+      
+      renderCoachDashboard();
+      
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/login');
+      });
+      
+      expect(fetchTeamByCoachId).not.toHaveBeenCalled();
+    });
 
-  beforeAll(async () => {
-    vi.doUnmock("../pages/coachDashboard/DashboardHeader");
-    vi.doUnmock("../pages/coachDashboard/DashboardSidebar");
-    vi.doUnmock("../pages/coachDashboard/coachStatsPage/MyTeamTab");
-    vi.doUnmock("../pages/coachDashboard/matchManaging/MatchesPage");
-    vi.doUnmock("../pages/coachDashboard/playerManagement/PlayerManagementPage");
+    it('sets team ID when coach has an existing team', async () => {
+      const mockUserId = 'coach-user-123';
+      const mockTeamId = 'team-456';
+      
+      vi.mocked(getCurrentTeamId).mockReturnValue(null);
+      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+        data: { 
+          session: { 
+            user: { id: mockUserId },
+          },
+        },
+        error: null,
+      } as any);
+      vi.mocked(fetchTeamByCoachId).mockResolvedValue({ id: mockTeamId } as any);
+      
+      renderCoachDashboard();
+      
+      await waitFor(() => {
+        expect(fetchTeamByCoachId).toHaveBeenCalledWith(mockUserId);
+      });
+      
+      await waitFor(() => {
+        expect(setCurrentTeamId).toHaveBeenCalledWith(mockTeamId);
+      });
+      
+      expect(mockNavigate).not.toHaveBeenCalledWith('/team-setup');
+    });
+
+    it('redirects to team setup when coach has no team', async () => {
+      const mockUserId = 'coach-user-123';
+      
+      vi.mocked(getCurrentTeamId).mockReturnValue(null);
+      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+        data: { 
+          session: { 
+            user: { id: mockUserId },
+          },
+        },
+        error: null,
+      } as any);
+      vi.mocked(fetchTeamByCoachId).mockResolvedValue(null);
+      
+      renderCoachDashboard();
+      
+      await waitFor(() => {
+        expect(fetchTeamByCoachId).toHaveBeenCalledWith(mockUserId);
+      });
+      
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/team-setup');
+      });
+      
+      expect(setCurrentTeamId).not.toHaveBeenCalled();
+    });
+
+    it('redirects to team setup when team has no ID', async () => {
+      const mockUserId = 'coach-user-123';
+      
+      vi.mocked(getCurrentTeamId).mockReturnValue(null);
+      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+        data: { 
+          session: { 
+            user: { id: mockUserId },
+          },
+        },
+        error: null,
+      } as any);
+      vi.mocked(fetchTeamByCoachId).mockResolvedValue({ id: null } as any);
+      
+      renderCoachDashboard();
+      
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/team-setup');
+      });
+      
+      expect(setCurrentTeamId).not.toHaveBeenCalled();
+    });
   });
 
-  beforeEach(async () => {
-    vi.resetModules();
-    CoachDashboardReal = (await import("../pages/coachDashboard/CoachDashboard")).default;
+  describe('Error Handling', () => {
+    it('handles session fetch errors gracefully', async () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue(null);
+      vi.mocked(supabase.auth.getSession).mockRejectedValue(new Error('Session error'));
+      
+      renderCoachDashboard();
+      
+      // Component should still render even if session fetch fails
+      expect(screen.getByTestId('dashboard-sidebar')).toBeInTheDocument();
+      expect(screen.getByTestId('player-management-page')).toBeInTheDocument();
+    });
+
+    it('handles team fetch errors gracefully', async () => {
+      const mockUserId = 'coach-user-123';
+      
+      vi.mocked(getCurrentTeamId).mockReturnValue(null);
+      vi.mocked(supabase.auth.getSession).mockResolvedValue({
+        data: { 
+          session: { 
+            user: { id: mockUserId },
+          },
+        },
+        error: null,
+      } as any);
+      vi.mocked(fetchTeamByCoachId).mockRejectedValue(new Error('Team fetch error'));
+      
+      renderCoachDashboard();
+      
+      // Component should still render even if team fetch fails
+      expect(screen.getByTestId('dashboard-sidebar')).toBeInTheDocument();
+      expect(screen.getByTestId('player-management-page')).toBeInTheDocument();
+    });
   });
 
-
-  it("navigates to Teams (MyTeam) via sidebar with real components", async () => {
-    render(
-      <MemoryRouter>
-        <CoachDashboardReal />
-      </MemoryRouter>
-    );
-
-    // Open sidebar
-    const toggleButton = await screen.findByRole("button", { name: /toggle navigation menu/i });
-    fireEvent.click(toggleButton);
-
-    // Click Teams in sidebar
-    const teamsButton = await screen.findByRole("button", { name: /Teams/i });
-    fireEvent.click(teamsButton);
-
-    // Verify MyTeam tab is displayed
-    expect(await screen.findByText(/My Team/i)).toBeInTheDocument();
-  });
-
-it("navigates to Teams (MyTeam) via sidebar with real components", async () => {
-    render(
-      <MemoryRouter>
-        <CoachDashboardReal />
-      </MemoryRouter>
-    );
-
-    const toggleButton = await screen.findByRole("button", { name: /toggle navigation menu/i });
-    fireEvent.click(toggleButton);
-
-    // Click Teams in sidebar
-    const teamsButton = await screen.findByRole("button", { name: /Teams/i });
-    fireEvent.click(teamsButton);
-
-    // Verify MyTeam tab is displayed
-    expect(await screen.findByText(/My Team/i)).toBeInTheDocument();
+  describe('CSS Classes', () => {
+    it('applies correct CSS classes to dashboard elements', () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+      
+      const { container } = renderCoachDashboard();
+      
+      const dashboardSection = container.querySelector('.dashboard.coach-dashboard');
+      expect(dashboardSection).toBeInTheDocument();
+      
+      const contentSection = container.querySelector('.dashboard-content');
+      expect(contentSection).toBeInTheDocument();
+    });
   });
 });

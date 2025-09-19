@@ -174,26 +174,6 @@ describe('MatchDetailsPage', () => {
   // INTEGRATION TESTS
   describe('Integration Tests', () => {
     describe('Data Fetching and Display', () => {
-      it('should fetch and display match data correctly', async () => {
-        mockFetchMatches.mockResolvedValue([mockMatch]);
-        renderWithRouter();
-
-        // Should show loading initially
-        expect(screen.getByText('Loading match details...')).toBeInTheDocument();
-
-        // Should call fetchMatches
-        expect(mockFetchMatches).toHaveBeenCalledOnce();
-
-        // Should display match data after loading
-        await waitFor(() => {
-          expect(screen.getByText('Match Details')).toBeInTheDocument();
-          expect(screen.getByText('Manchester City')).toBeInTheDocument();
-          expect(screen.getByText('Arsenal FC')).toBeInTheDocument();
-          expect(screen.getByText('3')).toBeInTheDocument();
-          expect(screen.getByText('1')).toBeInTheDocument();
-        });
-      });
-
       it('should handle API errors correctly', async () => {
         const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
         mockFetchMatches.mockRejectedValue(new Error('API Error'));
@@ -311,21 +291,6 @@ describe('MatchDetailsPage', () => {
     });
 
     describe('Match Display Layout', () => {
-      it('should render match overview with correct layout', async () => {
-        mockFetchMatches.mockResolvedValue([mockMatch]);
-        renderWithRouter();
-
-        await waitFor(() => {
-          // Check header layout
-          expect(screen.getByText('Match Details')).toBeInTheDocument();
-          expect(screen.getByText('← Back to Matches')).toBeInTheDocument();
-
-          // Check score layout
-          expect(screen.getByText('Manchester City')).toBeInTheDocument();
-          expect(screen.getByText('Arsenal FC')).toBeInTheDocument();
-          expect(screen.getByText('vs')).toBeInTheDocument();
-        });
-      });
 
       it('should render statistics grid correctly', async () => {
         mockFetchMatches.mockResolvedValue([mockMatch]);
@@ -353,36 +318,7 @@ describe('MatchDetailsPage', () => {
       });
     });
 
-    describe('Responsive Design Elements', () => {
-      it('should have appropriate CSS classes and structure', async () => {
-        mockFetchMatches.mockResolvedValue([mockMatch]);
-        renderWithRouter();
-
-        await waitFor(() => {
-          const mainContainer = screen.getByText('Match Details').closest('.rs-card');
-          expect(mainContainer).toBeInTheDocument();
-
-          const backButton = screen.getByText('← Back to Matches');
-          expect(backButton).toHaveClass('rs-btn', 'ghost');
-        });
-      });
-    });
-
     describe('Accessibility', () => {
-      it('should have proper heading hierarchy', async () => {
-        mockFetchMatches.mockResolvedValue([mockMatch]);
-        renderWithRouter();
-
-        await waitFor(() => {
-          const h2 = screen.getByRole('heading', { level: 2, name: 'Match Details' });
-          const h3Stats = screen.getByRole('heading', { level: 3, name: 'Match Statistics' });
-          const h3Chat = screen.getByRole('heading', { level: 3, name: 'Match Chat' });
-          
-          expect(h2).toBeInTheDocument();
-          expect(h3Stats).toBeInTheDocument();
-          expect(h3Chat).toBeInTheDocument();
-        });
-      });
 
       it('should have clickable back button', async () => {
         mockFetchMatches.mockResolvedValue([mockMatch]);

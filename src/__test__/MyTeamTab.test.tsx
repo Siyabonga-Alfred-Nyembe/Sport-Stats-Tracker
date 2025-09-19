@@ -1,149 +1,435 @@
-import { render, screen } from "@testing-library/react";
-import { vi } from "vitest";
-import MyTeamTab from "../pages/coachDashboard/coachStatsPage/MyTeamTab";
-import { useTeamData } from "../pages/coachDashboard/hooks/useTeamData";
-import { fetchTeamMatches } from "../services/matchService";
-import { setupServer } from "msw/node";
-import { http, HttpResponse } from "msw";
-
-//Unit Test Mocks
-vi.mock("../pages/coachDashboard/hooks/useTeamData", () => ({
-  useTeamData: vi.fn(),
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import MyTeamTab from '../pages/coachDashboard/coachStatsPage/MyTeamTab';
+import * as teamStatsHelper from '../pages/coachDashboard/coachStatsPage/team-stats-helper';
+import * as matchService from '../services/matchService';
+import * as playerService from '../services/playerService';
+import * as teamService from '../services/teamService';
+import { useTeamData } from '../pages/coachDashboard/hooks/useTeamData';
+import type { Match, Player, Team } from '../types';
+// Mock external dependencies
+vi.mock('../pages/coachDashboard/coachStatsPage/team-stats-helper', () => ({
+  calculateTeamStats: vi.fn()
 }));
 
-vi.mock("../services/matchService", () => ({
-  fetchTeamMatches: vi.fn(),
+vi.mock('../services/matchService', () => ({
+  fetchTeamMatches: vi.fn()
 }));
 
-vi.mock("html2canvas", () => ({
-  default: vi.fn().mockResolvedValue({
-    toDataURL: () => "data:image/png;base64,mock",
-    height: 200,
-    width: 400,
-  }),
+vi.mock('../services/playerService', () => ({
+  fetchPlayersWithStats: vi.fn()
 }));
 
-const saveMock = vi.fn();
-vi.mock("jspdf", () => ({
+vi.mock('../services/teamService', () => ({
+  getCurrentTeamId: vi.fn()
+}));
+
+vi.mock('../pages/coachDashboard/hooks/useTeamData', () => ({
+  useTeamData: vi.fn()
+}));
+
+// Mock PDF generation libraries
+vi.mock('jspdf', () => ({
   default: vi.fn().mockImplementation(() => ({
-    internal: { pageSize: { getWidth: () => 210, getHeight: () => 297 } },
+    internal: {
+      pageSize: {
+        getWidth: vi.fn(() => 210),
+        getHeight: vi.fn(() => 297)
+      }
+    },
     addPage: vi.fn(),
     addImage: vi.fn(),
-    save: saveMock,
-  })),
+    save: vi.fn()
+  }))
 }));
 
-class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-global.ResizeObserver = ResizeObserver;
+vi.mock('html2canvas', () => ({
+  default: vi.fn().mockResolvedValue({
+    toDataURL: vi.fn(() => 'data:image/png;base64,fake-image-data'),
+    width: 800,
+    height: 600
+  })
+}));
 
-//Mock Data
-const mockTeam = { id: "t1", name: "Team A" };
-const mockMatches = [
-  { id: "m1", teamId: "t1", opponentName: "B", teamScore: 2, opponentScore: 1 },
-  { id: "m2", teamId: "t1", opponentName: "C", teamScore: 1, opponentScore: 1 },
+// Mock child components
+vi.mock('../pages/coachDashboard/playerManagement/PlayerStatsModal', () => ({
+  default: ({ player, onClose }: any) => (
+    <div data-testid="player-stats-modal">
+      <h3>{player.name} Stats</h3>
+      <button data-testid="close-modal" onClick={onClose}>Close</button>
+    </div>
+  )
+}));
+
+vi.mock('../components/teamStatsReport', () => ({
+  default: ({ team, matches, stats, players, selectedPlayer, onPlayerSelect, showPlayerSelector }: any) => (
+    <div data-testid="team-stats-report">
+      <h2>{team.name} Report</h2>
+      <div data-testid="matches-count">{matches.length} matches</div>
+      <div data-testid="players-count">{players.length} players</div>
+      <div data-testid="stats-wins">{stats.wins} wins</div>
+      {showPlayerSelector && (
+        <select data-testid="player-selector" onChange={(e) => onPlayerSelect(e.target.value)}>
+          <option value="">Select Player</option>
+          {players.map((player: Player) => (
+            <option key={player.id} value={player.id}>{player.name}</option>
+          ))}
+        </select>
+      )}
+      {selectedPlayer && (
+        <div data-testid="selected-player">{selectedPlayer.name}</div>
+      )}
+    </div>
+  )
+}));
+
+// Mock data
+const mockTeam: Team = {
+  id: 'team-123',
+  name: 'Manchester United',
+  coachId: 'Test Coach',
+};
+
+const mockMatches: Match[] = [
+  {
+    id: 'match-1',
+    date: '2024-01-15T15:00:00Z',
+    teamId: 'team-123',
+    teamScore: 3,
+    opponentName: 'Arsenal',
+    opponentScore: 1,
+    status: 'completed',
+    possession: 65,
+    shots: 15,
+    shotsOnTarget: 8,
+    corners: 6,
+    fouls: 12,
+    passes: 450
+  },
+  {
+    id: 'match-2',
+    date: '2024-01-22T14:30:00Z',
+    teamId: 'team-123',
+    teamScore: 1,
+    opponentName: 'Chelsea',
+    opponentScore: 2,
+    status: 'completed',
+    possession: 55,
+    shots: 10,
+    shotsOnTarget: 4,
+    corners: 3,
+    fouls: 8,
+    passes: 380
+  }
 ];
 
-// --- Unit Tests ---
-describe("MyTeamTab - Unit Tests", () => {
+// Mock data
+const mockTeamId = 'team-123';
+const mockPlayers: Player[] = [
+  {
+    id: 'player-1',
+    name: 'John Doe',
+    position: 'Forward',
+    jerseyNum: "10",
+    teamId: mockTeamId,
+    imageUrl: 'https://example.com/avatar1.png',
+    stats: {
+        goals: 15,
+        assists: 8,
+        yellowCards: 2,
+        redCards: 0
+        // ✅ removed appearances
+        ,
+        shots: 0,
+        shotsOnTarget: 0,
+        chancesCreated: 0,
+        dribblesAttempted: 0,
+        dribblesSuccessful: 0,
+        offsides: 0,
+        tackles: 0,
+        interceptions: 0,
+        clearances: 0,
+        saves: 0,
+        cleansheets: 0,
+        savePercentage: 0,
+        passCompletion: 0,
+        minutesPlayed: 0,
+        performanceData: []
+    }
+  },
+  {
+    id: 'player-2',
+    name: 'Jane Smith',
+    position: 'Midfielder',
+    jerseyNum: "8",
+    teamId: mockTeamId,
+    imageUrl: 'https://example.com/avatar2.png',
+    stats: {
+        goals: 5,
+        assists: 12,
+        yellowCards: 1,
+        redCards: 0
+        // ✅ removed appearances
+        ,
+        shots: 0,
+        shotsOnTarget: 0,
+        chancesCreated: 0,
+        dribblesAttempted: 0,
+        dribblesSuccessful: 0,
+        offsides: 0,
+        tackles: 0,
+        interceptions: 0,
+        clearances: 0,
+        saves: 0,
+        cleansheets: 0,
+        savePercentage: 0,
+        passCompletion: 0,
+        minutesPlayed: 0,
+        performanceData: []
+    }
+  }
+];
+
+const mockTeamStats = {
+  wins: 1,
+  draws: 0,
+  losses: 1,
+  goalsFor: 4,
+  goalsAgainst: 3,
+  totalMatches: 2,
+  winPercentage: 50,
+  averageGoalsFor: 2,
+  averageGoalsAgainst: 1.5
+};
+
+// Mock functions
+const mockUseTeamData = useTeamData as Mock;
+const mockFetchTeamMatches = matchService.fetchTeamMatches as Mock;
+const mockFetchPlayersWithStats = playerService.fetchPlayersWithStats as Mock;
+const mockGetCurrentTeamId = teamService.getCurrentTeamId as Mock;
+const mockCalculateTeamStats = teamStatsHelper.calculateTeamStats as Mock;
+
+describe('MyTeamTab', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
-    (useTeamData as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+    
+    // Default mock implementations
+    mockUseTeamData.mockReturnValue({
       team: mockTeam,
       isLoading: false,
-      error: null,
+      error: null
+    });
+    
+    mockGetCurrentTeamId.mockReturnValue('team-123');
+    mockFetchTeamMatches.mockResolvedValue(mockMatches);
+    mockFetchPlayersWithStats.mockResolvedValue(mockPlayers);
+    mockCalculateTeamStats.mockReturnValue(mockTeamStats);
+
+    // Mock window.URL.createObjectURL for PDF tests
+    global.URL.createObjectURL = vi.fn(() => 'mock-url');
+    global.URL.revokeObjectURL = vi.fn();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  // UNIT TESTS
+  describe('Unit Tests', () => {
+    describe('Component Initialization', () => {
+      it('should load team, matches, and players on mount', async () => {
+        render(<MyTeamTab />);
+
+        expect(mockUseTeamData).toHaveBeenCalled();
+        
+        await waitFor(() => {
+          expect(mockFetchTeamMatches).toHaveBeenCalledWith(mockTeam.id);
+          expect(mockFetchPlayersWithStats).toHaveBeenCalledWith('team-123');
+          expect(mockCalculateTeamStats).toHaveBeenCalledWith(mockMatches);
+        });
+      });
+
+      it('should not load data when team is not available', async () => {
+        mockUseTeamData.mockReturnValue({
+          team: null,
+          isLoading: false,
+          error: null
+        });
+
+        render(<MyTeamTab />);
+
+        await waitFor(() => {
+          expect(mockFetchTeamMatches).not.toHaveBeenCalled();
+          expect(mockFetchPlayersWithStats).not.toHaveBeenCalled();
+        });
+      });
+
+      it('should not load data when currentTeamId is not available', async () => {
+        mockGetCurrentTeamId.mockReturnValue(null);
+
+        render(<MyTeamTab />);
+
+        await waitFor(() => {
+          expect(mockFetchTeamMatches).not.toHaveBeenCalled();
+          expect(mockFetchPlayersWithStats).not.toHaveBeenCalled();
+        });
+      });
     });
 
-    (fetchTeamMatches as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockMatches
-    );
-  });
+    describe('Error Handling', () => {
+      it('should handle data loading errors gracefully', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        mockFetchTeamMatches.mockRejectedValue(new Error('API Error'));
 
-  // it("renders team stats after loading matches", async () => {
-  //   render(<MyTeamTab />);
+        render(<MyTeamTab />);
 
-  //   expect(await screen.findByText("Matches Played")).toBeInTheDocument();
-  //   expect(screen.getByText(/Win%/i)).toBeInTheDocument();
-  //   expect(screen.getByText("Goals For")).toBeInTheDocument();
-  //   expect(screen.getByText("Goals Against")).toBeInTheDocument();
-  //   expect(screen.getByText("Goal Difference")).toBeInTheDocument();
-  // });
+        await waitFor(() => {
+          expect(screen.getByText('Failed to load team data. Please try again.')).toBeInTheDocument();
+        });
 
-  // it("triggers PDF export when export button is clicked", async () => {
-  //   render(<MyTeamTab />);
-  //   const button = await screen.findByText("Export as PDF");
-  //   fireEvent.click(button);
+        consoleSpy.mockRestore();
+      });
 
-  //   await waitFor(() => {
-  //     expect(saveMock).toHaveBeenCalledWith("Team A_Season_Report.pdf");
-  //   });
-  // });
+      it('should handle team loading error', () => {
+        mockUseTeamData.mockReturnValue({
+          team: null,
+          isLoading: false,
+          error: 'Team not found'
+        });
 
-  it("shows error message if fetch fails", async () => {
-    (fetchTeamMatches as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-      new Error("Failed")
-    );
+        render(<MyTeamTab />);
 
-    render(<MyTeamTab />);
-    expect(
-      await screen.findByText("Failed to load match data. Please try again.")
-    ).toBeInTheDocument();
-  });
-
-  it("renders loading states correctly", () => {
-    (useTeamData as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      team: null,
-      isLoading: true,
-      error: null,
+        expect(screen.getByText('Team not found')).toBeInTheDocument();
+      });
     });
 
-    render(<MyTeamTab />);
-    expect(screen.getByText("Loading team data...")).toBeInTheDocument();
   });
 
-  it("renders date filter inputs and button", async () => {
-    render(<MyTeamTab />);
-    expect(await screen.findByLabelText("From")).toBeInTheDocument();
-    expect(screen.getByLabelText("To")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Apply/i })).toBeInTheDocument();
-  });
-});
+  // UI TESTS
+  describe('UI Tests', () => {
+    describe('Loading States', () => {
 
-//Integration Tests
-const server = setupServer(
-  http.get("https://*.example.com/matches/*", (_req) => {
-    return HttpResponse.json(mockMatches);
-  })
-);
+      it('should have correct loading styles', () => {
+        mockUseTeamData.mockReturnValue({
+          team: null,
+          isLoading: true,
+          error: null
+        });
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+        render(<MyTeamTab />);
 
-describe("MyTeamTab - Integration Tests", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    (useTeamData as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      team: mockTeam,
-      isLoading: false,
-      error: null,
+        const loadingElement = screen.getByText('Loading team data...');
+        expect(loadingElement).toHaveClass('loading');
+      });
+    });
+
+    describe('Error Display', () => {
+      it('should display error messages with correct styling', async () => {
+        mockFetchTeamMatches.mockRejectedValue(new Error('API Error'));
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        render(<MyTeamTab />);
+
+        await waitFor(() => {
+          const errorElement = screen.getByText('Failed to load team data. Please try again.');
+          expect(errorElement).toBeInTheDocument();
+          expect(errorElement).toHaveClass('error');
+        });
+
+        consoleSpy.mockRestore();
+      });
+
+      it('should display team error', () => {
+        mockUseTeamData.mockReturnValue({
+          team: null,
+          isLoading: false,
+          error: 'Team not found'
+        });
+
+        render(<MyTeamTab />);
+
+        const errorElement = screen.getByText('Team not found');
+        expect(errorElement).toHaveClass('error');
+      });
     });
   });
 
-  it("fetches and displays matches from API", async () => {
-    render(<MyTeamTab />);
-    expect(await screen.findByText("Matches Played")).toBeInTheDocument();
-    expect(screen.getByText(/Performance Report/i)).toBeInTheDocument();
+  // INTEGRATION TESTS
+  describe('Integration Tests', () => {
+
+    describe('Service Integration', () => {
+      it('should handle service call sequence correctly', async () => {
+        render(<MyTeamTab />);
+
+        await waitFor(() => {
+          // Verify all services are called in the correct sequence
+          expect(mockGetCurrentTeamId).toHaveBeenCalledBefore(mockFetchPlayersWithStats as any);
+          expect(mockFetchTeamMatches).toHaveBeenCalledWith(mockTeam.id);
+          expect(mockFetchPlayersWithStats).toHaveBeenCalledWith('team-123');
+        });
+
+        // Verify stats calculation happens after data loading
+        expect(mockCalculateTeamStats).toHaveBeenCalledWith(mockMatches);
+      });
+
+      it('should handle partial service failures', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        
+        // Only matches fail
+        mockFetchTeamMatches.mockRejectedValue(new Error('Matches API Error'));
+        mockFetchPlayersWithStats.mockResolvedValue(mockPlayers);
+
+        render(<MyTeamTab />);
+
+        await waitFor(() => {
+          expect(screen.getByText('Failed to load team data. Please try again.')).toBeInTheDocument();
+        });
+
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe('State Management Integration', () => {
+      it('should manage error states correctly', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        
+        mockFetchTeamMatches.mockRejectedValue(new Error('API Error'));
+
+        render(<MyTeamTab />);
+
+        await waitFor(() => {
+          expect(screen.getByText('Failed to load team data. Please try again.')).toBeInTheDocument();
+          expect(screen.queryByText('Loading team stats...')).not.toBeInTheDocument();
+          expect(screen.queryByTestId('team-stats-report')).not.toBeInTheDocument();
+        });
+
+        consoleSpy.mockRestore();
+      });
+    });
   });
 
-  it("renders charts and form guide", async () => {
-    render(<MyTeamTab />);
-    expect(await screen.findByText("Recent Form (Last 5)")).toBeInTheDocument();
-    expect(screen.getByText("Goals For vs. Against per Match")).toBeInTheDocument();
-    expect(screen.getByText("Shots vs. Shots on Target per Match")).toBeInTheDocument();
+  // EDGE CASES AND ERROR SCENARIOS
+  describe('Edge Cases', () => {
+    describe('Component Lifecycle Edge Cases', () => {
+      it('should handle unmounting during data loading', async () => {
+        let resolveMatches: (value: Match[]) => void;
+        const matchesPromise = new Promise<Match[]>(resolve => {
+          resolveMatches = resolve;
+        });
+        
+        mockFetchTeamMatches.mockReturnValue(matchesPromise);
+
+        const { unmount } = render(<MyTeamTab />);
+
+        // Unmount before promises resolve
+        unmount();
+
+        // Resolve promises after unmount
+        resolveMatches!(mockMatches);
+
+        // Should not cause any errors (no assertions needed, just shouldn't throw)
+      });
+    });
   });
 });
