@@ -5,7 +5,7 @@ import AdvancedStatsForm from "./PlayerStatsForm/AdvancedStatsForm";
 import { upsertPlayerStats } from "../../../services/matchService";
 import { updateMatch } from "../../../services/matchService";
 import InlineAlert from "../../components/InlineAlert";
-import "./MatchesPage.css"; // your modal + glassy styles
+import "./MatchesPage.css"; 
 
 interface Props {
   match: Match;
@@ -229,56 +229,32 @@ const MatchDetailsModal: React.FC<Props> = ({
               type="number"
               min="0"
               defaultValue="0"
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { possession: Number(e.target.value) })
-              }
+  
             />
             <label>Assists</label>
             <input
               type="number"
               min="0"
               defaultValue="0"
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { shots: Number(e.target.value) })
-              }
+
             />
             <label>Yellow Cards</label>
             <input
               type="number"
               min="0"
               defaultValue="0"
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { shotsOnTarget: Number(e.target.value) })
-              }
+
             />
-            <label>Red Cards</label>
+            <label>Red Card</label>
             <input
-              type="number"
+              type="radio"
               min="0"
-              defaultValue="0"
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { corners: Number(e.target.value) })
-              }
+              defaultValue="unchecked"
             />
             </section>
-           
           </div>
-          <ul className="event-list">
-            {events.map((event) => (
-              <li key={event.id}>
-                <span>
-                  {event.eventType.replace("_", " ")}:{" "}
-                  <strong>{getPlayerName(event.playerId)}</strong>
-                </span>
-                <button onClick={() => onRemovePlayerEvent(event.id)}>
-                  &times;
-                </button>
-              </li>
-            ))}
-          </ul>
         </section>
 
-        {/* --- Advanced Player Stats Section --- */}
         {selectedPlayerId && (
           <AdvancedStatsForm
             player={players.find((p) => p.id === selectedPlayerId)!}
