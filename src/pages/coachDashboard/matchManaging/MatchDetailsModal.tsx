@@ -1,8 +1,9 @@
 // src/components/Matches/MatchDetailsModal.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { Match, Player, MatchEvent } from "../../../types";
 import AdvancedStatsForm from "./PlayerStatsForm/AdvancedStatsForm";
 import { upsertPlayerStats } from "../../../services/matchService";
+import { fetchPlayerStatsByMatch } from "../../../services/playerService";
 import { updateMatch } from "../../../services/matchService";
 import InlineAlert from "../../components/InlineAlert";
 import "./MatchesPage.css"; 
@@ -40,6 +41,59 @@ const MatchDetailsModal: React.FC<Props> = ({
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [basicStats, setBasicStats] = useState({
+    goals: 0,
+    assists: 0,
+    yellowCards: 0,
+    redCard: false
+  });
+
+  // Load existing stats when a player is selected
+  useEffect(() => {
+    const loadExistingStats = async () => {
+      if (!selectedPlayerId) {
+        setBasicStats({
+          goals: 0,
+          assists: 0,
+          yellowCards: 0,
+          redCard: false
+        });
+        return;
+      }
+
+      try {
+        const existingStats = await fetchPlayerStatsByMatch(selectedPlayerId);
+        const matchStats = existingStats.find((stat: any) => stat.match_id === match.id);
+        
+        if (matchStats) {
+          setBasicStats({
+            goals: matchStats.goals || 0,
+            assists: matchStats.assists || 0,
+            yellowCards: matchStats.yellow_cards || 0,
+            redCard: (matchStats.red_cards || 0) > 0
+          });
+        } else {
+          setBasicStats({
+            goals: 0,
+            assists: 0,
+            yellowCards: 0,
+            redCard: false
+          });
+        }
+      } catch (error) {
+        console.error('Error loading existing stats:', error);
+        // Reset to default values on error
+        setBasicStats({
+          goals: 0,
+          assists: 0,
+          yellowCards: 0,
+          redCard: false
+        });
+      }
+    };
+
+    loadExistingStats();
+  }, [selectedPlayerId, match.id]);
 
   const addNotification = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
     const id = Date.now().toString();
@@ -85,6 +139,39 @@ const MatchDetailsModal: React.FC<Props> = ({
       yellowCards: raw.yellowCards ?? raw.YellowCards ?? 0,
       redCards: raw.redCards ?? raw.RedCards ?? 0,
     };
+  };
+
+  const handleSaveBasicStats = async () => {
+    if (!selectedPlayerId) {
+      addNotification('Please select a player first', 'warning');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      console.log('[MatchDetailsModal] handleSaveBasicStats called', { matchId: match.id, playerId: selectedPlayerId, basicStats });
+
+      // Upsert player stats by (match_id, player_id)
+      const statsId = await upsertPlayerStats(match.id, selectedPlayerId, {
+        goals: basicStats.goals || 0,
+        assists: basicStats.assists || 0,
+        yellow_cards: basicStats.yellowCards || 0,
+        red_cards: basicStats.redCard ? 1 : 0,
+      });
+
+      if (!statsId) {
+        throw new Error('Failed to save player stats');
+      }
+
+      console.log('[MatchDetailsModal] Basic player stats saved successfully', { statsId, matchId: match.id, playerId: selectedPlayerId });
+      addNotification('Player stats saved', 'success');
+      
+    } catch (error) {
+      console.error('Error saving basic player stats:', error);
+      addNotification('Failed to save player stats. Please try again.', 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSavePlayerStats = async (
@@ -224,33 +311,49 @@ const MatchDetailsModal: React.FC<Props> = ({
               ))}
             </select>
             <section className="team-stats-form">
-                <label>Goals </label>
-            <input
-              type="number"
-              min="0"
-              defaultValue="0"
-  
-            />
-            <label>Assists</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue="0"
-
-            />
-            <label>Yellow Cards</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue="0"
-
-            />
-            <label>Red Card</label>
-            <input
-              type="radio"
-              min="0"
-              defaultValue="unchecked"
-            />
+              <label>Goals</label>
+              <input
+                type="number"
+                min="0"
+                value={basicStats.goals}
+                onChange={(e) => setBasicStats({...basicStats, goals: parseInt(e.target.value) || 0})}
+              />
+              <label>Assists</label>
+              <input
+                type="number"
+                min="0"
+                value={basicStats.assists}
+                onChange={(e) => setBasicStats({...basicStats, assists: parseInt(e.target.value) || 0})}
+              />
+              <label>Yellow Cards</label>
+              <input
+                type="number"
+                min="0"
+                value={basicStats.yellowCards}
+                onChange={(e) => setBasicStats({...basicStats, yellowCards: parseInt(e.target.value) || 0})}
+              />
+              <label>Red Card</label>
+              <input
+                type="checkbox"
+                checked={basicStats.redCard}
+                onChange={(e) => setBasicStats({...basicStats, redCard: e.target.checked})}
+              />
+              <button 
+                type="button" 
+                onClick={handleSaveBasicStats}
+                disabled={!selectedPlayerId || isSaving}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: selectedPlayerId ? 'var(--primary)' : 'var(--muted)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: selectedPlayerId ? 'pointer' : 'not-allowed',
+                  marginTop: '10px'
+                }}
+              >
+                {isSaving ? 'Saving...' : 'Save Basic Stats'}
+              </button>
             </section>
           </div>
         </section>
