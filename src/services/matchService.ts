@@ -1,13 +1,5 @@
 import supabase from '../../supabaseClient.ts';
-import type { Match, DbMatchRecord, DbPlayerStatsRecord } from '../types';
-
-export interface DbMatchEventRecord {
-  id: string;
-  match_id: string;
-  player_id: string;
-  event_type: 'goal' | 'assist' | 'yellow_card' | 'red_card';
-  minute?: number;
-}
+import type { Match, DbMatchRecord, DbPlayerStatsRecord, DbMatchEventRecord } from '../types';
 
 export async function fetchMatches(): Promise<Match[]> {
   try {
@@ -197,6 +189,39 @@ export async function upsertPlayerStats(
 ): Promise<string | null> {
   try {
     console.log('[matchService] upsertPlayerStats called', { matchId, playerId, statsData });
+    
+    // Validate inputs
+    if (!matchId || !playerId) {
+      console.error('upsertPlayerStats: Missing required parameters', { matchId, playerId });
+      return null;
+    }
+
+    // Ensure we have valid stats data
+    const validStatsData = {
+      goals: statsData.goals ?? 0,
+      assists: statsData.assists ?? 0,
+      shots: statsData.shots ?? 0,
+      shots_on_target: statsData.shots_on_target ?? 0,
+      chances_created: statsData.chances_created ?? 0,
+      dribbles_attempted: statsData.dribbles_attempted ?? 0,
+      dribbles_successful: statsData.dribbles_successful ?? 0,
+      offsides: statsData.offsides ?? 0,
+      tackles: statsData.tackles ?? 0,
+      interceptions: statsData.interceptions ?? 0,
+      clearances: statsData.clearances ?? 0,
+      saves: statsData.saves ?? 0,
+      clean_sheets: statsData.clean_sheets ?? 0,
+      save_percentage: statsData.save_percentage ?? 0,
+      pass_completion: statsData.pass_completion ?? 0,
+      minutes_played: statsData.minutes_played ?? 0,
+      yellow_cards: statsData.yellow_cards ?? 0,
+      red_cards: statsData.red_cards ?? 0,
+      match_id: matchId,
+      player_id: playerId
+    };
+
+    console.log('[matchService] Validated stats data:', validStatsData);
+
     // Check for existing record
     const { data: existing, error: fetchError } = await supabase
       .from('player_stats')
@@ -212,28 +237,41 @@ export async function upsertPlayerStats(
     }
 
     if (existing?.id) {
-      const { error: updateError } = await supabase
+      console.log('[matchService] Updating existing record:', existing.id);
+      const { data: updated, error: updateError } = await supabase
         .from('player_stats')
-        .update({ ...statsData, match_id: matchId, player_id: playerId })
-        .eq('id', existing.id);
+        .update(validStatsData)
+        .eq('id', existing.id)
+        .select('id')
+        .single();
+      
       if (updateError) {
         console.error('upsertPlayerStats update error', updateError);
         return null;
       }
-      console.log('[matchService] upsertPlayerStats updated', { id: existing.id });
-      return existing.id;
+      console.log('[matchService] upsertPlayerStats updated successfully', { id: updated?.id });
+      return updated?.id ?? existing.id;
     }
 
+    console.log('[matchService] Inserting new record');
     const { data: inserted, error: insertError } = await supabase
       .from('player_stats')
-      .insert([{ ...statsData, match_id: matchId, player_id: playerId }])
+      .insert([validStatsData])
       .select('id')
       .single();
+    
     if (insertError) {
       console.error('upsertPlayerStats insert error', insertError);
+      console.error('Insert error details:', {
+        code: insertError.code,
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint
+      });
       return null;
     }
-    console.log('[matchService] upsertPlayerStats inserted', { id: inserted?.id });
+    
+    console.log('[matchService] upsertPlayerStats inserted successfully', { id: inserted?.id });
     return inserted?.id ?? null;
   } catch (error) {
     console.error('upsertPlayerStats unexpected error', error);

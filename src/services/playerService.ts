@@ -97,7 +97,12 @@ export async function fetchPlayerStats(playerId: string): Promise<PlayerStats | 
 // Fetch and aggregate stats for multiple players at once
 export async function fetchAggregatedStatsForPlayers(playerIds: string[]): Promise<Record<string, PlayerStats>> {
   try {
-    if (!playerIds || playerIds.length === 0) return {};
+    if (!playerIds || playerIds.length === 0) {
+      console.log('fetchAggregatedStatsForPlayers: No player IDs provided');
+      return {};
+    }
+
+    console.log('fetchAggregatedStatsForPlayers: Fetching stats for players:', playerIds);
 
     const { data, error } = await supabase
       .from('player_stats')
@@ -108,6 +113,8 @@ export async function fetchAggregatedStatsForPlayers(playerIds: string[]): Promi
       console.error('fetchAggregatedStatsForPlayers error:', error);
       return {};
     }
+
+    console.log('fetchAggregatedStatsForPlayers: Raw data from database:', data);
 
     const byPlayer: Record<string, DbPlayerStatsRecord[]> = {};
     (data ?? []).forEach((stat: any) => {
@@ -122,6 +129,7 @@ export async function fetchAggregatedStatsForPlayers(playerIds: string[]): Promi
       result[pid] = aggregatePlayerStats(statsRecords);
     });
 
+    console.log('fetchAggregatedStatsForPlayers: Aggregated result:', result);
     return result;
   } catch (error) {
     console.error('fetchAggregatedStatsForPlayers unexpected error:', error);

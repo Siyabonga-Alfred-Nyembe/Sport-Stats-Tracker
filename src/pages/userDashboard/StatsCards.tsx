@@ -1,13 +1,55 @@
 // pages/userDashboard/StatsCards.tsx
 import "./StatCard.css" 
 import React from "react";
-interface Props { teams: number; players: number; matches: number; }
-const StatsCards: React.FC<Props> = ({ teams, players, matches }) => (
-  <section className="rs-stats">
-    <div className="rs-card"><h3>Total Teams</h3><div >{teams}</div></div>
-    <div className="rs-card"><h3>Total Players</h3><div>{players}</div></div>
-    <div className="rs-card"><h3>Matches</h3><div>{matches}</div></div>
-  </section>
-);
+import type { UiPlayer } from "./hooks/useDbData";
+
+interface Props { 
+  teams: number; 
+  players: number; 
+  matches: number; 
+  playersWithStats?: UiPlayer[];
+}
+
+const StatsCards: React.FC<Props> = ({ teams, players, matches, playersWithStats = [] }) => {
+  // Calculate some basic stats from players
+  const totalGoals = playersWithStats.reduce((sum, player) => sum + (player.stats?.goals || 0), 0);
+  const totalAssists = playersWithStats.reduce((sum, player) => sum + (player.stats?.assists || 0), 0);
+  const totalMinutes = playersWithStats.reduce((sum, player) => sum + (player.stats?.minutesPlayed || 0), 0);
+  
+  return (
+    <section className="rs-stats">
+      <div className="rs-card">
+        <h3>Total Teams</h3>
+        <div>{teams}</div>
+      </div>
+      <div className="rs-card">
+        <h3>Total Players</h3>
+        <div>{players}</div>
+      </div>
+      <div className="rs-card">
+        <h3>Matches</h3>
+        <div>{matches}</div>
+      </div>
+      {totalGoals > 0 && (
+        <div className="rs-card">
+          <h3>Total Goals</h3>
+          <div>{totalGoals}</div>
+        </div>
+      )}
+      {totalAssists > 0 && (
+        <div className="rs-card">
+          <h3>Total Assists</h3>
+          <div>{totalAssists}</div>
+        </div>
+      )}
+      {totalMinutes > 0 && (
+        <div className="rs-card">
+          <h3>Total Minutes</h3>
+          <div>{totalMinutes}</div>
+        </div>
+      )}
+    </section>
+  );
+};
 
 export default StatsCards;
