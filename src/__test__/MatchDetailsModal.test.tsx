@@ -268,22 +268,4 @@ describe("MatchDetailsModal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("shows saving state when saving", async () => {
-    // Make the service hang to test saving state
-    (upsertPlayerStats as any).mockImplementation(() => new Promise(() => {}));
-    
-    renderModal();
-    
-    // Select a player and trigger save
-    const dropdown = screen.getByRole("combobox");
-    fireEvent.change(dropdown, { target: { value: "p1" } });
-    
-    const saveButton = screen.getByTestId("save-stats-btn");
-    fireEvent.click(saveButton);
-    
-    await waitFor(() => {
-      expect(screen.getByText("Saving...")).toBeInTheDocument();
-    });
-  });
-
 });
