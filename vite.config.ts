@@ -1,20 +1,18 @@
 import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
+  plugins: [react()],
   test: {
-    silent: true,
-    logHeapUsage: false,
-    coverage: {
-      provider: "istanbul",             // uses Istanbul for coverage
-      reporter: ["text", "html"],       // text table + HTML report
-      // include: [
-      //   "src/pages/**/*.tsx",
-      //   "src/components/**/*.tsx",
-      //   "src/services/**/*.ts",
-      // ],
-      // include: ["src/**/*.{ts,tsx}"],
-      exclude: ["node_modules/", "dist/","src/__test__/**", "src/main.tsx"],
-
-    },
+    globals: true,
+    environment: "jsdom",
+    setupFiles: "./src/setupTests.ts",
+      coverage: {
+        provider: "v8",
+        reporter: ["text", "html", "lcov"],
+        exclude: ["node_modules/", "dist/","src/__test__/**"],
+        all: false,
+        skipFull: false,
+      },
   },
 });
