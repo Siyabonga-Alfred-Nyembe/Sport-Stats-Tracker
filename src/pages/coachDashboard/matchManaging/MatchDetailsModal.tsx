@@ -223,34 +223,45 @@ const MatchDetailsModal: React.FC<Props> = ({
                 </option>
               ))}
             </select>
-            <div className="event-buttons">
-              <button
-                onClick={() => handleAddEvent("goal")}
-                disabled={!selectedPlayerId}
-              >
-                Goal ⚽
-              </button>
-              <button
-                onClick={() => handleAddEvent("assist")}
-                disabled={!selectedPlayerId}
-              >
-                Assist 👟
-              </button>
-              <button
-                onClick={() => handleAddEvent("yellow_card")}
-                className="yellow"
-                disabled={!selectedPlayerId}
-              >
-                Yellow Card 🟨
-              </button>
-              <button
-                onClick={() => handleAddEvent("red_card")}
-                className="red"
-                disabled={!selectedPlayerId}
-              >
-                Red Card 🟥
-              </button>
-            </div>
+            <section className="team-stats-form">
+                <label>Goals </label>
+            <input
+              type="number"
+              min="0"
+              defaultValue="0"
+              onBlur={(e) =>
+                handleUpdateTeamStats(match.id, { possession: Number(e.target.value) })
+              }
+            />
+            <label>Assists</label>
+            <input
+              type="number"
+              min="0"
+              defaultValue="0"
+              onBlur={(e) =>
+                handleUpdateTeamStats(match.id, { shots: Number(e.target.value) })
+              }
+            />
+            <label>Yellow Cards</label>
+            <input
+              type="number"
+              min="0"
+              defaultValue="0"
+              onBlur={(e) =>
+                handleUpdateTeamStats(match.id, { shotsOnTarget: Number(e.target.value) })
+              }
+            />
+            <label>Red Cards</label>
+            <input
+              type="number"
+              min="0"
+              defaultValue="0"
+              onBlur={(e) =>
+                handleUpdateTeamStats(match.id, { corners: Number(e.target.value) })
+              }
+            />
+            </section>
+           
           </div>
           <ul className="event-list">
             {events.map((event) => (

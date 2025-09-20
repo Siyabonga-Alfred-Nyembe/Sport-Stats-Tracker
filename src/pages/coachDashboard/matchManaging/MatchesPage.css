@@ -125,12 +125,7 @@
   padding-bottom: 10px;
 }
 
-.event-form, .event-buttons {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
+
 .event-form select { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
 .event-buttons button { padding: 10px; border: none; border-radius: 8px; cursor: pointer; color: white; }
 .event-buttons button.yellow { background-color: #ffc107; color: #333; }

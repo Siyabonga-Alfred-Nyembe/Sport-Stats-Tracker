@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage --bail"
   },
   "dependencies": {
     "@supabase/auth-ui-react": "^0.4.7",
