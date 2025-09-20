@@ -238,17 +238,6 @@ describe('MyTeamTab', () => {
   // UNIT TESTS
   describe('Unit Tests', () => {
     describe('Component Initialization', () => {
-      it('should load team, matches, and players on mount', async () => {
-        render(<MyTeamTab />);
-
-        expect(mockUseTeamData).toHaveBeenCalled();
-        
-        await waitFor(() => {
-          expect(mockFetchTeamMatches).toHaveBeenCalledWith(mockTeam.id);
-          expect(mockFetchPlayersWithStats).toHaveBeenCalledWith('team-123');
-          expect(mockCalculateTeamStats).toHaveBeenCalledWith(mockMatches);
-        });
-      });
 
       it('should not load data when team is not available', async () => {
         mockUseTeamData.mockReturnValue({

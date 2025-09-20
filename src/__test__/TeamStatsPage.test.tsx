@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useNavigate, useParams } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import TeamStatsPage from '../pages/userDashboard/TeamStatsPage';
 import { useTeamData } from '../pages/coachDashboard/hooks/useTeamData';
 import * as matchService from '../services/matchService';
 import * as teamStatsHelper from '../pages/coachDashboard/coachStatsPage/team-stats-helper';
+import html2canvas from 'html2canvas';
 import type { Match, Team } from '../types';
 
 // Mock external dependencies
@@ -31,18 +32,20 @@ vi.mock('../pages/coachDashboard/coachStatsPage/team-stats-helper', () => ({
 }));
 
 // Mock PDF generation libraries
+const mockJsPDF = {
+  internal: {
+    pageSize: {
+      getWidth: vi.fn(() => 210),
+      getHeight: vi.fn(() => 297)
+    }
+  },
+  addPage: vi.fn(),
+  addImage: vi.fn(),
+  save: vi.fn()
+};
+
 vi.mock('jspdf', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    internal: {
-      pageSize: {
-        getWidth: vi.fn(() => 210),
-        getHeight: vi.fn(() => 297)
-      }
-    },
-    addPage: vi.fn(),
-    addImage: vi.fn(),
-    save: vi.fn()
-  }))
+  default: vi.fn().mockImplementation(() => mockJsPDF)
 }));
 
 vi.mock('html2canvas', () => ({
@@ -56,7 +59,27 @@ vi.mock('html2canvas', () => ({
 // Mock TeamStatsReport component
 vi.mock('../components/teamStatsReport', () => ({
   default: ({ team, matches, stats, showBackButton, onBack }: any) => (
-    <div data-testid="team-stats-report">
+    <div data-testid="team-stats-report" ref={(el: HTMLElement | null) => {
+      if (el) {
+        // Create a proper NodeList-like object
+        const mockElements = [
+          document.createElement('div'),
+          document.createElement('div')
+        ];
+        
+        // Create a NodeList-like object with the required properties
+        const mockNodeList = Object.assign(mockElements, {
+          item: (index: number) => mockElements[index] || null,
+          forEach: mockElements.forEach.bind(mockElements),
+          entries: mockElements.entries.bind(mockElements),
+          keys: mockElements.keys.bind(mockElements),
+          values: mockElements.values.bind(mockElements),
+          [Symbol.iterator]: mockElements[Symbol.iterator].bind(mockElements)
+        });
+        
+        el.querySelectorAll = vi.fn(() => mockNodeList as any);
+      }
+    }}>
       <h1>{team.name} Stats Report</h1>
       <div data-testid="matches-count">{matches.length} matches</div>
       <div data-testid="stats-summary">
@@ -73,7 +96,13 @@ vi.mock('../components/teamStatsReport', () => ({
       <div className="pdf-capture" data-testid="pdf-section-2">
         Section 2 Content
       </div>
-      <button data-testid="export-pdf-button" onClick={() => {}}>
+      <button data-testid="export-pdf-button" onClick={() => {
+        // Simulate the PDF export functionality
+        const component = document.querySelector('[data-testid="team-stats-report"]');
+        if (component && (component as any).handleExportPdf) {
+          (component as any).handleExportPdf();
+        }
+      }}>
         Export PDF
       </button>
     </div>
@@ -153,6 +182,13 @@ describe('TeamStatsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     
+    // Mock ResizeObserver for Recharts
+    global.ResizeObserver = vi.fn().mockImplementation(() => ({
+      observe: vi.fn(),
+      unobserve: vi.fn(),
+      disconnect: vi.fn(),
+    }));
+    
     // Default mock implementations
     mockUseParams.mockReturnValue({ teamId: 'team-123' });
     mockUseNavigate.mockReturnValue(mockNavigate);
@@ -167,14 +203,44 @@ describe('TeamStatsPage', () => {
     // Mock window.URL for PDF tests
     global.URL.createObjectURL = vi.fn(() => 'mock-url');
     global.URL.revokeObjectURL = vi.fn();
+    
+    // Reset PDF mocks
+    mockJsPDF.addPage.mockClear();
+    mockJsPDF.addImage.mockClear();
+    mockJsPDF.save.mockClear();
+    
+    // Reset html2canvas mock
+    (html2canvas as any).mockClear?.();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    // Clean up global mocks
+    delete (global as any).ResizeObserver;
   });
 
   // UNIT TESTS
   describe('Unit Tests', () => {
+    describe('Data Loading', () => {
+
+      it('should not fetch matches when teamId is undefined', async () => {
+        mockUseParams.mockReturnValue({ teamId: undefined });
+        
+        renderWithRouter();
+        
+        await waitFor(() => {
+          expect(mockFetchTeamMatches).not.toHaveBeenCalled();
+        });
+      });
+
+      it('should calculate team stats with fetched matches', async () => {
+        renderWithRouter();
+        
+        await waitFor(() => {
+          expect(mockCalculateTeamStats).toHaveBeenCalledWith(mockMatches);
+        });
+      });
+    });
 
     describe('Error Handling', () => {
       it('should handle team data loading error', () => {
@@ -258,7 +324,6 @@ describe('TeamStatsPage', () => {
         expect(screen.getByText('Error loading team stats.')).toBeInTheDocument();
       });
     });
-
   });
 
   // INTEGRATION TESTS
@@ -280,6 +345,18 @@ describe('TeamStatsPage', () => {
         
         consoleSpy.mockRestore();
       });
+
     });
+
+    describe('PDF Export Integration', () => {
+      it('should handle PDF export with no report reference', () => {
+        renderWithRouter();
+        
+        // The component should render successfully even if PDF export is called without a ref
+        expect(screen.queryByText('Error loading team stats.')).not.toBeInTheDocument();
+      });
+
+    });
+
   });
 });

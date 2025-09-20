@@ -1,17 +1,9 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  type MockedFunction,
-} from "vitest";
+import {describe, it, expect, vi, beforeEach, afterEach, type MockedFunction } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import Chat from "../pages/userDashboard/Chat";
-import { fetchChatForMatch, sendChatMessage, deleteChatMessage } from "../services/chatService";
+import { fetchChatForMatch, sendChatMessage, deleteChatMessage, type DbChatRecord } from "../services/chatService";
 
 
 // Mock the services
@@ -21,21 +13,20 @@ vi.mock("../services/chatService", () => ({
   deleteChatMessage: vi.fn(),
 }));
 
-
 // Mock supabase client
-const mockChannel = {
-  on: vi.fn().mockReturnThis(),
-  subscribe: vi.fn().mockReturnThis(),
-};
+vi.mock("../../supabaseClient", () => {
+  const mockChannel = {
+    on: vi.fn().mockReturnThis(),
+    subscribe: vi.fn().mockReturnThis(),
+  };
 
-const mockSupabase = {
-  channel: vi.fn().mockReturnValue(mockChannel),
-  removeChannel: vi.fn(),
-};
+  const mockSupabase = {
+    channel: vi.fn().mockReturnValue(mockChannel),
+    removeChannel: vi.fn(),
+  };
 
-vi.mock("../../../supabaseClient", () => ({
-  default: mockSupabase,
-}));
+  return { default: mockSupabase };
+});
 
 // Type the mocked functions
 const mockFetchChatForMatch = fetchChatForMatch as MockedFunction<
@@ -54,22 +45,25 @@ describe("Chat Component", () => {
     username: "TestUser",
   };
 
-  // const mockMessages = [
-  //   {
-  //     id: "1",
-  //     author: "John",
-  //     message: "Great game!",
-  //     inserted_at: "2024-01-01T10:00:00Z",
-  //     match_id: "match-123",
-  //   },
-  //   {
-  //     id: "2",
-  //     author: "Jane",
-  //     message: "Amazing play!",
-  //     inserted_at: "2024-01-01T10:05:00Z",
-  //     match_id: "match-123",
-  //   },
-  // ];
+   const mockMessages: DbChatRecord[] = [
+    {
+      id: "1",
+      match_id: "match-123",
+      user_id: "user-1",
+      author: "John",
+      message: "Great game!",
+      inserted_at: "2024-01-01T10:00:00Z",
+    },
+    {
+      id: "2",
+      match_id: "match-123",
+      user_id: "user-2",
+      author: "Jane",
+      message: "Amazing play!",
+      inserted_at: "2024-01-01T10:05:00Z",
+    },
+  ];
+
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -114,17 +108,17 @@ describe("Chat Component", () => {
       });
     });
 
-    // it("displays messages when they exist", async () => {
-    //   mockFetchChatForMatch.mockResolvedValue(mockMessages);
-    //   render(<Chat {...defaultProps} />);
+    it("displays messages when they exist", async () => {
+      mockFetchChatForMatch.mockResolvedValue(mockMessages);
+      render(<Chat {...defaultProps} />);
 
-    //   await waitFor(() => {
-    //     expect(screen.getByText("Great game!")).toBeInTheDocument();
-    //     expect(screen.getByText("Amazing play!")).toBeInTheDocument();
-    //     expect(screen.getByText("John")).toBeInTheDocument();
-    //     expect(screen.getByText("Jane")).toBeInTheDocument();
-    //   });
-    // });
+      await waitFor(() => {
+        expect(screen.getByText("Great game!")).toBeInTheDocument();
+        expect(screen.getByText("Amazing play!")).toBeInTheDocument();
+        expect(screen.getByText("John")).toBeInTheDocument();
+        expect(screen.getByText("Jane")).toBeInTheDocument();
+      });
+    });
   });
 
   describe("Unit Tests - User Interactions", () => {
@@ -206,20 +200,20 @@ describe("Chat Component", () => {
       });
     });
 
-    // it("calls deleteChatMessage when delete button is clicked", async () => {
-    //   const user = userEvent.setup();
-    //   mockFetchChatForMatch.mockResolvedValue(mockMessages);
-    //   render(<Chat {...defaultProps} />);
+    it("calls deleteChatMessage when delete button is clicked", async () => {
+      const user = userEvent.setup();
+      mockFetchChatForMatch.mockResolvedValue(mockMessages);
+      render(<Chat {...defaultProps} />);
 
-    //   await waitFor(() => {
-    //     expect(screen.getByText("Great game!")).toBeInTheDocument();
-    //   });
+      await waitFor(() => {
+        expect(screen.getByText("Great game!")).toBeInTheDocument();
+      });
 
-    //   const deleteButtons = screen.getAllByText("Delete");
-    //   await user.click(deleteButtons[0]);
+      const deleteButtons = screen.getAllByText("Delete");
+      await user.click(deleteButtons[0]);
 
-    //   expect(mockDeleteChatMessage).toHaveBeenCalledWith("1");
-    // });
+      expect(mockDeleteChatMessage).toHaveBeenCalledWith("1");
+    });
   });
 
 });
