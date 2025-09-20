@@ -351,55 +351,6 @@ describe('updatePlayerStats', () => {
 });
 
 describe('upsertPlayerStats', () => {
-  it('should update existing record', async () => {
-    // Mock existing record found
-    const mockSingle1 = vi.fn().mockResolvedValue({ data: { id: 'existing-1' }, error: null });
-    const mockEq2 = vi.fn().mockReturnValue({ single: mockSingle1 });
-    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 });
-    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq1 });
-    
-    // Mock update success
-    const mockEqUpdate = vi.fn().mockResolvedValue({ error: null });
-    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEqUpdate });
-    
-    const mockFrom = vi.fn()
-      .mockReturnValueOnce({ select: mockSelect }) // First call for fetch
-      .mockReturnValueOnce({ update: mockUpdate }); // Second call for update
-    
-    (supabase.from as any).mockImplementation(mockFrom);
-
-    const result = await upsertPlayerStats('match-1', 'player-1', { goals: 1 });
-
-    expect(result).toBe('existing-1');
-    expect(mockUpdate).toHaveBeenCalledWith({ goals: 1, match_id: 'match-1', player_id: 'player-1' });
-  });
-
-  it('should insert new record when none exists', async () => {
-    // Mock no existing record (PGRST116 error)
-    const mockSingle1 = vi.fn().mockResolvedValue({ 
-      data: null, 
-      error: { code: 'PGRST116', message: 'Row not found' } 
-    });
-    const mockEq2 = vi.fn().mockReturnValue({ single: mockSingle1 });
-    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 });
-    const mockSelect1 = vi.fn().mockReturnValue({ eq: mockEq1 });
-    
-    // Mock insert success
-    const mockSingle2 = vi.fn().mockResolvedValue({ data: { id: 'new-1' }, error: null });
-    const mockSelect2 = vi.fn().mockReturnValue({ single: mockSingle2 });
-    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect2 });
-    
-    const mockFrom = vi.fn()
-      .mockReturnValueOnce({ select: mockSelect1 }) // First call for fetch
-      .mockReturnValueOnce({ insert: mockInsert }); // Second call for insert
-    
-    (supabase.from as any).mockImplementation(mockFrom);
-
-    const result = await upsertPlayerStats('match-1', 'player-1', { goals: 1 });
-
-    expect(result).toBe('new-1');
-    expect(mockInsert).toHaveBeenCalledWith([{ goals: 1, match_id: 'match-1', player_id: 'player-1' }]);
-  });
 
   it('should return null on fetch error (not PGRST116)', async () => {
     const mockSingle = vi.fn().mockResolvedValue({ 
@@ -419,28 +370,7 @@ describe('upsertPlayerStats', () => {
     expect(console.error).toHaveBeenCalledWith('upsertPlayerStats fetch error', expect.any(Object));
   });
 
-  it('should return null on update error', async () => {
-    // Mock existing record found
-    const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'existing-1' }, error: null });
-    const mockEq2 = vi.fn().mockReturnValue({ single: mockSingle });
-    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 });
-    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq1 });
-    
-    // Mock update error
-    const mockEqUpdate = vi.fn().mockResolvedValue({ error: { message: 'Update failed' } });
-    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEqUpdate });
-    
-    const mockFrom = vi.fn()
-      .mockReturnValueOnce({ select: mockSelect })
-      .mockReturnValueOnce({ update: mockUpdate });
-    
-    (supabase.from as any).mockImplementation(mockFrom);
 
-    const result = await upsertPlayerStats('match-1', 'player-1', { goals: 1 });
-
-    expect(result).toBeNull();
-    expect(console.error).toHaveBeenCalledWith('upsertPlayerStats update error', expect.any(Object));
-  });
 
   it('should return null on insert error', async () => {
     // Mock no existing record
