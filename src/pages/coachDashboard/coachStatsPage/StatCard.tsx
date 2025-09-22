@@ -1,6 +1,6 @@
 // src/pages/coachDashboard/StatCard.tsx
 import React from 'react';
-import './MyTeamTab.css';
+import './StatCard.css';
 
 interface Props {
   label: string;
@@ -8,10 +8,16 @@ interface Props {
 }
 
 const StatCard: React.FC<Props> = ({ label, value }) => (
-  <div className="rs-card stat-card">
-    <span className="stat-card-value">{label} </span>
-    <span className="stat-card-label"> {value}</span>
-  </div>
+  
+    <article className="the-card">
+      <header>
+        {label}
+      </header>
+      <section className='stat'>
+        {value}
+      </section>
+    </article>
+  
 );
 
 export default StatCard;

@@ -13,7 +13,6 @@ import StatCard from './StatCard';
 import TeamPerformanceChart from './TeamPerformanceChart.tsx';
 import TeamFormGuide from './TeamFormGuide.tsx';
 import PlayerStatsModal from '../playerManagement/PlayerStatsModal.tsx';
-import './MyTeamTab.css';
 import TeamShotsChart from "./Charts/TeamShotsChart";
 import BarChart from "./Charts/BarChart.tsx";
 import PiChart from "./Charts/PiChart.tsx";
