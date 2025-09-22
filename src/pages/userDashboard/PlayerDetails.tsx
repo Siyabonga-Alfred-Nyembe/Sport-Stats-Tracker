@@ -44,7 +44,8 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
         
         if (stats.length === 0) {
           console.log('No stats found for player');
-          setError('No statistics found for this player');
+          // Do not treat as an error; show the no-stats UI instead
+          setPlayerStats([]);
           return;
         }
 
@@ -159,7 +160,7 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
           style={{ marginTop: "10px", padding: "8px 16px", backgroundColor: "var(--primary)", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
           onClick={onBack}
         >
-          Back to Players
+          Return to Players
         </button>
       </div>
     );
