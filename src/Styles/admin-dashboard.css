@@ -19,9 +19,9 @@
   margin: 0;
 }
 
-.back-btn {
+.logout-btn {
   padding: 10px 20px;
-  background: #667eea;
+  background: #ef4444;
   color: white;
   border: none;
   border-radius: 6px;
@@ -30,8 +30,8 @@
   transition: all 0.3s ease;
 }
 
-.back-btn:hover {
-  background: #5a67d8;
+.logout-btn:hover {
+  background: #dc2626;
   transform: translateY(-2px);
 }
 
@@ -96,6 +96,38 @@
   border-radius: 10px;
   padding: 30px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Chats */
+.chats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-card {
+  background: #eef2ff; /* Indigo-100 for clear contrast on white */
+  border: 1px solid #c7d2fe; /* Indigo-200 */
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.chat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.chat-author {
+  font-weight: 700;
+  color: #3730a3; /* Indigo-800 */
+}
+
+.chat-message {
+  color: #1f2937; /* Gray-800 for readability */
+  line-height: 1.5;
+  white-space: pre-wrap;
 }
 
 .coaches-list {
