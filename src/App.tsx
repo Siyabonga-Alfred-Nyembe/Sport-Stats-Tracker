@@ -24,7 +24,7 @@ function App() {
         <Routes>
           <Route path="/teams/:teamId/stats" element={<TeamStatsPage />} />
           {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<AdminDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/auth-callback" element={<AuthCallback />} />
