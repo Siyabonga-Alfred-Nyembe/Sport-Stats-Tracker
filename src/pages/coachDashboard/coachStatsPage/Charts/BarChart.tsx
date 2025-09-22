@@ -1,6 +1,5 @@
 // src/pages/coachDashboard/charts/GoalsChart.tsx
 import React from 'react';
-import '../MyTeamTab.css';
 import { Bar } from "react-chartjs-2";
 //import { Chart as ChartJS, defaults } from "chart.js/auto";
 

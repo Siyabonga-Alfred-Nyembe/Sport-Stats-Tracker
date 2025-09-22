@@ -42,7 +42,7 @@ body {
 
 .coach-dashboard {
   min-height: 100vh;
-  padding-top: 80px; /* space for header */
+  padding-top: 40px; /* space for header */
   background: linear-gradient(to right, #0077B6, #0096C7, #48CAE4);
 }
 

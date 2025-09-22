@@ -80,11 +80,17 @@ const TeamStatsReport: React.FC<Props> = ({
 
   return (
     <main className="team-stats-container">
+      
       <header className="stats-header pdf-capture">
         <section>
           <h1>{team.name}</h1>
           <p>Performance Report</p>
           <p className="stats-summary">Based on {stats.totalMatches || 0} matches</p>
+        </section>
+
+        <section className="rs-card-sec pdf-capture">
+          <h2>Recent Form (Last 5)</h2>
+          <TeamFormGuide form={stats.form || []} />
         </section>
 
         <div className="filter-by-date">
@@ -124,25 +130,28 @@ const TeamStatsReport: React.FC<Props> = ({
       </header>
 
       <article ref={reportRef}>
-        <section className="rs-card pdf-capture">
-          <h2>Team Performance Averages</h2>
-          <ul>
-            <li><strong>Avg. Possession:</strong> {stats.avgPossession || 0}%</li>
-            <li><strong>Avg. Shots:</strong> {stats.avgShots || 0}</li>
-            <li><strong>Avg. Shots on Target:</strong> {stats.avgShotsOnTarget || 0}</li>
-            <li><strong>Avg. Fouls:</strong> {stats.avgFouls || 0}</li>
-            <li><strong>Avg. Corners:</strong> {stats.avgCorners || 0}</li>
-            <li><strong>Avg. Passes:</strong> {stats.avgPasses || 0}</li>
-            <li><strong>Avg. Pass Accuracy:</strong> {stats.avgPassAccuracy || 0}%</li>
-            <li><strong>Avg. Tackles:</strong> {stats.avgTackles || 0}</li>
-            <li><strong>Avg. Saves:</strong> {stats.avgSaves || 0}</li>
-          </ul>
-        </section>
+        <section className="pef-sec">
+  <h2>Team Performance Averages</h2>
+  <ul>
+    <StatCard label="Matches Played" value={stats.totalMatches || 0} />
+    <StatCard label="Possession" value={stats.avgPossession || 0} />
+    <StatCard label="Shots" value={stats.avgShots || 0} />
+    <StatCard label="Shots on Target" value={stats.avgShotsOnTarget || 0} />
+    <StatCard label="Fouls" value={stats.avgFouls || 0} />
+    <StatCard label="Corners" value={stats.avgCorners || 0} />
+    <StatCard label="Passes" value={stats.avgPasses || 0} />
+    <StatCard label="Pass Accuracy" value={`${stats.avgPassAccuracy || 0}%`} />
+    <StatCard label="Tackles" value={stats.avgTackles || 0} />
+    <StatCard label="Saves" value={stats.avgSaves || 0} />
+    
+  </ul>
+</section>
 
-        <section className="rs-stats pdf-capture">
+
+        <section className="rs-stats-sec pdf-capture">
           <h2>General</h2>
-          <StatCard label="Matches Played" value={stats.totalMatches || 0} />
-          <BarChart 
+          <section className="gen-team-stats">
+            <BarChart 
             title="Goals" 
             label={["Goals For","Goals Against","Goal Difference"]} 
             values={[stats.goalsFor || 0, stats.goalsAgainst || 0, stats.goalDifference || 0]} 
@@ -157,10 +166,13 @@ const TeamStatsReport: React.FC<Props> = ({
             label={["Wins","Losses","Draws"]} 
             values={[stats.wins || 0, stats.losses || 0, stats.draws || 0]} 
           />
+          </section>
+          
         </section>
-
-        <section className="rs-stats pdf-capture">
-          <h2>Attacking</h2>
+        <section className="def-att">
+          <section className="rs-stats-sec pdf-capture">
+            <h2>Attacking</h2>
+          <section className="att-team-stats">  
           <BarChart 
             title="Shooting" 
             label={["Shots","Shots on Target","Goals"]} 
@@ -171,11 +183,14 @@ const TeamStatsReport: React.FC<Props> = ({
             label={["Successful Passes","Unsuccessful Passes"]} 
             values={[Number(stats.avgPassAccuracy) || 0, 100 - (Number(stats.avgPassAccuracy) || 0)]} 
           />
+          </section>
+          
         </section>
 
-        <section className="rs-stats pdf-capture">
+        <section className="rs-stats-sec pdf-capture">
           <h2>Defending</h2>
-          <BarChart 
+          <section className="att-team-stats">
+            <BarChart 
             title="General" 
             label={["Tackles","Interceptions","Clearances"]} 
             values={[stats.totalTackles || 0, 50, 16]} 
@@ -185,24 +200,11 @@ const TeamStatsReport: React.FC<Props> = ({
             label={["Fouls","Yellow Cards","Red Cards"]} 
             values={[13, 9, 1]} 
           />
+          </section>
+          
         </section>
-
-        <section className="rs-card pdf-capture">
-          <h2>Recent Form (Last 5)</h2>
-          <TeamFormGuide form={stats.form || []} />
         </section>
-
-        <section className="charts-grid">
-          <article className="rs-card pdf-capture">
-            <h3>Goals For vs. Against per Match</h3>
-            <TeamPerformanceChart matches={matches} />
-          </article>
-
-          <article className="rs-card pdf-capture">
-            <h3>Shots vs. Shots on Target per Match</h3>
-            <TeamShotsChart matches={matches} />
-          </article>
-        </section>
+        
       </article>
     </main>
   );

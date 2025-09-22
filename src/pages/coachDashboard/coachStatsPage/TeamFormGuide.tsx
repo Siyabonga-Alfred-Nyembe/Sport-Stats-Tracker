@@ -1,6 +1,5 @@
 // src/pages/coachDashboard/TeamFormGuide.tsx
 import React from 'react';
-import './MyTeamTab.css';
 
 interface Props {
   form: ('W' | 'D' | 'L')[];
