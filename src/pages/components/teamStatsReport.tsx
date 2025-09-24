@@ -1,4 +1,5 @@
 // src/components/TeamStatsReport.tsx
+
 import React, { useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -59,15 +60,18 @@ const TeamStatsReport: React.FC<Props> = ({
         const canvas = await html2canvas(element, { scale: 2 });
         const imgData = canvas.toDataURL("image/png");
         const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
         if (yPosition + imgHeight > pdf.internal.pageSize.getHeight() - pageMargin) {
           pdf.addPage();
           yPosition = pageMargin;
         }
+
         pdf.addImage(imgData, "PNG", pageMargin, yPosition, pdfWidth, imgHeight);
         yPosition += imgHeight + 5;
       };
 
       const elementsToCapture = reportRef.current.querySelectorAll<HTMLElement>(".pdf-capture");
+
       for (const element of Array.from(elementsToCapture)) {
         await addElementToPdf(element);
       }
@@ -80,31 +84,25 @@ const TeamStatsReport: React.FC<Props> = ({
 
   return (
     <main className="team-stats-container">
-      
-      <header className="stats-header pdf-capture">
+      <header className="stats-header" aria-label="Team Stats header section">
         <section>
           <h1>{team.name}</h1>
           <p>Performance Report</p>
           <p className="stats-summary">Based on {stats.totalMatches || 0} matches</p>
         </section>
 
-        <section className="rs-card-sec pdf-capture">
+        <section className="form-card">
           <h2>Recent Form (Last 5)</h2>
           <TeamFormGuide form={stats.form || []} />
         </section>
 
-        <div className="filter-by-date">
-            <label htmlFor="start-date">From</label>
-            <input type="date" id="start-date" name="start-date" />
-            <label htmlFor="end-date">To</label>
-            <input type="date" id="end-date" name="end-date" />
-            <button className="rs-btn filter-btn">Apply</button>
-          </div>
-
         <nav className="header-controls">
           {showBackButton && (
-            <button className="rs-btn" onClick={onBack}>← Back</button>
+            <button className="CoachBtn" onClick={onBack}>
+              ← Back
+            </button>
           )}
+
           {showPlayerSelector && (
             <div className="player-selector">
               <label htmlFor="player-select">View Player Stats:</label>
@@ -115,7 +113,7 @@ const TeamStatsReport: React.FC<Props> = ({
                 value={selectedPlayer?.id || ""}
               >
                 <option value="">Select a player...</option>
-                {players.map(player => (
+                {players.map((player) => (
                   <option key={player.id} value={player.id}>
                     {player.name} - {player.position}
                   </option>
@@ -123,88 +121,97 @@ const TeamStatsReport: React.FC<Props> = ({
               </select>
             </div>
           )}
-          <button className="rs-btn" onClick={handleExportPdf} disabled={isExporting}>
+
+          <button className="CoachBtn" onClick={handleExportPdf} disabled={isExporting}>
             {isExporting ? "Exporting..." : "Export as PDF"}
           </button>
         </nav>
       </header>
 
+      <section className="filter-by-date" aria-label="Filter By date section">
+        <label htmlFor="start-date" aria-label="Start date input">
+          From
+        </label>
+        <input type="date" id="start-date" name="start-date" />
+
+        <label htmlFor="end-date">To</label>
+        <input type="date" id="end-date" name="end-date" aria-label="End date input" />
+
+        <button className="CoachBtn" aria-label="Apply Filter button">
+          Apply
+        </button>
+      </section>
+
       <article ref={reportRef}>
         <section className="pef-sec">
-  <h2>Team Performance Averages</h2>
-  <ul>
-    <StatCard label="Matches Played" value={stats.totalMatches || 0} />
-    <StatCard label="Possession" value={stats.avgPossession || 0} />
-    <StatCard label="Shots" value={stats.avgShots || 0} />
-    <StatCard label="Shots on Target" value={stats.avgShotsOnTarget || 0} />
-    <StatCard label="Fouls" value={stats.avgFouls || 0} />
-    <StatCard label="Corners" value={stats.avgCorners || 0} />
-    <StatCard label="Passes" value={stats.avgPasses || 0} />
-    <StatCard label="Pass Accuracy" value={`${stats.avgPassAccuracy || 0}%`} />
-    <StatCard label="Tackles" value={stats.avgTackles || 0} />
-    <StatCard label="Saves" value={stats.avgSaves || 0} />
-    
-  </ul>
-</section>
-
+          <h2>Team Performance Averages</h2>
+          <ul>
+            <StatCard label="Matches Played" value={stats.totalMatches || 0} />
+            <StatCard label="Possession" value={stats.avgPossession || 0} />
+            <StatCard label="Shots" value={stats.avgShots || 0} />
+            <StatCard label="Shots on Target" value={stats.avgShotsOnTarget || 0} />
+            <StatCard label="Fouls" value={stats.avgFouls || 0} />
+            <StatCard label="Corners" value={stats.avgCorners || 0} />
+            <StatCard label="Passes" value={stats.avgPasses || 0} />
+            <StatCard label="Pass Accuracy" value={`${stats.avgPassAccuracy || 0}%`} />
+            <StatCard label="Tackles" value={stats.avgTackles || 0} />
+            <StatCard label="Saves" value={stats.avgSaves || 0} />
+          </ul>
+        </section>
 
         <section className="rs-stats-sec pdf-capture">
           <h2>General</h2>
           <section className="gen-team-stats">
-            <BarChart 
-            title="Goals" 
-            label={["Goals For","Goals Against","Goal Difference"]} 
-            values={[stats.goalsFor || 0, stats.goalsAgainst || 0, stats.goalDifference || 0]} 
-          />
-          <PiChart 
-            title="Results %" 
-            label={["Win%","Loss/Draw%"]} 
-            values={[stats.winPercentage || 0, 100 - (stats.winPercentage || 0)]} 
-          />
-          <PiChart 
-            title="Results" 
-            label={["Wins","Losses","Draws"]} 
-            values={[stats.wins || 0, stats.losses || 0, stats.draws || 0]} 
-          />
+            <BarChart
+              title="Goals"
+              label={["Goals For", "Goals Against", "Goal Difference"]}
+              values={[stats.goalsFor || 0, stats.goalsAgainst || 0, stats.goalDifference || 0]}
+            />
+            <PiChart
+              title="Results %"
+              label={["Win%", "Loss/Draw%"]}
+              values={[stats.winPercentage || 0, 100 - (stats.winPercentage || 0)]}
+            />
+            <PiChart
+              title="Results"
+              label={["Wins", "Losses", "Draws"]}
+              values={[stats.wins || 0, stats.losses || 0, stats.draws || 0]}
+            />
           </section>
-          
         </section>
+
         <section className="def-att">
           <section className="rs-stats-sec pdf-capture">
             <h2>Attacking</h2>
-          <section className="att-team-stats">  
-          <BarChart 
-            title="Shooting" 
-            label={["Shots","Shots on Target","Goals"]} 
-            values={[stats.totalShots || 0, stats.totalShotsOnTarget || 0, stats.goalsFor || 0]} 
-          />
-          <PiChart 
-            title="Passing" 
-            label={["Successful Passes","Unsuccessful Passes"]} 
-            values={[Number(stats.avgPassAccuracy) || 0, 100 - (Number(stats.avgPassAccuracy) || 0)]} 
-          />
+            <section className="att-team-stats">
+              <BarChart
+                title="Shooting"
+                label={["Shots", "Shots on Target", "Goals"]}
+                values={[stats.totalShots || 0, stats.totalShotsOnTarget || 0, stats.goalsFor || 0]}
+              />
+              <PiChart
+                title="Passing"
+                label={["Successful Passes", "Unsuccessful Passes"]}
+                values={[
+                  Number(stats.avgPassAccuracy) || 0,
+                  100 - (Number(stats.avgPassAccuracy) || 0),
+                ]}
+              />
+            </section>
           </section>
-          
-        </section>
 
-        <section className="rs-stats-sec pdf-capture">
-          <h2>Defending</h2>
-          <section className="att-team-stats">
-            <BarChart 
-            title="General" 
-            label={["Tackles","Interceptions","Clearances"]} 
-            values={[stats.totalTackles || 0, 50, 16]} 
-          />
-          <BarChart 
-            title="Discipline" 
-            label={["Fouls","Yellow Cards","Red Cards"]} 
-            values={[13, 9, 1]} 
-          />
+          <section className="rs-stats-sec pdf-capture">
+            <h2>Defending</h2>
+            <section className="att-team-stats">
+              <BarChart
+                title="General"
+                label={["Tackles", "Interceptions", "Clearances"]}
+                values={[stats.totalTackles || 0, 50, 16]}
+              />
+              <BarChart title="Discipline" label={["Fouls", "Yellow Cards", "Red Cards"]} values={[13, 9, 1]} />
+            </section>
           </section>
-          
         </section>
-        </section>
-        
       </article>
     </main>
   );

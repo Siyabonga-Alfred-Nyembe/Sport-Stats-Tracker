@@ -1,7 +1,7 @@
 .the-card {
   position: relative; /* Needed for absolute positioning of gradient inside */
-  background-color: #9dd4f8;
-  border-radius: 10px;
+  border: solid 1px;
+  border-radius: 30px;
   padding-top: 0;
   flex: 100%;
   min-height: 100px;
@@ -14,19 +14,7 @@
     }
 }
 
-.the-card::before {
-  content: '';
-  position: absolute;
-  top: -25%;
-  left: -25%;
-  width: 150%;
-  height: 150%;
-  filter: blur(100px);
-  background-image: linear-gradient(hsl(222, 84%, 60%), hsl(164, 79%, 71%));
-  animation: rotate 50s cubic-bezier(0.8, 0.2, 0.2, 0.8) alternate infinite;
-  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-  z-index: 0; /* Push gradient to the back */
-}
+
 
 .the-card * {
   position: relative;
