@@ -12,7 +12,7 @@ import supabase from "../../../supabaseClient";
 
 const CoachDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("players");
+  const [activeTab, setActiveTab] = useState("myTeam");
 
   useEffect(() => {
     // No-op user fetch needed here currently

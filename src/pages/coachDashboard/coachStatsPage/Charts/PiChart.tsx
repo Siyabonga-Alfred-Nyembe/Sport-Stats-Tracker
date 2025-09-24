@@ -1,7 +1,7 @@
 // src/pages/coachDashboard/charts/WinsChart.tsx
 import React from 'react';
 import { Doughnut } from "react-chartjs-2";
-import { Chart as ChartJS, defaults } from "chart.js/auto";
+import { Chart as ChartJS } from "chart.js/auto";
 
 interface Props {
   label: string[];
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const PiChart: React.FC<Props> = ({ label, values, title }) => (
-  <section className='chart-container'>
+  <section className="chart-container">
     <Doughnut
       data={{
         labels: label,
@@ -19,28 +19,44 @@ const PiChart: React.FC<Props> = ({ label, values, title }) => (
             label: title,
             data: values,
             backgroundColor: [
-              "rgba(43, 63, 229, 0.8)",
-              "rgba(250, 192, 19, 0.8)",
-              "rgba(253, 135, 135, 0.8)",
+              "rgba(59, 130, 246, 0.8)",   // Blue-500
+              "rgba(139, 92, 246, 0.8)",   // Violet-500
+              "rgba(16, 185, 129, 0.8)",   // Emerald-500
+              "rgba(251, 191, 36, 0.8)",   // Amber-400
+              "rgba(236, 72, 153, 0.8)",   // Fuchsia-500
             ],
             borderColor: [
-              "rgba(43, 63, 229, 0.8)",
-              "rgba(250, 192, 19, 0.8)",
-              "rgba(253, 135, 135, 0.8)",
+              "rgba(255, 255, 255, 1)", // clean white border between slices
             ],
+            borderWidth: 2,
+            hoverOffset: 12, // adds a nice "pop-out" on hover
           },
         ],
       }}
       options={{
         responsive: true,
         maintainAspectRatio: false,
+        cutout: "70%", // makes it more like a sleek ring chart
         plugins: {
           title: {
             display: true,
             text: title,
+            font: {
+              size: 18,
+             
+            },
+            color: "#1f2937", // gray-800
           },
           legend: {
             position: "bottom",
+            labels: {
+              color: "#374151", // gray-700
+              font: {
+                size: 13,
+              },
+              padding: 16,
+              usePointStyle: true, // round dots instead of squares
+            },
           },
         },
       }}
