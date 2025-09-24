@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
 import { type DbChatRecord } from "../services/chatService";
+import { deleteUserCompletely } from "../services/adminService";
 import "../Styles/admin-dashboard.css";
 
 interface User {
@@ -46,6 +47,7 @@ const AdminDashboard: React.FC = () => {
 
     if (profile?.role !== 'admin') {
       navigate('/');
+      console.log('Not an admin');
       return;
     }
   };
@@ -135,21 +137,15 @@ const AdminDashboard: React.FC = () => {
   };
 
   const deleteUser = async (userId: string) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    if (!window.confirm('Are you sure you want to delete this user and all related data?')) return;
     try {
-      // Attempt to delete from primary 'users' table
-      const { error: usersError } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
-
-      // Also cleanup related profile rows if they exist
-      await supabase.from('profiles').delete().eq('id', userId);
-      await supabase.from('user_profiles').delete().eq('id', userId);
-
-      if (!usersError) {
+      const ok = await deleteUserCompletely(userId);
+      if (ok) {
         setUsers(users.filter(user => user.id !== userId));
         setStats({ ...stats, totalUsers: Math.max(0, stats.totalUsers - 1) });
+        // Also remove their chats from the list if any
+        setChats(chats.filter(c => c.user_id !== userId));
+        setStats((s) => ({ ...s, totalChats: chats.filter(c => c.user_id !== userId).length }));
       }
     } catch (error) {
       console.error('Error deleting user:', error);

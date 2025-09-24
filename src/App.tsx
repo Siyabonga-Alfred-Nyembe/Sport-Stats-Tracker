@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/landingPage";
 import Login from "./pages/login";
@@ -24,7 +23,7 @@ function App() {
         <Routes>
           <Route path="/teams/:teamId/stats" element={<TeamStatsPage />} />
           {/* Public Routes */}
-          <Route path="/" element={<AdminDashboard />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/auth-callback" element={<AuthCallback />} />
