@@ -19,7 +19,7 @@ body {
   display: flex;
   flex-wrap: wrap; /* allow stacking on smaller screens */
   gap: 0;
-  padding-top: 30px;
+  padding-top: 0px;
   width: 100%;
   max-width: 1800px;
   margin: 0;
@@ -32,18 +32,12 @@ body {
 
 /* Each section (roster / lineup) */
 .management-section {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
   border-radius: 0px;
   padding: 30px;
   min-height: 100vh;
-  border: 1px solid rgba(255, 255, 255, 0.2);
   flex: 1 1 400px; /* responsive width, minimum 400px */
   display: flex;
   flex-direction: column;
-  
-  
   box-sizing: border-box;
 }
 

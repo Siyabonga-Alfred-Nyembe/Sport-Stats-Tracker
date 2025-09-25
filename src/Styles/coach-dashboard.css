@@ -32,7 +32,6 @@ body,
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  background: linear-gradient(to right, #0077B6, #0096C7, #48CAE4);
   color: white;
 }
 
