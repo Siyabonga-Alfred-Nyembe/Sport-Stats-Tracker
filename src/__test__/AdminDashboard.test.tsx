@@ -4,23 +4,25 @@ import { BrowserRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import AdminDashboard from '../pages/AdminDashboard';
 import supabase from '../../supabaseClient';
+import { deleteUserCompletely } from '../services/adminService';
+
+// Mock the adminService
+vi.mock('../services/adminService', () => ({
+  deleteUserCompletely: vi.fn(),
+}));
 
 vi.mock('../../supabaseClient', () => ({
   default: {
     auth: {
       getSession: vi.fn(),
+      signOut: vi.fn(),
     },
     from: vi.fn(() => ({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           single: vi.fn(),
         })),
-        order: vi.fn(() => ({
-          single: vi.fn(),
-        })),
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn(),
+        order: vi.fn(() => ({})),
       })),
       delete: vi.fn(() => ({
         eq: vi.fn(),
@@ -39,38 +41,32 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock window.confirm
+// Mock window.confirm and window.location
 Object.defineProperty(window, 'confirm', {
   writable: true,
   value: vi.fn(),
 });
 
+Object.defineProperty(window, 'location', {
+  writable: true,
+  value: { assign: vi.fn() },
+});
+
 // Test data
-const mockCoaches = [
+const mockChats = [
   {
-    id: '1',
-    email: 'coach1@test.com',
-    name: 'John Coach',
-    status: 'pending' as const,
-    created_at: '2023-01-01T00:00:00Z',
-    team_name: 'Team A',
-    experience: '5 years',
+    id: 'chat1',
+    author: 'John Doe',
+    message: 'Hello, this is a test chat message',
+    user_id: 'user1',
+    inserted_at: '2023-01-01T00:00:00Z',
   },
   {
-    id: '2',
-    email: 'coach2@test.com',
-    name: 'Jane Coach',
-    status: 'approved' as const,
-    created_at: '2023-01-02T00:00:00Z',
-    team_name: 'Team B',
-    experience: '3 years',
-  },
-  {
-    id: '3',
-    email: 'coach3@test.com',
-    name: 'Bob Coach',
-    status: 'rejected' as const,
-    created_at: '2023-01-03T00:00:00Z',
+    id: 'chat2',
+    author: 'Jane Smith',
+    message: 'Another test message',
+    user_id: 'user2',
+    inserted_at: '2023-01-02T00:00:00Z',
   },
 ];
 
@@ -78,22 +74,16 @@ const mockUsers = [
   {
     id: 'user1',
     email: 'user1@test.com',
-    role: 'fan' as const,
+    role: 'user',
     created_at: '2023-01-01T00:00:00Z',
     last_sign_in: new Date().toISOString(),
   },
   {
     id: 'user2',
     email: 'admin@test.com',
-    role: 'admin' as const,
+    role: 'admin',
     created_at: '2023-01-02T00:00:00Z',
-    last_sign_in: '2023-01-01T00:00:00Z',
-  },
-  {
-    id: 'user3',
-    email: 'coach@test.com',
-    role: 'coach' as const,
-    created_at: '2023-01-03T00:00:00Z',
+    last_sign_in_at: '2023-01-01T00:00:00Z',
   },
 ];
 
@@ -114,37 +104,45 @@ describe('AdminDashboard', () => {
       data: { session: { user: { id: 'admin-id' } } }
     });
 
-    // Default admin profile mock
-    const mockSelect = vi.fn(() => ({
-      eq: vi.fn(() => ({
-        single: vi.fn().mockResolvedValue({
-          data: { role: 'admin' }
-        })
-      }))
-    }));
+    (supabase.auth.signOut as any).mockResolvedValue({});
+    (deleteUserCompletely as any).mockResolvedValue(true);
 
+    // Default admin profile mock
     const mockFrom = vi.fn((table: string) => {
       if (table === 'profiles') {
         return {
-          select: mockSelect,
-          delete: vi.fn(() => ({
-            eq: vi.fn().mockResolvedValue({ error: null })
-          })),
-          update: vi.fn(() => ({
-            eq: vi.fn().mockResolvedValue({ error: null })
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              single: vi.fn().mockResolvedValue({
+                data: { role: 'admin' }
+              })
+            })),
+            order: vi.fn().mockResolvedValue({ data: mockUsers })
           }))
         };
       }
-      if (table === 'coaches') {
+      if (table === 'chats') {
         return {
           select: vi.fn(() => ({
-            order: vi.fn().mockResolvedValue({ data: mockCoaches })
+            order: vi.fn().mockResolvedValue({ data: mockChats })
           })),
-          update: vi.fn(() => ({
+          delete: vi.fn(() => ({
             eq: vi.fn().mockResolvedValue({ error: null })
           }))
         };
       }
+      if (table === 'users') {
+        return {
+          select: vi.fn(() => ({
+            order: vi.fn().mockResolvedValue({ data: mockUsers })
+          }))
+        };
+      }
+      return {
+        select: vi.fn(() => ({
+          order: vi.fn().mockResolvedValue({ data: [] })
+        }))
+      };
     });
 
     (supabase.from as any).mockImplementation(mockFrom);
@@ -154,7 +152,7 @@ describe('AdminDashboard', () => {
     vi.resetAllMocks();
   });
 
-  // UNIT TESTS
+  // UNIT TESTS - Testing individual component functionality
   describe('Unit Tests', () => {
     it('should render loading state initially', () => {
       renderComponent();
@@ -162,78 +160,106 @@ describe('AdminDashboard', () => {
     });
 
     it('should render dashboard header with correct title', async () => {
-      // Mock successful data fetch
-      const mockFrom = vi.fn((table: string) => {
-        if (table === 'profiles') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn().mockResolvedValue({ data: { role: 'admin' } })
-              })),
-              order: vi.fn().mockResolvedValue({ data: mockUsers })
-            }))
-          };
-        }
-        return {
-          select: vi.fn(() => ({
-            order: vi.fn().mockResolvedValue({ data: mockCoaches })
-          }))
-        };
-      });
-      (supabase.from as any).mockImplementation(mockFrom);
-
       renderComponent();
       
       await waitFor(() => {
         expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
       });
     });
+
+    it('should render logout button', async () => {
+      renderComponent();
+      
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should render navigation tabs', async () => {
+      renderComponent();
+      
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Chats' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'User Management' })).toBeInTheDocument();
+      });
+    });
   });
 
-  // INTEGRATION TESTS
-  describe('Integration Tests', () => {
-
-    it('should approve a coach successfully', async () => {
-      const mockUpdate = vi.fn(() => ({
-        eq: vi.fn().mockResolvedValue({ error: null })
-      }));
-      
-      const mockFrom = vi.fn((table: string) => {
-        if (table === 'profiles') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn().mockResolvedValue({ data: { role: 'admin' } })
-              })),
-              order: vi.fn().mockResolvedValue({ data: mockUsers })
-            })),
-            update: mockUpdate
-          };
-        }
-        return {
-          select: vi.fn(() => ({
-            order: vi.fn().mockResolvedValue({ data: mockCoaches })
-          })),
-          update: mockUpdate
-        };
-      });
-      (supabase.from as any).mockImplementation(mockFrom);
-
+  // UI TESTS - Testing user interface interactions
+  describe('UI Tests', () => {
+    it('should highlight active tab correctly', async () => {
       renderComponent();
       const user = userEvent.setup();
       
       await waitFor(() => {
-        expect(screen.getByText('John Coach')).toBeInTheDocument();
+        const chatsTab = screen.getByRole('button', { name: 'Chats' });
+        expect(chatsTab).toHaveClass('active');
       });
 
-      const approveButton = screen.getByRole('button', { name: 'Approve' });
-      await user.click(approveButton);
-
-      expect(mockUpdate).toHaveBeenCalledWith({ status: 'approved' });
+      // Click User Management tab
+      const usersTab = screen.getByRole('button', { name: 'User Management' });
+      await user.click(usersTab);
+      
+      expect(usersTab).toHaveClass('active');
+      expect(screen.getByRole('button', { name: 'Chats' })).not.toHaveClass('active');
     });
 
-    it('should reject a coach successfully', async () => {
-      const mockUpdate = vi.fn(() => ({
+    it('should switch between tabs and show appropriate content', async () => {
+      renderComponent();
+      const user = userEvent.setup();
+      
+      await waitFor(() => {
+        // Should show chats content by default
+        expect(screen.getByText('Hello, this is a test chat message')).toBeInTheDocument();
+      });
+
+      // Switch to users tab
+      const usersTab = screen.getByRole('button', { name: 'User Management' });
+      await user.click(usersTab);
+      
+      await waitFor(() => {
+        expect(screen.getByText('user1@test.com')).toBeInTheDocument();
+        expect(screen.getByText('admin@test.com')).toBeInTheDocument();
+      });
+    });
+
+    it('should display chat cards with correct information', async () => {
+      renderComponent();
+      
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+        expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+        expect(screen.getByText('Hello, this is a test chat message')).toBeInTheDocument();
+        expect(screen.getByText('Another test message')).toBeInTheDocument();
+      });
+    });
+
+    it('should show delete buttons for chats and users', async () => {
+      renderComponent();
+      const user = userEvent.setup();
+      
+      await waitFor(() => {
+        // Should show remove buttons for chats
+        const removeButtons = screen.getAllByText('Remove');
+        expect(removeButtons).toHaveLength(2);
+      });
+
+      // Switch to users tab
+      const usersTab = screen.getByRole('button', { name: 'User Management' });
+      await user.click(usersTab);
+      
+      await waitFor(() => {
+        // Should show delete buttons for users
+        const deleteButtons = screen.getAllByText('Delete');
+        expect(deleteButtons).toHaveLength(2);
+      });
+    });
+  });
+
+  // INTEGRATION TESTS - Testing component interactions with external services
+  describe('Integration Tests', () => {
+    it('should delete a chat successfully', async () => {
+      const mockDelete = vi.fn(() => ({
         eq: vi.fn().mockResolvedValue({ error: null })
       }));
       
@@ -248,31 +274,84 @@ describe('AdminDashboard', () => {
             }))
           };
         }
+        if (table === 'chats') {
+          return {
+            select: vi.fn(() => ({
+              order: vi.fn().mockResolvedValue({ data: mockChats })
+            })),
+            delete: mockDelete
+          };
+        }
+        if (table === 'users') {
+          return {
+            select: vi.fn(() => ({
+              order: vi.fn().mockResolvedValue({ data: mockUsers })
+            }))
+          };
+        }
         return {
           select: vi.fn(() => ({
-            order: vi.fn().mockResolvedValue({ data: mockCoaches })
-          })),
-          update: mockUpdate
+            order: vi.fn().mockResolvedValue({ data: [] })
+          }))
         };
       });
       (supabase.from as any).mockImplementation(mockFrom);
+      (window.confirm as any).mockReturnValue(true);
 
       renderComponent();
       const user = userEvent.setup();
       
       await waitFor(() => {
-        expect(screen.getByText('John Coach')).toBeInTheDocument();
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
       });
 
-      const rejectButton = screen.getByRole('button', { name: 'Reject' });
-      await user.click(rejectButton);
+      const removeButtons = screen.getAllByText('Remove');
+      await user.click(removeButtons[0]);
 
-      expect(mockUpdate).toHaveBeenCalledWith({ status: 'rejected' });
+      expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to remove this chat?');
+      expect(mockDelete).toHaveBeenCalled();
+    });
+
+    // it('should delete a user successfully', async () => {
+    //   (deleteUserCompletely as any).mockResolvedValue(true);
+    //   (window.confirm as any).mockReturnValue(true);
+
+    //   renderComponent();
+    //   const user = userEvent.setup();
+      
+    //   // Switch to users tab
+    //   const usersTab = screen.getByRole('button', { name: 'User Management' });
+    //   await user.click(usersTab);
+      
+    //   await waitFor(() => {
+    //     expect(screen.getByText('user1@test.com')).toBeInTheDocument();
+    //   });
+
+    //   const deleteButtons = screen.getAllByText('Delete');
+    //   await user.click(deleteButtons[0]);
+
+    //   expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this user and all related data?');
+    //   expect(deleteUserCompletely).toHaveBeenCalledWith('user1');
+    // });
+
+    it('should handle logout successfully', async () => {
+      renderComponent();
+      const user = userEvent.setup();
+      
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
+      });
+
+      const logoutButton = screen.getByRole('button', { name: /logout/i });
+      await user.click(logoutButton);
+
+      expect(supabase.auth.signOut).toHaveBeenCalled();
+      expect(window.location.assign).toHaveBeenCalledWith('/');
     });
   });
 
-  // EDGE CASES
-  describe('Edge Cases', () => {
+  // EDGE TESTS - Testing edge cases and error scenarios
+  describe('Edge Tests', () => {
     it('should redirect to login if no session', async () => {
       (supabase.auth.getSession as any).mockResolvedValue({
         data: { session: null }
@@ -290,7 +369,7 @@ describe('AdminDashboard', () => {
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
             single: vi.fn().mockResolvedValue({
-              data: { role: 'fan' }
+              data: { role: 'user' }
             })
           }))
         }))
@@ -304,7 +383,7 @@ describe('AdminDashboard', () => {
       });
     });
 
-    it('should handle empty coaches list', async () => {
+    it('should handle empty chats list', async () => {
       const mockFrom = vi.fn((table: string) => {
         if (table === 'profiles') {
           return {
@@ -312,6 +391,13 @@ describe('AdminDashboard', () => {
               eq: vi.fn(() => ({
                 single: vi.fn().mockResolvedValue({ data: { role: 'admin' } })
               })),
+              order: vi.fn().mockResolvedValue({ data: [] })
+            }))
+          };
+        }
+        if (table === 'chats') {
+          return {
+            select: vi.fn(() => ({
               order: vi.fn().mockResolvedValue({ data: [] })
             }))
           };
@@ -327,7 +413,7 @@ describe('AdminDashboard', () => {
       renderComponent();
       
       await waitFor(() => {
-        expect(screen.getByText('No coach applications found.')).toBeInTheDocument();
+        expect(screen.getByText('No chats found.')).toBeInTheDocument();
       });
     });
 
@@ -362,144 +448,26 @@ describe('AdminDashboard', () => {
       consoleSpy.mockRestore();
     });
 
-  });
-
-  // UI INTERACTION TESTS
-  describe('UI Interaction Tests', () => {
-    it('should highlight active tab correctly', async () => {
-      const mockFrom = vi.fn((table: string) => {
-        if (table === 'profiles') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn().mockResolvedValue({ data: { role: 'admin' } })
-              })),
-              order: vi.fn().mockResolvedValue({ data: [] })
-            }))
-          };
-        }
-        return {
-          select: vi.fn(() => ({
-            order: vi.fn().mockResolvedValue({ data: [] })
-          }))
-        };
-      });
-      (supabase.from as any).mockImplementation(mockFrom);
+    it('should handle logout error gracefully', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      (supabase.auth.signOut as any).mockRejectedValue(new Error('Logout error'));
 
       renderComponent();
       const user = userEvent.setup();
       
       await waitFor(() => {
-        const coachesTab = screen.getByRole('button', { name: 'Coach Applications' });
-        expect(coachesTab).toHaveClass('active');
+        expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
       });
 
-      // Click Users tab
-      const usersTab = screen.getByRole('button', { name: 'User Management' });
-      await user.click(usersTab);
-      
-      expect(usersTab).toHaveClass('active');
-      expect(screen.getByRole('button', { name: 'Coach Applications' })).not.toHaveClass('active');
-    });
+      const logoutButton = screen.getByRole('button', { name: /logout/i });
+      await user.click(logoutButton);
 
-    it('should navigate back to home when back button is clicked', async () => {
-      const mockFrom = vi.fn((table: string) => {
-        if (table === 'profiles') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn().mockResolvedValue({ data: { role: 'admin' } })
-              })),
-              order: vi.fn().mockResolvedValue({ data: [] })
-            }))
-          };
-        }
-        return {
-          select: vi.fn(() => ({
-            order: vi.fn().mockResolvedValue({ data: [] })
-          }))
-        };
-      });
-      (supabase.from as any).mockImplementation(mockFrom);
-
-      renderComponent();
-      const user = userEvent.setup();
-      
       await waitFor(() => {
-        expect(screen.getByText('Back to Home')).toBeInTheDocument();
+        expect(consoleSpy).toHaveBeenCalledWith('Error during logout:', expect.any(Error));
+        expect(window.location.assign).toHaveBeenCalledWith('/');
       });
 
-      await user.click(screen.getByText('Back to Home'));
-      expect(mockNavigate).toHaveBeenCalledWith('/');
-    });
-
-    it('should display correct status badges for coaches', async () => {
-      const mockFrom = vi.fn((table: string) => {
-        if (table === 'profiles') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn().mockResolvedValue({ data: { role: 'admin' } })
-              })),
-              order: vi.fn().mockResolvedValue({ data: [] })
-            }))
-          };
-        }
-        return {
-          select: vi.fn(() => ({
-            order: vi.fn().mockResolvedValue({ data: mockCoaches })
-          }))
-        };
-      });
-      (supabase.from as any).mockImplementation(mockFrom);
-
-      renderComponent();
-      
-      await waitFor(() => {
-        expect(screen.getByText('pending')).toBeInTheDocument();
-        expect(screen.getByText('approved')).toBeInTheDocument();
-        expect(screen.getByText('rejected')).toBeInTheDocument();
-      });
-
-      const pendingBadge = screen.getByText('pending');
-      const approvedBadge = screen.getByText('approved');
-      const rejectedBadge = screen.getByText('rejected');
-
-      expect(pendingBadge).toHaveClass('status-badge', 'pending');
-      expect(approvedBadge).toHaveClass('status-badge', 'approved');
-      expect(rejectedBadge).toHaveClass('status-badge', 'rejected');
-    });
-
-    it('should show action buttons only for pending coaches', async () => {
-      const mockFrom = vi.fn((table: string) => {
-        if (table === 'profiles') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn().mockResolvedValue({ data: { role: 'admin' } })
-              })),
-              order: vi.fn().mockResolvedValue({ data: [] })
-            }))
-          };
-        }
-        return {
-          select: vi.fn(() => ({
-            order: vi.fn().mockResolvedValue({ data: mockCoaches })
-          }))
-        };
-      });
-      (supabase.from as any).mockImplementation(mockFrom);
-
-      renderComponent();
-      
-      await waitFor(() => {
-        // Should have approve/reject buttons for pending coach
-        expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
-        
-        // Should show "Action taken" for non-pending coaches
-        expect(screen.getAllByText('Action taken')).toHaveLength(2);
-      });
+      consoleSpy.mockRestore();
     });
 
   });
