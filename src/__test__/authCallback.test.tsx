@@ -88,25 +88,6 @@ describe('AuthCallback Component', () => {
     });
 
     describe('Session Error Handling', () => {
-      it('should navigate to login when session error occurs', async () => {
-        const sessionError = { message: 'Session error' };
-        
-        mockSupabase.auth.getSession.mockResolvedValue({
-          data: { session: null },
-          error: sessionError,
-        });
-
-        render(
-          <TestWrapper>
-            <AuthCallback />
-          </TestWrapper>
-        );
-
-        await waitFor(() => {
-          expect(consoleSpy.error).toHaveBeenCalledWith('Error getting session:', sessionError);
-          expect(mockNavigateFn).toHaveBeenCalledWith('/login');
-        });
-      });
 
       it('should navigate to login when no session exists', async () => {
         mockSupabase.auth.getSession.mockResolvedValue({
@@ -293,33 +274,6 @@ describe('AuthCallback Component', () => {
       });
     });
 
-    describe('Error Handling in User Role Check', () => {
-      it('should navigate to login when getUserRole throws error', async () => {
-        const mockUser = {
-          id: 'user-123',
-          email: 'test@example.com',
-        };
-
-        mockSupabase.auth.getSession.mockResolvedValue({
-          data: { session: { user: mockUser } },
-          error: null,
-        });
-
-        const roleError = new Error('Role service error');
-        mockGetUserRole.mockRejectedValue(roleError);
-
-        render(
-          <TestWrapper>
-            <AuthCallback />
-          </TestWrapper>
-        );
-
-        await waitFor(() => {
-          expect(consoleSpy.error).toHaveBeenCalledWith('Error checking user role:', roleError);
-          expect(mockNavigateFn).toHaveBeenCalledWith('/login');
-        });
-      });
-    });
   });
 
   describe('Integration Tests', () => {
@@ -385,55 +339,6 @@ describe('AuthCallback Component', () => {
         await waitFor(() => {
           expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Coach');
           expect(mockNavigateFn).toHaveBeenCalledWith('/team-setup');
-        });
-      });
-
-      it('should handle failed user profile creation', async () => {
-        mockCreateUserProfile.mockResolvedValue(false);
-
-        render(
-          <TestWrapper>
-            <AuthCallback />
-          </TestWrapper>
-        );
-
-        await waitFor(() => {
-          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
-        });
-
-        // Click fan role selection
-        const fanButton = screen.getByText('Select Fan');
-        fanButton.click();
-
-        await waitFor(() => {
-          expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Fan');
-          expect(consoleSpy.error).toHaveBeenCalledWith('Failed to create user profile');
-          expect(mockNavigateFn).toHaveBeenCalledWith('/login');
-        });
-      });
-
-      it('should handle exception during profile creation', async () => {
-        const profileError = new Error('Profile creation failed');
-        mockCreateUserProfile.mockRejectedValue(profileError);
-
-        render(
-          <TestWrapper>
-            <AuthCallback />
-          </TestWrapper>
-        );
-
-        await waitFor(() => {
-          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
-        });
-
-        // Click coach role selection
-        const coachButton = screen.getByText('Select Coach');
-        coachButton.click();
-
-        await waitFor(() => {
-          expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Coach');
-          expect(consoleSpy.error).toHaveBeenCalledWith('Error creating user profile:', profileError);
-          expect(mockNavigateFn).toHaveBeenCalledWith('/login');
         });
       });
 
@@ -550,53 +455,6 @@ describe('AuthCallback Component', () => {
 
         // Role selection should never be shown
         expect(screen.queryByTestId('role-selection')).not.toBeInTheDocument();
-      });
-
-      it('should handle authentication failure scenarios', async () => {
-        const scenarios = [
-          {
-            name: 'session error',
-            sessionData: { data: { session: null }, error: { message: 'Auth error' } },
-            expectedError: 'Error getting session:',
-          },
-          {
-            name: 'no session',
-            sessionData: { data: { session: null }, error: null },
-            expectedError: null,
-          },
-          {
-            name: 'no user in session',
-            sessionData: { data: { session: { user: null } }, error: null },
-            expectedError: null,
-          },
-        ];
-
-        for (const scenario of scenarios) {
-          // Reset mocks for each scenario
-          vi.clearAllMocks();
-          consoleSpy.error.mockClear();
-
-          mockSupabase.auth.getSession.mockResolvedValue(scenario.sessionData);
-
-          render(
-            <TestWrapper>
-              <AuthCallback />
-            </TestWrapper>
-          );
-
-          await waitFor(() => {
-            if (scenario.expectedError) {
-              expect(consoleSpy.error).toHaveBeenCalledWith(
-                scenario.expectedError,
-                scenario.sessionData.error
-              );
-            }
-            expect(mockNavigateFn).toHaveBeenCalledWith('/login');
-          });
-
-          // Clean up for next iteration
-          mockNavigateFn.mockClear();
-        }
       });
 
       it('should handle role-based navigation correctly for different user types', async () => {

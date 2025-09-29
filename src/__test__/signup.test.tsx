@@ -50,10 +50,12 @@ describe("Signup Component - Unit Tests", () => {
 
     fireEvent.click(googleButton);
 
-    expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
-      provider: "google",
-      options: { redirectTo: window.location.origin + "/auth-callback" },
-    });
+  expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
+    provider: "google",
+    options: {
+      redirectTo: window.location.origin + "/auth-callback?from=signup",
+    },
+  });
   });
 });
 
