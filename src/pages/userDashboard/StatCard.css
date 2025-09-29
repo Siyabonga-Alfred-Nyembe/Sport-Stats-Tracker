@@ -6,7 +6,13 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   margin-bottom: 24px;
 }
-
+.app-title{
+  font-size:28px;
+  font-weight:400;
+  color:  #32CD32;
+  padding-top: 8px;
+  margin-bottom:8px;
+}
 .rs-card {
   background: var(--card);
   padding: 20px;

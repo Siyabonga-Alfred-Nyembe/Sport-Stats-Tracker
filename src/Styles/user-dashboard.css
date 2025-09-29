@@ -18,11 +18,11 @@
 .rs-dashboard {
   --bg: #f8fafc;
   --card: #ffffff;
-  --primary: #0b63d8;
-  --primary-600: #2563eb;
+  --primary: #32CD32 ;
+  --primary-600: rgba(50, 205, 50,0.7);
   --violet: #7c3aed;
-  --muted: #000000;
-  --text-primary: #1e293b;
+  --muted: rgba(0, 0, 0, 0.5);
+  --text-primary:  #228B22;
   --text-inverse: #ffffff;
   --border-color: #e2e8f0;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -111,13 +111,9 @@ body {
   
 }
 .contentContainer{
-  background: rgba(0, 0, 0,0.1);
+  background: transparent;
   padding: 20px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
-  width: 100%;
-  color: black
+  
 }
 
 .rs-card h3 {
@@ -191,7 +187,9 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
+  color: #228B22;
   transition: all 0.2s ease;
+  font-weight: 400;
 }
 
 .rs-match:hover {
@@ -292,7 +290,7 @@ body {
   padding: 10px 16px;
   border: 1px solid var(--primary);
   border-radius: 6px;
-  background: var(--primary);
+  background: var(--primary-600);
   color: var(--text-inverse);
   cursor: pointer;
   font-weight: 500;
@@ -303,7 +301,7 @@ body {
 }
 
 .rs-btn:hover {
-  background: var(--primary-600);
+  background: var(--primary);
   transform: translateY(-1px);
 }
 

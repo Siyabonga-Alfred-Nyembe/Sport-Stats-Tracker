@@ -4,7 +4,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  background: white;
+  background: transparent;
   right: 0;
   height: auto;
   display: flex;
@@ -21,12 +21,13 @@
   left: 0;
   right: 0;
   height: 3rem;
-  background: var(--card);
+  background: transparent;
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1rem;
+  border-bottom: 1px solid #32CD32 ;
+  padding: 0 0.3rem;
   transition: all 0.3s ease;
 }
 .header-content {

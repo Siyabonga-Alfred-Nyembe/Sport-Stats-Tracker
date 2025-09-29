@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import "./TeamsList.css";
 
 interface Team {
   id: string;
@@ -35,31 +36,17 @@ const TeamsList: React.FC<Props> = ({ teams, isFavorite, toggleFavorite, loading
 
   return (
     <section>
-      <header style={{ marginBottom: 12 }}>
+      <header className="teams-section-header">
         <h2>Teams</h2>
-        <p style={{ color: "var(--muted)" }}>
-          All teams referenced in your matches/players
-        </p>
       </header>
 
       <ul className="rs-list">
         {teams.map((t) => (
-          <li
-            key={t.id}
-            className="rs-match"
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-          >
+          <li key={t.id} className="rs-match">
             {/* Navigate to Team Stats */}
             <button
               className="team-link"
               onClick={() => navigate(`/teams/${t.id}/stats`)}
-              style={{
-                fontWeight: 800,
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                textAlign: "left",
-              }}
             >
               {t.name}
             </button>
@@ -67,16 +54,10 @@ const TeamsList: React.FC<Props> = ({ teams, isFavorite, toggleFavorite, loading
             {/* Favorite star button */}
             <button
               aria-label={isFavorite(t.id) ? "Remove from favorites" : "Add to favorites"}
-              className="rs-btn ghost"
+              className={`rs-btn ghost${isFavorite(t.id) ? " favorited" : ""}`}
               onClick={() => handleStarClick(t.id)}
               title={isFavorite(t.id) ? "Unfavorite" : "Favorite"}
               disabled={loading || togglingTeamId === t.id}
-              style={{
-                fontSize: "18px",
-                color: isFavorite(t.id) ? "#ffd700" : "#ccc",
-                cursor: loading || togglingTeamId === t.id ? "not-allowed" : "pointer",
-                opacity: loading || togglingTeamId === t.id ? 0.6 : 1,
-              }}
             >
               {togglingTeamId === t.id ? "⏳" : isFavorite(t.id) ? "★" : "☆"}
             </button>

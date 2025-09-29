@@ -51,7 +51,7 @@ describe("PlayersList Component", () => {
   it("navigates to player details when clicked", () => {
     renderWithRouter(<PlayersList players={players} teams={teams} />);
 
-    const playerOneDiv = screen.getByText(/Player One/i).closest("div.rs-match");
+    const playerOneDiv = screen.getByText(/Player One/i).closest("div.rs-player");
     expect(playerOneDiv).toBeTruthy();
 
     if (playerOneDiv) {
@@ -59,7 +59,7 @@ describe("PlayersList Component", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/players/p1");
     }
 
-    const playerTwoDiv = screen.getByText(/Player Two/i).closest("div.rs-match");
+    const playerTwoDiv = screen.getByText(/Player Two/i).closest("div.rs-player");
     expect(playerTwoDiv).toBeTruthy();
 
     if (playerTwoDiv) {
