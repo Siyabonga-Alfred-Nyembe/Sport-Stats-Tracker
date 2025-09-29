@@ -25,6 +25,8 @@ const MatchesPage: React.FC = () => {
   const [date, setDate] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   // Load team data and other data from database
@@ -179,7 +181,19 @@ const MatchesPage: React.FC = () => {
         </form>
         
         <div className="match-list">
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginBottom: 8, flexWrap: 'wrap' }}>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              style={{ padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }}
+            />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              style={{ padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }}
+            />
             <input
               type="text"
               placeholder="Search teams or dates"
@@ -191,10 +205,20 @@ const MatchesPage: React.FC = () => {
           {isLoading ? (
             <p>Loading matches...</p>
           ) : matches.filter(m => {
+            // text search
             const q = search.toLowerCase();
-            if (!q) return true;
-            return m.opponentName.toLowerCase().includes(q) || (m.date || '').includes(q);
-          }          ).map(match => (
+            const matchesText = !q || m.opponentName.toLowerCase().includes(q) || (m.date || '').includes(q);
+            if (!matchesText) return false;
+
+            // date range filter (inclusive)
+            if (!startDate && !endDate) return true;
+            const dStr = (m.date || '').slice(0, 10);
+            if (!dStr) return false;
+            // Compare as strings (YYYY-MM-DD) works lexicographically; fallback to Date if needed
+            const afterStart = !startDate || dStr >= startDate;
+            const beforeEnd = !endDate || dStr <= endDate;
+            return afterStart && beforeEnd;
+          }).map(match => (
             // We wrap the new MatchCard in a div to handle the click event
             <div key={match.id} onClick={() => setSelectedMatch(match)}>
               <MatchCard
