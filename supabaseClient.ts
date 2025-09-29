@@ -13,6 +13,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error("Current values:", { supabaseUrl, supabaseAnonKey });
 }
 
-const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "");
+const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "", {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
 
 export default supabase;

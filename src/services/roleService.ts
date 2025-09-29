@@ -3,7 +3,7 @@ import supabase from '../../supabaseClient';
 export interface UserRole {
   id: string;
   email: string;
-  role: 'Fan' | 'Coach';
+  role: 'Fan' | 'Coach' | 'Admin';
   google_id?: string;
 }
 
@@ -27,7 +27,7 @@ export async function getUserRole(userId: string): Promise<UserRole | null> {
   }
 }
 
-export async function updateUserRole(userId: string, role: 'Fan' | 'Coach'): Promise<boolean> {
+export async function updateUserRole(userId: string, role: 'Fan' | 'Coach' | 'Admin'): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('users')
@@ -56,7 +56,7 @@ export async function isFan(userId: string): Promise<boolean> {
   return userRole?.role === 'Fan';
 }
 
-export async function createUserProfile(userId: string, email: string, role: 'Fan' | 'Coach' = 'Fan'): Promise<boolean> {
+export async function createUserProfile(userId: string, email: string, role: 'Fan' | 'Coach' | 'Admin' = 'Fan'): Promise<boolean> {
   try {
     // Insert into users table
     const { error: userError } = await supabase

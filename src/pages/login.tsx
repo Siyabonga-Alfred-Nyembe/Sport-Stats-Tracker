@@ -8,6 +8,11 @@ const Login: React.FC = () => {
 
   const handleGoogleSignIn = async () => {
     try {
+      console.log("[Login] Initiating Google OAuth sign-in", {
+        redirectTo: window.location.origin + "/auth-callback",
+        origin: window.location.origin,
+        location: window.location.href
+      });
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -15,14 +20,16 @@ const Login: React.FC = () => {
         },
       });
 
+      console.log("[Login] signInWithOAuth resolved", { data, error });
+
       if (error) {
         setErrorMessage(error.message);
-        console.error("Google sign-in error:", error.message);
+        console.error("[Login] Google sign-in error:", error);
       } else {
-        console.log("Redirecting to Google login:", data);
+        console.log("[Login] Redirecting to Google login (Supabase response):", data);
       }
     } catch (err) {
-      console.error("Unexpected error:", err);
+      console.error("[Login] Unexpected error during Google sign-in:", err);
       setErrorMessage("An unexpected error occurred during Google login.");
     }
   };

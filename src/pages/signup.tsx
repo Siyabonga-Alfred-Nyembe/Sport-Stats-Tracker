@@ -8,21 +8,29 @@ const Signup: React.FC = () => {
 
   const handleGoogleSignIn = async () => {
     try {
+      try { localStorage.setItem('cameFromSignup', '1'); } catch {}
+      console.log("[Signup] Initiating Google OAuth sign-in", {
+        redirectTo: window.location.origin + "/auth-callback",
+        origin: window.location.origin,
+        location: window.location.href
+      });
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin + "/auth-callback",
+          redirectTo: window.location.origin + "/auth-callback?from=signup",
         },
       });
 
+      console.log("[Signup] signInWithOAuth resolved", { data, error });
+
       if (error) {
         setErrorMessage(error.message);
-        console.error("Google sign-in error:", error.message);
+        console.error("[Signup] Google sign-in error:", error);
       } else {
-        console.log("Redirecting to Google login:", data);
+        console.log("[Signup] Redirecting to Google login (Supabase response):", data);
       }
     } catch (err) {
-      console.error("Unexpected error:", err);
+      console.error("[Signup] Unexpected error during Google sign-in:", err);
       setErrorMessage("An unexpected error occurred during Google login.");
     }
   };
