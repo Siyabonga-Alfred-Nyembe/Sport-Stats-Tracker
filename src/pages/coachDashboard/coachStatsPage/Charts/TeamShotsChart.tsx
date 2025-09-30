@@ -1,5 +1,5 @@
 // src/pages/coachDashboard/TeamShotsChart.tsx
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -18,6 +18,15 @@ interface Props {
 }
 
 const TeamShotsChart: React.FC<Props> = ({ matches }) => {
+  const chartRef = useRef<ChartJS<"bar", (number | null)[], unknown>>(null);
+
+  useEffect(() => {
+    return () => {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
+    };
+  }, []);
   
   const labels = matches.map((_, i) => `Match ${i + 1}`).reverse();
 
@@ -50,9 +59,7 @@ const TeamShotsChart: React.FC<Props> = ({ matches }) => {
 
   return (
     <section className='graph'>
-   
-      <Bar data={data} options={options} />
-   
+      <Bar ref={chartRef} data={data} options={options} />
     </section>
   );
 };

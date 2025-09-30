@@ -122,7 +122,7 @@ export interface DbPlayerStatsRecord {
 }
 
 // Add missing DbMatchEventRecord interface
-export interface DbMatchEventRecord {
+export type DbMatchEventRecord = {
   id: string;
   match_id: string;
   player_id: string;

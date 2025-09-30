@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createTeam } from '../services/teamService';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import supabase from '../../supabaseClient';
 import InlineAlert from './components/InlineAlert';
 
@@ -11,7 +11,6 @@ const TeamSetup: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const getCurrentUser = async () => {

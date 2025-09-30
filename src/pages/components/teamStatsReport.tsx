@@ -4,9 +4,7 @@ import React, { useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import StatCard from "../coachDashboard/coachStatsPage/StatCard";
-import TeamPerformanceChart from "../coachDashboard/coachStatsPage/TeamPerformanceChart";
 import TeamFormGuide from "../coachDashboard/coachStatsPage/TeamFormGuide";
-import TeamShotsChart from "../coachDashboard/coachStatsPage/Charts/TeamShotsChart";
 import BarChart from "../coachDashboard/coachStatsPage/Charts/BarChart";
 import PiChart from "../coachDashboard/coachStatsPage/Charts/PiChart";
 import type { Match, Player } from "../../types";
@@ -26,7 +24,6 @@ interface Props {
 
 const TeamStatsReport: React.FC<Props> = ({
   team,
-  matches,
   stats,
   players = [],
   selectedPlayer,

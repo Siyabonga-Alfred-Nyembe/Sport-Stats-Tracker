@@ -10,7 +10,7 @@ interface PlayerCardProps {
   children?: React.ReactNode; // Allow buttons or other elements to be passed in
 }
 
-const PlayerCard: React.FC<PlayerCardProps> = ({ imageUrl, name, position, children,jerseyNum }) => {
+const PlayerCard: React.FC<PlayerCardProps> = ({ name, position, children,jerseyNum }) => {
   return (
     <article className="player-card">
       {/* <figure className="player-figure">

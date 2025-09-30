@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import type { Player } from "../../../../types";
 import GKStatsForm from "./GKStatsForm";
 import MidStatsForm from "./MidStatsForm";
@@ -12,10 +12,7 @@ interface Props {
 }
 
 const AdvancedStatsForm: React.FC<Props> = ({ player, onSave }) => {
-  const [stats, setStats] = useState<Record<string, number>>({});
-
   const handleSave = (data: Record<string, number>) => {
-    setStats(data);
     onSave(player.id, data);
   };
 

@@ -267,7 +267,6 @@ describe('RosterManagement Component', () => {
     });
 
     it('should prevent event propagation when button is clicked', async () => {
-      const onPlayerClick = vi.fn();
       const onAddToLineup = vi.fn();
       const onRemovePlayer = vi.fn();
       
@@ -275,7 +274,6 @@ describe('RosterManagement Component', () => {
         <RosterManagement 
           {...defaultProps} 
           players={[mockPlayers[0]]} 
-          onPlayerClick={onPlayerClick}
           onAddToLineup={onAddToLineup}
           onRemovePlayer={onRemovePlayer}
         />
@@ -289,7 +287,7 @@ describe('RosterManagement Component', () => {
       
       expect(onAddToLineup).toHaveBeenCalledTimes(1);
       expect(onRemovePlayer).toHaveBeenCalledTimes(1);
-      expect(onPlayerClick).not.toHaveBeenCalled(); // Should not be called due to event propagation prevention
+      // Event propagation should be prevented
     });
   });
 

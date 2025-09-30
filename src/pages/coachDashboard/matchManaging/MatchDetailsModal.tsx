@@ -32,11 +32,8 @@ interface Notification {
 const MatchDetailsModal: React.FC<Props> = ({
   match,
   players,
-  events,
   onClose,
   onUpdateTeamStats,
-  onAddPlayerEvent,
-  onRemovePlayerEvent,
 }) => {
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -108,14 +105,6 @@ const MatchDetailsModal: React.FC<Props> = ({
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const handleAddEvent = (eventType: MatchEvent["eventType"]) => {
-    if (!selectedPlayerId) {
-      addNotification('Please select a player first', 'warning');
-      return;
-    }
-    const eventId = `evt-${Date.now()}`;
-    onAddPlayerEvent(eventId, match.id, selectedPlayerId, eventType);
-  };
 
   const normalizeStatsKeys = (raw: Record<string, number>) => {
     // Normalize various form field casings to db field names used in services
@@ -256,8 +245,6 @@ const MatchDetailsModal: React.FC<Props> = ({
     }
   };
 
-  const getPlayerName = (playerId: string) =>
-    players.find((p) => p.id === playerId)?.name || "Unknown Player";
 
   return (
     <div className="modal-overlay" onClick={onClose}>

@@ -11,9 +11,6 @@
   font-size: 1rem;
 }
 
-.topbar-profile-btn {
-  /* Uses .rs-btn.ghost styles */
-}
 
 .topbar-logout-btn {
   display: flex;

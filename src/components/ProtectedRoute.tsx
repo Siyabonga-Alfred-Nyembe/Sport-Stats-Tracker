@@ -5,7 +5,7 @@ import supabase from '../../supabaseClient';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'Fan' | 'Coach';
+  requiredRole?: 'Fan' | 'Coach' | 'Admin';
   redirectTo?: string;
 }
 
@@ -40,6 +40,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           hasRequiredRole = await isCoach(session.user.id);
         } else if (requiredRole === 'Fan') {
           hasRequiredRole = await isFan(session.user.id);
+        } else if (requiredRole === 'Admin') {
+          // Add your admin check logic here, or allow by default
+          hasRequiredRole = true;
         }
 
         if (hasRequiredRole) {

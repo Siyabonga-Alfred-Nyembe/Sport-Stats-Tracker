@@ -9,9 +9,9 @@ import {
   updatePlayerStats,
   upsertPlayerStats,
   createMatchEvent,
-  deleteMatchEvent,
-  type DbMatchEventRecord
+  deleteMatchEvent
 } from '../services/matchService';
+import type { DbMatchEventRecord } from '../types';
 import supabase from '../../supabaseClient';
 import type { DbMatchRecord } from '../types';
 
@@ -85,7 +85,8 @@ const mockMatchEvent: DbMatchEventRecord = {
   match_id: 'match-1',
   player_id: 'player-1',
   event_type: 'goal',
-  minute: 25
+  minute: 25,
+  created_at: new Date().toISOString()
 };
 
 describe('fetchMatches', () => {
@@ -586,7 +587,8 @@ describe('Edge Cases', () => {
       const eventWithoutMinute = {
         match_id: 'match-1',
         player_id: 'player-1',
-        event_type: 'red_card' as const
+        event_type: 'red_card' as const,
+        created_at: new Date().toISOString()
         // minute is optional
       };
 

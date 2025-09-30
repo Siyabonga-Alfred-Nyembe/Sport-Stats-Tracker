@@ -1,6 +1,16 @@
 // src/pages/coachDashboard/charts/GoalsChart.tsx
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 interface Props {
   label: string[];
@@ -8,9 +18,21 @@ interface Props {
   title: string;
 }
 
-const BarChart: React.FC<Props> = ({ label, values, title }) => (
-  <section className='chart-container'>
-    <Bar
+const BarChart: React.FC<Props> = ({ label, values, title }) => {
+  const chartRef = useRef<ChartJS<"bar", (number | null)[], unknown>>(null);
+
+  useEffect(() => {
+    return () => {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
+    };
+  }, []);
+
+  return (
+    <section className='chart-container'>
+      <Bar
+        ref={chartRef}
       data={{
         labels: label,
         datasets: [
@@ -78,8 +100,9 @@ const BarChart: React.FC<Props> = ({ label, values, title }) => (
           },
         },
       }}
-    />
-  </section>
-);
+      />
+    </section>
+  );
+};
 
 export default BarChart;

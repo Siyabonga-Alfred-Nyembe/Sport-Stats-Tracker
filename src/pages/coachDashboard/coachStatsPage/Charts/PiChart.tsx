@@ -1,7 +1,14 @@
 // src/pages/coachDashboard/charts/WinsChart.tsx
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Doughnut } from "react-chartjs-2";
-import { Chart as ChartJS } from "chart.js/auto";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface Props {
   label: string[];
@@ -9,9 +16,21 @@ interface Props {
   title: string;
 }
 
-const PiChart: React.FC<Props> = ({ label, values, title }) => (
-  <section className="chart-container">
-    <Doughnut
+const PiChart: React.FC<Props> = ({ label, values, title }) => {
+  const chartRef = useRef<ChartJS<"doughnut", (number | null)[], unknown>>(null);
+
+  useEffect(() => {
+    return () => {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
+    };
+  }, []);
+
+  return (
+    <section className="chart-container">
+      <Doughnut
+        ref={chartRef}
       data={{
         labels: label,
         datasets: [
@@ -60,8 +79,9 @@ const PiChart: React.FC<Props> = ({ label, values, title }) => (
           },
         },
       }}
-    />
-  </section>
-);
+      />
+    </section>
+  );
+};
 
 export default PiChart;
