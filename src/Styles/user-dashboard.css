@@ -18,8 +18,8 @@
 .rs-dashboard {
   --bg: #f8fafc;
   --card: #ffffff;
-  --primary: #32CD32 ;
-  --primary-600: rgba(50, 205, 50,0.7);
+  --primary: #7c3aed;
+  --primary-600: #7c3aed;
   --violet: #7c3aed;
   --muted: rgba(0, 0, 0, 0.5);
   --text-primary:  #228B22;
@@ -54,7 +54,7 @@ body {
 .rs-dashboard {
   position: relative;
   top: 50px;
-  background: radial-gradient(circle at top, #e0f7fa 0%, #d1fae5 50%, #bfdbfe 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   
 }
 
