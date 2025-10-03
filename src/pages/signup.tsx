@@ -10,7 +10,7 @@ const Signup: React.FC = () => {
     try {
       try { localStorage.setItem('cameFromSignup', '1'); } catch {}
       console.log("[Signup] Initiating Google OAuth sign-in", {
-        redirectTo: window.location.origin + "/auth-callback",
+        redirectTo: window.location.origin + "/auth/callback",
         origin: window.location.origin,
         location: window.location.href
       });

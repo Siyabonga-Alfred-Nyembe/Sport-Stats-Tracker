@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createTeam } from '../services/teamService';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate} from 'react-router-dom';
 import supabase from '../../supabaseClient';
 import InlineAlert from './components/InlineAlert';
 
@@ -11,7 +11,6 @@ const TeamSetup: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -64,7 +63,7 @@ const TeamSetup: React.FC = () => {
         <label style={{ fontWeight: 600, marginBottom: 4 }}>Enter team name</label>
         <input
           type="text"
-          placeholder="e.g. Kaizer Chiefs"
+          placeholder="e.g. Orlando Pirates FC"
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
           required

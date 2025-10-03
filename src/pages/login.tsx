@@ -9,7 +9,7 @@ const Login: React.FC = () => {
   const handleGoogleSignIn = async () => {
     try {
       console.log("[Login] Initiating Google OAuth sign-in", {
-        redirectTo: window.location.origin + "/auth-callback",
+        redirectTo: window.location.origin + "/auth/callback",
         origin: window.location.origin,
         location: window.location.href
       });
