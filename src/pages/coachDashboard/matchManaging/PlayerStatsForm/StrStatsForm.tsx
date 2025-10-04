@@ -1,28 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface Props {
+  initialStats?: Record<string, number>; 
   onSave: (stats: Record<string, number>) => void;
 }
 
-const StrStatsForm: React.FC<Props> = ({ onSave }) => {
+const StrStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
   const [form, setForm] = useState({
-    Shots: 0,
-    ShotsOnTarget: 0,
+    shots: 0,
+    shotsOnTarget: 0,
     dribblesAttempted: 0,
     dribblesSuccessful: 0,
     offsides: 0,
   });
 
+  useEffect(() => {
+    if (initialStats) {
+      setForm({
+        shots: initialStats.shots || initialStats.Shots || 0,
+        shotsOnTarget: initialStats.shotsOnTarget || initialStats.ShotsOnTarget || 0,
+        dribblesAttempted: initialStats.dribblesAttempted || 0,
+        dribblesSuccessful: initialStats.dribblesSuccessful || 0,
+        offsides: initialStats.offsides || 0,
+      });
+    }
+  }, [initialStats]);
+
+  // Save when form data changes
+  const handleInputChange = (field: string, value: number) => {
+    const newForm = { ...form, [field]: value };
+    setForm(newForm);
+    onSave(newForm);
+  };
+
   return (
-    <form onSubmit={e => {e.preventDefault(); onSave(form);}}>
+    <div className="position-stats-form">
       {Object.keys(form).map((field) => (
-        <div key={field}>
+        <div key={field} className="form-group">
           <label>{field}</label>
-          <input type="number" style={{color:'white'}} value={(form as any)[field]} onChange={e => setForm({...form, [field]: +e.target.value})} />
+          <input type="number" style={{color:'blue'}} value={(form as any)[field]} onChange={e => handleInputChange(field, +e.target.value)} />
         </div>
       ))}
-      <button type="submit">Save</button>
-    </form>
+    </div>
   );
 };
 

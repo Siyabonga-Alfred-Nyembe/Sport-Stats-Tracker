@@ -141,15 +141,7 @@ export async function fetchPlayerStatsByMatch(playerId: string): Promise<DbPlaye
   try {
     console.log('fetchPlayerStatsByMatch called with playerId:', playerId);
     
-    // First, let's see what's in the player_stats table
-    const { data: allStats, error: allStatsError } = await supabase
-      .from('player_stats')
-      .select('*')
-      .limit(5);
-    
-    console.log('All stats in table (first 5):', allStats, 'error:', allStatsError);
-    
-    // Now try to fetch specific player stats
+    // Fetch specific player stats
     const { data, error } = await supabase
       .from('player_stats')
       .select('*')

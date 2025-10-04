@@ -76,6 +76,7 @@ const MatchDetailsModal: React.FC<Props> = ({
           });
           
           setAdvancedStats({
+            // Common stats
             shots: matchStats.shots || 0,
             shotsOnTarget: matchStats.shots_on_target || 0,
             chancesCreated: matchStats.chances_created || 0,
@@ -90,6 +91,10 @@ const MatchDetailsModal: React.FC<Props> = ({
             savePercentage: matchStats.save_percentage || 0,
             passCompletion: matchStats.pass_completion || 0,
             minutesPlayed: matchStats.minutes_played || 0,
+            // Position-specific stats
+            passesSuccessful: matchStats.passes_successful || 0,
+            passesAttempted: matchStats.passes_attempted || 0,
+            goalsConceded: matchStats.goals_conceded || 0,
           });
         } else {
           setBasicStats({
@@ -147,6 +152,10 @@ const MatchDetailsModal: React.FC<Props> = ({
       minutesPlayed: raw.minutesPlayed ?? raw.MinutesPlayed ?? 0,
       yellowCards: raw.yellowCards ?? raw.YellowCards ?? 0,
       redCards: raw.redCards ?? raw.RedCards ?? 0,
+      // Position-specific stats
+      passesSuccessful: raw.passesSuccessful ?? raw.PassesSuccessful ?? 0,
+      passesAttempted: raw.passesAttempted ?? raw.PassesAttempted ?? 0,
+      goalsConceded: raw.goalsConceded ?? raw.GoalsConceded ?? 0,
     };
   };
 
@@ -181,6 +190,10 @@ const MatchDetailsModal: React.FC<Props> = ({
         save_percentage: combinedStats.savePercentage || 0,
         pass_completion: combinedStats.passCompletion || 0,
         minutes_played: combinedStats.minutesPlayed || 0,
+        // Position-specific stats
+        passes_successful: combinedStats.passesSuccessful || 0,
+        passes_attempted: combinedStats.passesAttempted || 0,
+        goals_conceded: combinedStats.goalsConceded || 0,
       });
 
       if (!statsId) {
@@ -287,7 +300,7 @@ const MatchDetailsModal: React.FC<Props> = ({
           </div>
 
           {selectedPlayerId && (
-            <form className="mdm-stats-form" onSubmit={(e) => { e.preventDefault(); handleSaveAllPlayerStats(); }}>
+            <div className="mdm-stats-container">
               <fieldset className="mdm-fieldset">
                 <legend className="mdm-legend">Basic Statistics</legend>
                 <div className="mdm-form-grid">
@@ -350,18 +363,20 @@ const MatchDetailsModal: React.FC<Props> = ({
                 <AdvancedStatsForm
                   player={players.find((p) => p.id === selectedPlayerId)!}
                   onSave={(playerId, stats) => setAdvancedStats(stats)}
+                  initialStats={advancedStats}
                 />
               </div>
 
               <button 
-                type="submit"
+                type="button"
                 className="mdm-submit-btn"
                 disabled={!selectedPlayerId || isSaving}
+                onClick={handleSaveAllPlayerStats}
                 aria-label="Save all player statistics"
               >
                 {isSaving ? 'Saving...' : 'Save Player Stats'}
               </button>
-            </form>
+            </div>
           )}
         </section>
 
