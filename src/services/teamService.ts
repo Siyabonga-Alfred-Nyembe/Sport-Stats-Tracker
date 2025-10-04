@@ -4,6 +4,7 @@ export interface TeamRecord {
   id: string;
   name: string;
   coach_id?: string | null;
+  coach_name?: string | null;
   logo_url?: string | null;
 }
 
@@ -27,11 +28,15 @@ export function setCurrentTeamId(teamId: string) {
 }
 
 export async function fetchTeamById(teamId: string): Promise<TeamRecord | null> {
+  console.log('fetchTeamById called with teamId:', teamId);
   const { data, error } = await supabase
     .from('teams')
     .select('*')
     .eq('id', teamId)
     .maybeSingle();
+  
+  console.log('fetchTeamById response - data:', data, 'error:', error);
+  
   if (error) {
     console.error('fetchTeamById error', error);
     return null;
@@ -51,7 +56,7 @@ export async function uploadTeamLogo(teamId: string, file: File): Promise<string
   return publicUrl?.publicUrl ?? null;
 }
 
-export async function createTeam(teamName: string, logoFile?: File | null, coachId?: string): Promise<TeamRecord | null> {
+export async function createTeam(teamName: string, logoFile?: File | null, coachId?: string, coachName?: string): Promise<TeamRecord | null> {
   const teamId = slugify(teamName);
   let logoUrl: string | null = null;
   if (logoFile) {
@@ -62,6 +67,7 @@ export async function createTeam(teamName: string, logoFile?: File | null, coach
     name: teamName,
     logo_url: logoUrl,
     coach_id: coachId || null,
+    coach_name: coachName || null,
   };
   const { data, error } = await supabase.from('teams').insert(payload).select().single();
   if (error) {
@@ -83,6 +89,20 @@ export async function fetchTeamByCoachId(coachId: string): Promise<TeamRecord | 
     return null;
   }
   return data as unknown as TeamRecord | null;
+}
+
+export async function updateTeam(teamId: string, updates: Partial<TeamRecord>): Promise<boolean> {
+  const { error } = await supabase
+    .from('teams')
+    .update(updates)
+    .eq('id', teamId);
+  
+  if (error) {
+    console.error('updateTeam error', error);
+    return false;
+  }
+  
+  return true;
 }
 
 

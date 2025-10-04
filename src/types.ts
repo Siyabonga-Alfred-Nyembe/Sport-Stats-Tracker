@@ -117,6 +117,10 @@ export interface DbPlayerStatsRecord {
   minutes_played: number;
   yellow_cards: number;
   red_cards: number;
+  // Position-specific stats (matching actual DB schema)
+  passes_successful?: number;
+  passes_attempted?: number;
+  goals_conceded?: number;
   created_at: string;
   updated_at: string;
 }
