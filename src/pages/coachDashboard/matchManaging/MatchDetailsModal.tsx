@@ -6,7 +6,7 @@ import { upsertPlayerStats } from "../../../services/matchService";
 import { fetchPlayerStatsByMatch } from "../../../services/playerService";
 import { updateMatch } from "../../../services/matchService";
 import InlineAlert from "../../components/InlineAlert";
-import "./MatchesPage.css"; 
+import "./MatchDetailsModal.css";
 
 interface Props {
   match: Match;
@@ -47,6 +47,7 @@ const MatchDetailsModal: React.FC<Props> = ({
     yellowCards: 0,
     redCard: false
   });
+  const [advancedStats, setAdvancedStats] = useState<Record<string, number>>({});
 
   // Load existing stats when a player is selected
   useEffect(() => {
@@ -58,6 +59,7 @@ const MatchDetailsModal: React.FC<Props> = ({
           yellowCards: 0,
           redCard: false
         });
+        setAdvancedStats({});
         return;
       }
 
@@ -72,6 +74,23 @@ const MatchDetailsModal: React.FC<Props> = ({
             yellowCards: matchStats.yellow_cards || 0,
             redCard: (matchStats.red_cards || 0) > 0
           });
+          
+          setAdvancedStats({
+            shots: matchStats.shots || 0,
+            shotsOnTarget: matchStats.shots_on_target || 0,
+            chancesCreated: matchStats.chances_created || 0,
+            dribblesAttempted: matchStats.dribbles_attempted || 0,
+            dribblesSuccessful: matchStats.dribbles_successful || 0,
+            offsides: matchStats.offsides || 0,
+            tackles: matchStats.tackles || 0,
+            interceptions: matchStats.interceptions || 0,
+            clearances: matchStats.clearances || 0,
+            saves: matchStats.saves || 0,
+            cleansheets: matchStats.clean_sheets || 0,
+            savePercentage: matchStats.save_percentage || 0,
+            passCompletion: matchStats.pass_completion || 0,
+            minutesPlayed: matchStats.minutes_played || 0,
+          });
         } else {
           setBasicStats({
             goals: 0,
@@ -79,16 +98,17 @@ const MatchDetailsModal: React.FC<Props> = ({
             yellowCards: 0,
             redCard: false
           });
+          setAdvancedStats({});
         }
       } catch (error) {
         console.error('Error loading existing stats:', error);
-        // Reset to default values on error
         setBasicStats({
           goals: 0,
           assists: 0,
           yellowCards: 0,
           redCard: false
         });
+        setAdvancedStats({});
       }
     };
 
@@ -98,7 +118,6 @@ const MatchDetailsModal: React.FC<Props> = ({
   const addNotification = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
     const id = Date.now().toString();
     setNotifications(prev => [...prev, { message, type, id }]);
-    // Auto-remove notification after 5 seconds
     setTimeout(() => {
       removeNotification(id);
     }, 5000);
@@ -108,17 +127,7 @@ const MatchDetailsModal: React.FC<Props> = ({
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const handleAddEvent = (eventType: MatchEvent["eventType"]) => {
-    if (!selectedPlayerId) {
-      addNotification('Please select a player first', 'warning');
-      return;
-    }
-    const eventId = `evt-${Date.now()}`;
-    onAddPlayerEvent(eventId, match.id, selectedPlayerId, eventType);
-  };
-
   const normalizeStatsKeys = (raw: Record<string, number>) => {
-    // Normalize various form field casings to db field names used in services
     return {
       goals: raw.goals ?? raw.Goals ?? 0,
       assists: raw.assists ?? raw.Assists ?? 0,
@@ -141,7 +150,7 @@ const MatchDetailsModal: React.FC<Props> = ({
     };
   };
 
-  const handleSaveBasicStats = async () => {
+  const handleSaveAllPlayerStats = async () => {
     if (!selectedPlayerId) {
       addNotification('Please select a player first', 'warning');
       return;
@@ -149,71 +158,38 @@ const MatchDetailsModal: React.FC<Props> = ({
 
     try {
       setIsSaving(true);
-      console.log('[MatchDetailsModal] handleSaveBasicStats called', { matchId: match.id, playerId: selectedPlayerId, basicStats });
+      console.log('[MatchDetailsModal] Saving all player stats', { matchId: match.id, playerId: selectedPlayerId, basicStats, advancedStats });
 
-      // Upsert player stats by (match_id, player_id)
+      const combinedStats = normalizeStatsKeys({ ...advancedStats });
+
       const statsId = await upsertPlayerStats(match.id, selectedPlayerId, {
         goals: basicStats.goals || 0,
         assists: basicStats.assists || 0,
         yellow_cards: basicStats.yellowCards || 0,
         red_cards: basicStats.redCard ? 1 : 0,
+        shots: combinedStats.shots || 0,
+        shots_on_target: combinedStats.shotsOnTarget || 0,
+        chances_created: combinedStats.chancesCreated || 0,
+        dribbles_attempted: combinedStats.dribblesAttempted || 0,
+        dribbles_successful: combinedStats.dribblesSuccessful || 0,
+        offsides: combinedStats.offsides || 0,
+        tackles: combinedStats.tackles || 0,
+        interceptions: combinedStats.interceptions || 0,
+        clearances: combinedStats.clearances || 0,
+        saves: combinedStats.saves || 0,
+        clean_sheets: combinedStats.cleansheets || 0,
+        save_percentage: combinedStats.savePercentage || 0,
+        pass_completion: combinedStats.passCompletion || 0,
+        minutes_played: combinedStats.minutesPlayed || 0,
       });
 
       if (!statsId) {
         throw new Error('Failed to save player stats');
       }
 
-      console.log('[MatchDetailsModal] Basic player stats saved successfully', { statsId, matchId: match.id, playerId: selectedPlayerId });
-      addNotification('Player stats saved', 'success');
+      console.log('[MatchDetailsModal] All player stats saved successfully', { statsId, matchId: match.id, playerId: selectedPlayerId });
+      addNotification('Player stats saved successfully', 'success');
       
-    } catch (error) {
-      console.error('Error saving basic player stats:', error);
-      addNotification('Failed to save player stats. Please try again.', 'error');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSavePlayerStats = async (
-    playerId: string,
-    incomingStats: Record<string, number>
-  ) => {
-    try {
-      setIsSaving(true);
-      console.log('[MatchDetailsModal] handleSavePlayerStats called', { matchId: match.id, playerId, incomingStats });
-
-      const stats = normalizeStatsKeys(incomingStats);
-      console.log('[MatchDetailsModal] Normalized stats', stats);
-      // Upsert player stats by (match_id, player_id)
-      const statsId = await upsertPlayerStats(match.id, playerId, {
-        goals: stats.goals || 0,
-        assists: stats.assists || 0,
-        shots: stats.shots || 0,
-        shots_on_target: stats.shotsOnTarget || 0,
-        chances_created: stats.chancesCreated || 0,
-        dribbles_attempted: stats.dribblesAttempted || 0,
-        dribbles_successful: stats.dribblesSuccessful || 0,
-        offsides: stats.offsides || 0,
-        tackles: stats.tackles || 0,
-        interceptions: stats.interceptions || 0,
-        clearances: stats.clearances || 0,
-        saves: stats.saves || 0,
-        clean_sheets: stats.cleansheets || 0,
-        save_percentage: stats.savePercentage || 0,
-        pass_completion: stats.passCompletion || 0,
-        minutes_played: stats.minutesPlayed || 0,
-        yellow_cards: stats.yellowCards || 0,
-        red_cards: stats.redCards || 0,
-      });
-
-      if (!statsId) {
-        throw new Error('Failed to save player stats');
-      }
-
-      console.log('[MatchDetailsModal] Player stats saved successfully', { statsId, matchId: match.id, playerId });
-      addNotification('Player stats saved', 'success');
-      
-      // No local cache required; data will be fetched fresh where needed
     } catch (error) {
       console.error('Error saving player stats:', error);
       addNotification('Failed to save player stats. Please try again.', 'error');
@@ -226,7 +202,6 @@ const MatchDetailsModal: React.FC<Props> = ({
     try {
       setIsSaving(true);
       
-      // Update match in database
       const success = await updateMatch(matchId, {
         possession: stats.possession,
         shots: stats.shots,
@@ -244,7 +219,6 @@ const MatchDetailsModal: React.FC<Props> = ({
         throw new Error('Failed to update team stats');
       }
       
-      // Update local state
       onUpdateTeamStats(matchId, stats);
       addNotification('Team stats updated successfully', 'success');
       
@@ -256,212 +230,280 @@ const MatchDetailsModal: React.FC<Props> = ({
     }
   };
 
-  const getPlayerName = (playerId: string) =>
-    players.find((p) => p.id === playerId)?.name || "Unknown Player";
-
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close-btn" onClick={onClose}>
+    <div className="mdm-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="mdm-title">
+      <article className="mdm-container" onClick={(e) => e.stopPropagation()}>
+        <button 
+          className="mdm-close-btn" 
+          onClick={onClose}
+          aria-label="Close match details modal"
+        >
           &times;
         </button>
 
-        <h2 className="section-title">Match Details</h2>
-        <h3>
-          {players[0]?.teamId} vs {match.opponentName} ({match.teamScore} -{" "}
-          {match.opponentScore})
-        </h3>
+        <header className="mdm-header">
+          <h2 id="mdm-title" className="mdm-title">Match Details</h2>
+          <h3 className="mdm-subtitle">
+            {players[0]?.teamId} vs {match.opponentName} ({match.teamScore} - {match.opponentScore})
+          </h3>
+        </header>
 
-        {/* Display all notifications */}
-        {notifications.map(notification => (
-          <InlineAlert
-            key={notification.id}
-            message={notification.message}
-            type={notification.type}
-            onClose={() => removeNotification(notification.id)}
-          />
-        ))}
+        <div className="mdm-notifications" role="status" aria-live="polite">
+          {notifications.map(notification => (
+            <InlineAlert
+              key={notification.id}
+              message={notification.message}
+              type={notification.type}
+              onClose={() => removeNotification(notification.id)}
+            />
+          ))}
+        </div>
 
         {isSaving && (
-          <div style={{ 
-            background: 'rgba(0, 255, 0, 0.1)', 
-            color: 'green', 
-            padding: '1rem', 
-            margin: '1rem 0', 
-            borderRadius: '8px',
-            border: '1px solid green'
-          }}>
+          <div className="mdm-saving-indicator" role="status" aria-live="polite">
             Saving...
           </div>
         )}
 
-        {/* --- Player Events Section --- */}
-        <section className="stat-section">
-          <h4>Player Events</h4>
-          <div className="event-form">
+        <section className="mdm-section" aria-labelledby="mdm-player-stats-heading">
+          <h4 id="mdm-player-stats-heading" className="mdm-section-title">Player Statistics</h4>
+          
+          <div className="mdm-player-select-wrapper">
+            <label htmlFor="mdm-player-select" className="mdm-label">Select Player</label>
             <select
+              id="mdm-player-select"
+              className="mdm-select"
               value={selectedPlayerId}
               onChange={(e) => setSelectedPlayerId(e.target.value)}
+              aria-label="Select a player to record statistics"
             >
-              <option value="">Select Player...</option>
+              <option value="">Choose a player...</option>
               {players.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} (#{p.jerseyNum})
                 </option>
               ))}
             </select>
-            <section className="team-stats-form">
-              <label>Goals</label>
-              <input
-                type="number"
-                min="0"
-                value={basicStats.goals}
-                onChange={(e) => setBasicStats({...basicStats, goals: parseInt(e.target.value) || 0})}
-              />
-              <label>Assists</label>
-              <input
-                type="number"
-                min="0"
-                value={basicStats.assists}
-                onChange={(e) => setBasicStats({...basicStats, assists: parseInt(e.target.value) || 0})}
-              />
-              <label>Yellow Cards</label>
-              <input
-                type="number"
-                min="0"
-                value={basicStats.yellowCards}
-                onChange={(e) => setBasicStats({...basicStats, yellowCards: parseInt(e.target.value) || 0})}
-              />
-              <label>Red Card</label>
-              <input
-                type="checkbox"
-                checked={basicStats.redCard}
-                onChange={(e) => setBasicStats({...basicStats, redCard: e.target.checked})}
-              />
+          </div>
+
+          {selectedPlayerId && (
+            <form className="mdm-stats-form" onSubmit={(e) => { e.preventDefault(); handleSaveAllPlayerStats(); }}>
+              <fieldset className="mdm-fieldset">
+                <legend className="mdm-legend">Basic Statistics</legend>
+                <div className="mdm-form-grid">
+                  <div className="mdm-form-group">
+                    <label htmlFor="mdm-goals" className="mdm-label">Goals</label>
+                    <input
+                      id="mdm-goals"
+                      type="number"
+                      min="0"
+                      className="mdm-input"
+                      value={basicStats.goals}
+                      onChange={(e) => setBasicStats({...basicStats, goals: parseInt(e.target.value) || 0})}
+                      aria-label="Number of goals scored"
+                    />
+                  </div>
+
+                  <div className="mdm-form-group">
+                    <label htmlFor="mdm-assists" className="mdm-label">Assists</label>
+                    <input
+                      id="mdm-assists"
+                      type="number"
+                      min="0"
+                      className="mdm-input"
+                      value={basicStats.assists}
+                      onChange={(e) => setBasicStats({...basicStats, assists: parseInt(e.target.value) || 0})}
+                      aria-label="Number of assists"
+                    />
+                  </div>
+
+                  <div className="mdm-form-group">
+                    <label htmlFor="mdm-yellow-cards" className="mdm-label">Yellow Cards</label>
+                    <input
+                      id="mdm-yellow-cards"
+                      type="number"
+                      min="0"
+                      max="2"
+                      className="mdm-input"
+                      value={basicStats.yellowCards}
+                      onChange={(e) => setBasicStats({...basicStats, yellowCards: parseInt(e.target.value) || 0})}
+                      aria-label="Number of yellow cards received"
+                    />
+                  </div>
+
+                  <div className="mdm-form-group mdm-checkbox-group">
+                    <label htmlFor="mdm-red-card" className="mdm-label">Red Card</label>
+                    <input
+                      id="mdm-red-card"
+                      type="checkbox"
+                      className="mdm-checkbox"
+                      checked={basicStats.redCard}
+                      onChange={(e) => setBasicStats({...basicStats, redCard: e.target.checked})}
+                      aria-label="Red card received"
+                    />
+                  </div>
+                </div>
+              </fieldset>
+
+              <div className="mdm-advanced-stats-wrapper">
+                <p className="mdm-legend">Advanced Statistics</p>
+                <AdvancedStatsForm
+                  player={players.find((p) => p.id === selectedPlayerId)!}
+                  onSave={(playerId, stats) => setAdvancedStats(stats)}
+                />
+              </div>
+
               <button 
-                type="button" 
-                onClick={handleSaveBasicStats}
+                type="submit"
+                className="mdm-submit-btn"
                 disabled={!selectedPlayerId || isSaving}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: selectedPlayerId ? 'var(--primary)' : 'var(--muted)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: selectedPlayerId ? 'pointer' : 'not-allowed',
-                  marginTop: '10px'
-                }}
+                aria-label="Save all player statistics"
               >
-                {isSaving ? 'Saving...' : 'Save Basic Stats'}
+                {isSaving ? 'Saving...' : 'Save Player Stats'}
               </button>
-            </section>
-          </div>
+            </form>
+          )}
         </section>
 
-        {selectedPlayerId && (
-          <AdvancedStatsForm
-            player={players.find((p) => p.id === selectedPlayerId)!}
-            onSave={handleSavePlayerStats}
-          />
-        )}
+        <section className="mdm-section" aria-labelledby="mdm-team-stats-heading">
+          <h4 id="mdm-team-stats-heading" className="mdm-section-title">Team Statistics</h4>
+          <form className="mdm-team-stats-form">
+            <div className="mdm-form-grid">
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-possession" className="mdm-label">Possession (%)</label>
+                <input
+                  id="mdm-possession"
+                  type="number"
+                  min="0"
+                  max="100"
+                  className="mdm-input"
+                  defaultValue={match.possession}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { possession: Number(e.target.value) })}
+                  aria-label="Team possession percentage"
+                />
+              </div>
 
-        {/* --- Team Stats Section --- */}
-        <section className="stat-section">
-          <h4>Team Stats</h4>
-          <div className="team-stats-form">
-            <label>Possession (%)</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.possession}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { possession: Number(e.target.value) })
-              }
-            />
-            <label>Total Shots</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.shots}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { shots: Number(e.target.value) })
-              }
-            />
-            <label>Shots on Target</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.shotsOnTarget}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { shotsOnTarget: Number(e.target.value) })
-              }
-            />
-            <label>Corners</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.corners}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { corners: Number(e.target.value) })
-              }
-            />
-            <label>Fouls</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.fouls}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { fouls: Number(e.target.value) })
-              }
-            />
-            <label>Offsides</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.offsides}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { offsides: Number(e.target.value) })
-              }
-            />
-            <label>Passes</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.passes}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { passes: Number(e.target.value) })
-              }
-            />
-            <label>Pass Accuracy (%)</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.passAccuracy}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { passAccuracy: Number(e.target.value) })
-              }
-            />
-            <label>Tackles</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.tackles}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { tackles: Number(e.target.value) })
-              }
-            />
-            <label>Saves</label>
-            <input
-              type="number"
-              min="0"
-              defaultValue={match.saves}
-              onBlur={(e) =>
-                handleUpdateTeamStats(match.id, { saves: Number(e.target.value) })
-              }
-            />
-          </div>
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-total-shots" className="mdm-label">Total Shots</label>
+                <input
+                  id="mdm-total-shots"
+                  type="number"
+                  min="0"
+                  className="mdm-input"
+                  defaultValue={match.shots}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { shots: Number(e.target.value) })}
+                  aria-label="Total shots taken"
+                />
+              </div>
+
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-shots-target" className="mdm-label">Shots on Target</label>
+                <input
+                  id="mdm-shots-target"
+                  type="number"
+                  min="0"
+                  className="mdm-input"
+                  defaultValue={match.shotsOnTarget}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { shotsOnTarget: Number(e.target.value) })}
+                  aria-label="Shots on target"
+                />
+              </div>
+
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-corners" className="mdm-label">Corners</label>
+                <input
+                  id="mdm-corners"
+                  type="number"
+                  min="0"
+                  className="mdm-input"
+                  defaultValue={match.corners}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { corners: Number(e.target.value) })}
+                  aria-label="Corner kicks"
+                />
+              </div>
+
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-fouls" className="mdm-label">Fouls</label>
+                <input
+                  id="mdm-fouls"
+                  type="number"
+                  min="0"
+                  className="mdm-input"
+                  defaultValue={match.fouls}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { fouls: Number(e.target.value) })}
+                  aria-label="Fouls committed"
+                />
+              </div>
+
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-offsides" className="mdm-label">Offsides</label>
+                <input
+                  id="mdm-offsides"
+                  type="number"
+                  min="0"
+                  className="mdm-input"
+                  defaultValue={match.offsides}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { offsides: Number(e.target.value) })}
+                  aria-label="Offsides called"
+                />
+              </div>
+
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-passes" className="mdm-label">Passes</label>
+                <input
+                  id="mdm-passes"
+                  type="number"
+                  min="0"
+                  className="mdm-input"
+                  defaultValue={match.passes}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { passes: Number(e.target.value) })}
+                  aria-label="Total passes"
+                />
+              </div>
+
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-pass-accuracy" className="mdm-label">Pass Accuracy (%)</label>
+                <input
+                  id="mdm-pass-accuracy"
+                  type="number"
+                  min="0"
+                  max="100"
+                  className="mdm-input"
+                  defaultValue={match.passAccuracy}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { passAccuracy: Number(e.target.value) })}
+                  aria-label="Pass accuracy percentage"
+                />
+              </div>
+
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-tackles" className="mdm-label">Tackles</label>
+                <input
+                  id="mdm-tackles"
+                  type="number"
+                  min="0"
+                  className="mdm-input"
+                  defaultValue={match.tackles}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { tackles: Number(e.target.value) })}
+                  aria-label="Tackles made"
+                />
+              </div>
+
+              <div className="mdm-form-group">
+                <label htmlFor="mdm-saves" className="mdm-label">Saves</label>
+                <input
+                  id="mdm-saves"
+                  type="number"
+                  min="0"
+                  className="mdm-input"
+                  defaultValue={match.saves}
+                  onBlur={(e) => handleUpdateTeamStats(match.id, { saves: Number(e.target.value) })}
+                  aria-label="Goalkeeper saves"
+                />
+              </div>
+            </div>
+          </form>
         </section>
-      </div>
+      </article>
     </div>
   );
 };

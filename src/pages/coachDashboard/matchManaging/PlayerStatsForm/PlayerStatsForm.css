@@ -1,14 +1,9 @@
 .stats-form {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  padding: 1rem;
-  border-radius: 1rem;
-  margin-top: 1rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  color: white;
 }
 
 .stats-form h5 {
-  color: #2563eb;
+  color: white;
   margin-bottom: 0.5rem;
 }
 
@@ -28,7 +23,7 @@
 }
 
 .stats-form button {
-  background: #7b24c6;
+  background: var(--primary);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 0.75rem;

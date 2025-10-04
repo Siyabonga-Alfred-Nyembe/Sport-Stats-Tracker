@@ -17,7 +17,7 @@ const MidStatsForm: React.FC<Props> = ({ onSave }) => {
       {Object.keys(form).map((field) => (
         <div key={field}>
           <label>{field}</label>
-          <input type="number" value={(form as any)[field]} onChange={e => setForm({...form, [field]: +e.target.value})} />
+          <input type="number" style={{color:'white'}} value={(form as any)[field]} onChange={e => setForm({...form, [field]: +e.target.value})} />
         </div>
       ))}
       <button type="submit">Save</button>
