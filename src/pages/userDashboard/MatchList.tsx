@@ -20,7 +20,7 @@ const MatchesList: React.FC<Props> = ({matches, teams, query, setQuery, onOpen})
           <div className="subtitle">Search and open a match to view details & chat</div>
         </div>
         <div className="rs-actions">
-          <input placeholder="Search teams or dates" value={query} onChange={e => setQuery(e.target.value)} />
+          <input  placeholder="Search teams or dates" value={query} onChange={e => setQuery(e.target.value)} />
           <button className="rs-btn ghost" onClick={() => setQuery("")}>Clear</button>
         </div>
       </div>
@@ -40,7 +40,7 @@ const MatchesList: React.FC<Props> = ({matches, teams, query, setQuery, onOpen})
             const awayName = away?.name || `Team ${m.awayTeamId}`;
 
             return (
-              <div key={m.id} className="rs-match">
+              <div key={m.id} className="fan-match-card">
                 <div className="teams">
                   {homeName} <span className="vs">vs</span> {awayName}
                   <div className="meta">{m.date}</div>

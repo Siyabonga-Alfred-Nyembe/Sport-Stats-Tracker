@@ -31,7 +31,7 @@
 
 .score {
   margin: 0 20px;
-  background-color: #8a2be2;
+  background-color: var(--primary);
   color: white;
   padding: 8px 18px;
   border-radius: 8px;

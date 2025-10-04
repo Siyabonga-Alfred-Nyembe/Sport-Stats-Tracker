@@ -50,12 +50,12 @@
   flex: 1;
 }
 
-.team-name.home { text-align: left; color: #8a2be2; }
+.team-name.home { text-align: left; color:var(--secondary); }
 .team-name.away { text-align: right; }
 
 .match-card-score {
   margin: 0 20px;
-  background-color: #8a2be2;
+  background-color: var(--secondary);
   color: white;
   padding: 5px 15px;
   border-radius: 8px;
@@ -70,7 +70,7 @@
 
 .details-prompt {
   font-style: italic;
-  color: #8a2be2;
+  color: var(--secondary);
 }
 
 /* --- Modal Styles --- */

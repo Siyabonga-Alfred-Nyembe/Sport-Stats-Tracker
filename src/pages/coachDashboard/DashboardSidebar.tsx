@@ -43,7 +43,6 @@ const DashboardSidebar: React.FC<Props> = ({ onNavigate }) => {
             <div className="hamburger-line"></div>
             <div className="hamburger-line"></div>
           </button>
-          <h1 className="app-title">R&S Sports</h1>
         </div>
       </header>
 

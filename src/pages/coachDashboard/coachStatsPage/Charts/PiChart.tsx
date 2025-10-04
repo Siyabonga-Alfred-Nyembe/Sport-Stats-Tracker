@@ -36,13 +36,13 @@ const PiChart: React.FC<Props> = ({ label, values, title }) => (
       options={{
         responsive: true,
         maintainAspectRatio: false,
-        cutout: "70%", // makes it more like a sleek ring chart
+        cutout: "30%", // makes it more like a sleek ring chart
         plugins: {
           title: {
             display: true,
             text: title,
             font: {
-              size: 18,
+              size: 20,
              
             },
             color: "#1f2937", // gray-800

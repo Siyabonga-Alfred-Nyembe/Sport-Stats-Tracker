@@ -22,7 +22,7 @@
 .rs-player {
   display: flex;
   justify-content: space-between;
-  color:  #228B22;
+  color:  var(--primary);
   
   align-items: center;
   padding: 8px;

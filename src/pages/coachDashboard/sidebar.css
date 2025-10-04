@@ -7,15 +7,13 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  
+}
+.dashboard-header {
+  background-color: beige;
 }
 
-.app-title {
-  color: white;
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-}
+
 
 /* === Hamburger Menu === */
 .hamburger-menu {

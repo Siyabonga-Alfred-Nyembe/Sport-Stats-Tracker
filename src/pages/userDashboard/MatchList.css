@@ -3,6 +3,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  color: var(--primary);
 }
 
 .matches-header h3 {
@@ -22,8 +23,10 @@
 .rs-actions input {
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--muted);
   font-size: 1rem;
+  color: var(--muted);
+
 }
 
 .rs-list {
@@ -38,31 +41,37 @@
   color: var(--muted);
 }
 
-.rs-match {
+.fan-match-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
+  padding: 1rem;
   border-bottom: 1px solid #eee;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.rs-match .teams {
+.fan-match-card .teams {
   font-weight: 600;
   font-size: 1.1rem;
+  color: var(--primary);
 }
 
-.rs-match .vs {
+.fan-match-card .vs {
   color: var(--muted);
   font-weight: 300;
 }
 
-.rs-match .meta {
+.fan-match-card .meta {
   color: var(--muted);
   font-size: 0.95em;
   font-weight: 300;
 }
 
-.rs-match .score {
+.fan-match-card .score {
   font-weight: 300;
   min-width: 58px;
   text-align: center;
@@ -71,7 +80,7 @@
   font-size: 1.5rem;
 }
 
-.rs-match .actions {
+.fan-match-card .actions {
   display: flex;
   gap: 8px;
   align-items: center;
