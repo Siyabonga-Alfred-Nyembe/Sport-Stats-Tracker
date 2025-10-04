@@ -198,12 +198,12 @@ export async function upsertPlayerStats(
 
     // Ensure we have valid stats data
     const validStatsData = {
-      goals: statsData.goals ?? 0,
-      assists: statsData.assists ?? 0,
-      shots: statsData.shots ?? 0,
-      shots_on_target: statsData.shots_on_target ?? 0,
-      chances_created: statsData.chances_created ?? 0,
-      dribbles_attempted: statsData.dribbles_attempted ?? 0,
+      goals: statsData.goals ,
+      assists: statsData.assists,
+      shots: statsData.shots ,
+      shots_on_target: statsData.shots_on_target,
+      chances_created: statsData.chances_created,
+      dribbles_attempted: statsData.dribbles_attempted ,
       dribbles_successful: statsData.dribbles_successful ?? 0,
       offsides: statsData.offsides ?? 0,
       tackles: statsData.tackles ?? 0,
