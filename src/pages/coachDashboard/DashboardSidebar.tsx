@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../../supabaseClient";
+import { IoPerson,IoLogOut,IoBarChartSharp } from "react-icons/io5";
+import { GiSoccerBall,GiSoccerKick } from "react-icons/gi";
 import './sidebar.css';
 
 interface Props {
@@ -59,26 +61,25 @@ const DashboardSidebar: React.FC<Props> = ({ onNavigate }) => {
         </div>
         <nav className="sidebar-nav">
           <button onClick={() => handleNavigation("myTeam")}>
-            <span className="nav-icon">📊</span>
+            <span className="nav-icon"><IoBarChartSharp/></span>
             Overview
           </button>
           <button onClick={() => handleNavigation("players")}>
-            <span className="nav-icon">👥</span>
+            <span className="nav-icon"><GiSoccerKick/></span>
             Players
           </button>
           <button onClick={() => handleNavigation("matches")}>
-            <span className="nav-icon">⚽</span>
+            <span className="nav-icon"><GiSoccerBall /></span>
             Matches
+          </button>
+          <button onClick={() => handleNavigation("profile")}>
+            <span className="nav-icon"><IoPerson /></span>
+            Profile
           </button>
 
           {/* Logout button moved here */}
           <button className="logout-btn" onClick={handleLogout}>
-            <img
-              src="https://img.icons8.com/?size=100&id=98958&format=png&color=000000"
-              width="24"
-              height="24"
-              alt="Logout"
-            />
+            <span className="nav-icon"><IoLogOut /></span>
             Logout
           </button>
         </nav>

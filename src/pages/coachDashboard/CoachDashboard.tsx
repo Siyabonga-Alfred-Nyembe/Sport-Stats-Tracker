@@ -9,6 +9,7 @@ import "../../Styles/coach-dashboard.css";
 import { getCurrentTeamId, setCurrentTeamId } from "../../services/teamService";
 import { fetchTeamByCoachId } from "../../services/teamService";
 import supabase from "../../../supabaseClient";
+import Profile from "./CoachProfile"
 
 const CoachDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -54,6 +55,9 @@ const CoachDashboard: React.FC = () => {
         )}
         {activeTab === "players" && (
           <PlayerManagementPage />
+        )}
+        {activeTab === "profile" && (
+          <Profile />
         )}
       </section>
     </section>
