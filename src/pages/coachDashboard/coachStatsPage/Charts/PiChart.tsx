@@ -29,7 +29,7 @@ const PiChart: React.FC<Props> = ({ label, values, title }) => (
               "rgba(255, 255, 255, 1)", // clean white border between slices
             ],
             borderWidth: 2,
-            hoverOffset: 12, // adds a nice "pop-out" on hover
+            hoverOffset: 20, // adds a nice "pop-out" on hover
           },
         ],
       }}

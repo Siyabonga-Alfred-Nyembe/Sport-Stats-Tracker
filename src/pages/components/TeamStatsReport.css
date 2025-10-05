@@ -26,7 +26,7 @@
 .stats-header section h1 {
   margin: 0;
   font-size: 2rem;
-  color: var(--secondary);
+  color: var(--primary);
 }
 
 .stats-header section p {
@@ -45,15 +45,8 @@
   border-radius: 10px;
   justify-content: center;
   align-items: center;
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 1rem;
-  width: 100%;
   max-width: 400px;
-  margin: auto;
   max-height: 100px;
 }
 
@@ -77,7 +70,7 @@
 .player-selector label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--secondary);
+  color: var(--primary);
   text-align: right;
 }
 
@@ -95,7 +88,7 @@
 }
 
 h2{
-  color: var(--secondary);
+  color: var(--primary);
 }
 
 .player-dropdown:hover {
@@ -104,7 +97,7 @@ h2{
 
 .player-dropdown:focus {
   outline: none;
-  border-color:var(--secondary);
+  border-color:var(--primary);
   box-shadow: 0 0 0 3px rgba(0, 79, 139, 0.1);
 }
 
@@ -124,33 +117,14 @@ h2{
 
 /* === Team Performance Section === */
 
-.rep-stats-sec {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 10px;
-  padding: 1rem;
-  margin: 1.5rem auto;
-  width: 100%;
-  
-}
-.gen-stats-sec{
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 10px;
-  background-color: #000;
-  padding: 1rem;
-  margin: 1.5rem auto;
 
 
-}
 
 .pef-sec h2,
 .rep-stats-sec h2 {
   margin-bottom: 1rem;
   padding-left: 5px;
-  color: var(--secondary);
+  color: var(--primary);
 }
 
 .pef-sec ul {
@@ -239,7 +213,7 @@ h2{
 }
 
 .filter-by-date input[type="date"]:focus {
-  border-color: var(--secondary);
+  border-color: var(--primary);
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
@@ -250,19 +224,30 @@ h2{
   width: 100%;
   gap: 1rem;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
 }
 
-.gen-team-stats > :nth-child(1) {
-  grid-row: span 2;
-  grid-column: span 1;
-}
+
+
 
 .chart-container {
-  margin: auto;
   width: 100%;
-  max-width: 600px;
-  border-radius: 10px;
+  max-width: 700px; 
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow);
 }
+
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 
 .att-team-stats {
   display: grid;
@@ -305,7 +290,21 @@ h2{
   .player-selector label {
     text-align: left;
   }
+  .chart-container {
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+    max-width: 100%;
+  }
+  .gen-team-stats,
+  .att-team-stats,.def-att {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
 }
+
+
 
 @media (max-width: 480px) {
   .team-info h1 {
@@ -314,4 +313,10 @@ h2{
   .player-dropdown {
     font-size: 0.85rem;
   }
+  .filter-by-date{
+    flex-direction: column;
+  }
 }
+
+
+
