@@ -23,6 +23,12 @@ vi.mock("../../supabaseClient", () => {
   const mockSupabase = {
     channel: vi.fn().mockReturnValue(mockChannel),
     removeChannel: vi.fn(),
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: "test-user-id" } },
+        error: null
+      })
+    }
   };
 
   return { default: mockSupabase };
@@ -136,7 +142,8 @@ describe("Chat Component", () => {
       expect(mockSendChatMessage).toHaveBeenCalledWith(
         "match-123",
         "TestUser",
-        "Hello world!"
+        "Hello world!",
+        "test-user-id"
       );
     });
 
@@ -153,7 +160,8 @@ describe("Chat Component", () => {
       expect(mockSendChatMessage).toHaveBeenCalledWith(
         "match-123",
         "TestUser",
-        "Hello world!"
+        "Hello world!",
+        "test-user-id"
       );
     });
 
@@ -200,19 +208,58 @@ describe("Chat Component", () => {
       });
     });
 
-    it("calls deleteChatMessage when delete button is clicked", async () => {
+    it("calls deleteChatMessage when delete button is clicked for user's own message", async () => {
       const user = userEvent.setup();
-      mockFetchChatForMatch.mockResolvedValue(mockMessages);
+      // Create messages where the first one belongs to the current user
+      const messagesWithUserOwnership = [
+        {
+          ...mockMessages[0],
+          user_id: "test-user-id" // This matches the mocked user ID
+        },
+        {
+          ...mockMessages[1],
+          user_id: "other-user-id" // This is a different user
+        }
+      ];
+      mockFetchChatForMatch.mockResolvedValue(messagesWithUserOwnership);
       render(<Chat {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByText("Great game!")).toBeInTheDocument();
       });
 
+      // Only one delete button should be visible (for the user's own message)
       const deleteButtons = screen.getAllByText("Delete");
+      expect(deleteButtons).toHaveLength(1);
       await user.click(deleteButtons[0]);
 
       expect(mockDeleteChatMessage).toHaveBeenCalledWith("1");
+    });
+
+    it("does not show delete button for messages from other users", async () => {
+      const user = userEvent.setup();
+      // Create messages where none belong to the current user
+      const messagesFromOtherUsers = [
+        {
+          ...mockMessages[0],
+          user_id: "other-user-1"
+        },
+        {
+          ...mockMessages[1],
+          user_id: "other-user-2"
+        }
+      ];
+      mockFetchChatForMatch.mockResolvedValue(messagesFromOtherUsers);
+      render(<Chat {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Great game!")).toBeInTheDocument();
+        expect(screen.getByText("Amazing play!")).toBeInTheDocument();
+      });
+
+      // No delete buttons should be visible
+      const deleteButtons = screen.queryAllByText("Delete");
+      expect(deleteButtons).toHaveLength(0);
     });
   });
 

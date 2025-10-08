@@ -30,10 +30,17 @@ export async function sendChatMessage(matchId: string, author: string | null, me
 }
 
 export async function deleteChatMessage(id: string) {
+  // Get current user to verify ownership
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
   const { error } = await supabase
     .from('chats')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('user_id', user.id); // Only allow deletion if user_id matches
   if (error) throw error;
 }
 
