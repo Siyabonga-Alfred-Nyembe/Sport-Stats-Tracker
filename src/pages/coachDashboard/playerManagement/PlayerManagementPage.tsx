@@ -7,7 +7,6 @@ import { fetchPlayersWithStats } from '../../../services/playerService';
 import { loadLineup, saveLineup, updatePlayerPosition, debugLineup, removePlayerFromLineup } from '../../../services/lineupService';
 import RosterManagement from './RosterManagement';
 import LineupSelection from './LineupSelection';
-import InlineAlert from '../../components/InlineAlert';
 import './PlayerManagement.css';
 
 // Import the Player type from your central types file
