@@ -74,7 +74,6 @@ const TeamSetup: React.FC = () => {
           accept="image/*"
           onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
         />
-        <small style={{ opacity: 0.8, marginTop: 4 }}>If logo upload fails (bucket missing), the team will be created without a logo.</small>
         <button type="submit" disabled={saving} style={{ marginTop: 16 }}>{saving ? 'Saving...' : 'Create Team'}</button>
       </form>
     </main>

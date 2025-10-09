@@ -19,7 +19,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ imageUrl, name, position, child
           
         </figcaption>
       </figure> */}
-      <h2 className="player-name">{name}</h2>
+      <h2 className="player-nam">{name}</h2>
           <p className="player-position">{jerseyNum}</p>
           <p className="player-position">{position}</p>
       {children && <div className="player-card-actions">{children}</div>}

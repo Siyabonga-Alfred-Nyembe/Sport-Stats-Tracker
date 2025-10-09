@@ -44,11 +44,11 @@
   text-align: center;
 }
 
-.player-name {
+.player-nam {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a; /* Strong dark color for name */
+  color: var(--primary); /* Strong dark color for name */
 }
 
 .player-position {
