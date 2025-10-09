@@ -229,23 +229,12 @@ const PlayerManagementPage: React.FC = () => {
   
   return (
     <main className="management-container">
-      {/* Inline Alerts */}
-      {errorMsg && (
-        <InlineAlert 
-          type="error" 
-          message={errorMsg} 
-          onClose={() => setErrorMsg(null)}
-        />
-      )}
-      {successMsg && (
-        <InlineAlert 
-          type="success" 
-          message={successMsg} 
-          onClose={() => setSuccessMsg(null)}
-        />
-      )}
 
       <RosterManagement
+       errorMsg={errorMsg}
+       setErrorMsg={setErrorMsg}
+       successMsg={successMsg}
+       setSuccessMsg={setSuccessMsg}
         players={players}
         lineupIds={new Set(lineup.map(p => p.id))}
         onAddPlayer={handleAddPlayer}
