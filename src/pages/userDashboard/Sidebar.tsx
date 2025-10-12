@@ -1,18 +1,26 @@
 import React, { useState } from "react";
 import "./Sidebar.css";
+import { SiF1 } from "react-icons/si";
+import { CiStar } from "react-icons/ci";
+import { RiTeamLine } from "react-icons/ri";
+import { SlPeople } from "react-icons/sl";
+import { GrOverview } from "react-icons/gr";
+import { GiSoccerBall } from "react-icons/gi";
 
-type Tab = "overview" | "teams" | "players" | "matches" | "favorites";
+
+type Tab = "overview" | "teams" | "players" | "matches" | "favorites"|"F1";
 interface Props {
   activeTab: Tab;
   goToTab: (t: Tab) => void;
 }
 
-const tabIcons: Record<Tab, string> = {
-  overview: "📊",
-  teams: "👥",
-  players: "🏃",
-  matches: "⚽",
-  favorites: "⭐",
+const tabIcons: Record<Tab, JSX.Element> = {
+  overview: <GrOverview aria-label="overview icon"/>,
+  teams: <RiTeamLine aria-label="teams icon"/>,
+  players: <SlPeople aria-label="players icon"/>,
+  matches: <GiSoccerBall />,
+  favorites: <CiStar aria-label="favorites icon"/>,
+  F1: <SiF1 aria-label="F1 Icon" />,
 };
 
 const Sidebar: React.FC<Props> = ({ activeTab, goToTab }) => {
@@ -56,7 +64,7 @@ const Sidebar: React.FC<Props> = ({ activeTab, goToTab }) => {
           </button>
         </div>
         <nav className="sidebar-nav">
-          {(["overview", "teams", "players", "matches", "favorites"] as Tab[]).map(
+          {(["overview", "teams", "players", "matches", "favorites","F1"] as Tab[]).map(
             (t) => (
               <button
                 key={t}

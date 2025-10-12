@@ -12,6 +12,10 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 import TeamStatsPage from "./pages/userDashboard/TeamStatsPage";
+import F1Dashboard from "./pages/f1/f1Dashboard";
+import F1DriversPage from "./pages/f1/F1DriversPage";
+import F1TeamsPage from "./pages/f1/F1TeamPage";
+import F1StatsPage from "./pages/f1/F1StatsPage";
 
 function App() {
   return (
@@ -27,7 +31,19 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/auth-callback" element={<AuthCallback />} />
-
+          <Route
+            path="/f1-dashboard/*"
+            element={
+              <ProtectedRoute requiredRole="Fan" redirectTo="/login">
+                <F1Dashboard />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="drivers" element={<F1DriversPage />} />
+            <Route path="teams" element={<F1TeamsPage />} />
+            <Route path="stats" element={<F1StatsPage />} />
+            <Route index element={<F1DriversPage />} />
+          </Route>
           {/* Fan Routes */}
           <Route
             path="/user-dashboard"

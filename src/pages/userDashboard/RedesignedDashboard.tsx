@@ -18,7 +18,7 @@ import menImg from "../../images/menu.png"
 
 
 const USERNAME_KEY = "rs_dashboard_username_v2";
-type Tab = "overview"|"teams"|"players"|"matches"|"favorites";
+type Tab = "overview"|"teams"|"players"|"matches"|"favorites"|"F1";
 
 const RedesignedDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ const RedesignedDashboard: React.FC = () => {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<"overview"|"teams"|"players"|"matches"|"favorites">("overview");
+  const [activeTab, setActiveTab] = useState<"overview"|"teams"|"players"|"matches"|"favorites"|"F1">("overview");
   const [selectedMatchId, setSelectedMatchId] = useState<string|null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string|null>(null);
   const [query, setQuery] = useState("");
@@ -103,12 +103,23 @@ const RedesignedDashboard: React.FC = () => {
   const homeTeam = selectedMatch ? teams.find(t => t.id === selectedMatch.homeTeamId) : null;
   const awayTeam = selectedMatch ? teams.find(t => t.id === selectedMatch.awayTeamId) : null;
 
+  // Handle navigation including F1 dashboard
+  const handleTabNavigation = (t: Tab) => {
+    if (t === "F1") {
+      navigate("/f1-dashboard/drivers");
+    } else {
+      setActiveTab(t);
+      navigate(t === "overview" ? "/user-dashboard" : `/${t}`);
+      setSelectedMatchId(null);
+    }
+  };
+
   return (
     <div className="rs-dashboard">
      
       <div className="rs-container">
         <aside className="rs-sidebar">
-          <Sidebar activeTab={activeTab} goToTab={(t: Tab) => { setActiveTab(t); navigate(t === "overview" ? "/user-dashboard" : `/${t}`); setSelectedMatchId(null); }} />
+          <Sidebar activeTab={activeTab} goToTab={handleTabNavigation} />
             <Topbar username={username} setUsername={setUsername} onProfile={()=>navigate("/profile-settings")} />
         </aside>
            

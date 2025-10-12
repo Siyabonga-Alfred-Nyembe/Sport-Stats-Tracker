@@ -1,0 +1,53 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import { SlPeople } from "react-icons/sl";
+import { GiF1Car } from "react-icons/gi"
+import { IoIosStats } from "react-icons/io";
+
+interface Props {
+  activeTab: "drivers" | "teams" | "stats";
+  onNavigate: (tab: "drivers" | "teams" | "stats") => void;
+}
+
+const F1Sidebar: React.FC<Props> = ({ activeTab, onNavigate }) => {
+  return (
+    <nav className="f1-sidebar" aria-label="Formula 1 section navigation">
+      <h1 className="f1-logo">F1 Tracker</h1>
+      <ul className="f1-nav-list" role="menu">
+        <li role="menuitem">
+          <button
+            className={activeTab === "drivers" ? "active" : ""}
+            aria-current={activeTab === "drivers" ? "page" : undefined}
+            onClick={() => onNavigate("drivers")}
+          >
+            <SlPeople /> Drivers
+          </button>
+        </li>
+        <li role="menuitem">
+          <button
+            className={activeTab === "teams" ? "active" : ""}
+            aria-current={activeTab === "teams" ? "page" : undefined}
+            onClick={() => onNavigate("teams")}
+          >
+            <GiF1Car /> Teams
+          </button>
+        </li>
+        <li role="menuitem">
+          <button
+            className={activeTab === "stats" ? "active" : ""}
+            aria-current={activeTab === "stats" ? "page" : undefined}
+            onClick={() => onNavigate("stats")}
+          >
+            <IoIosStats /> Stats
+          </button>
+        </li>
+      </ul>
+      <hr aria-hidden="true" />
+      <Link to="/user-dashboard" className="f1-back" aria-label="Return to football dashboard">
+        ← Back to Football
+      </Link>
+    </nav>
+  );
+};
+
+export default F1Sidebar;
