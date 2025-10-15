@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { SlPeople } from "react-icons/sl";
 import { GiF1Car } from "react-icons/gi"
 import { IoIosStats } from "react-icons/io";
+import { CiTrophy } from "react-icons/ci";
 
 interface Props {
-  activeTab: "drivers" | "teams" | "stats";
-  onNavigate: (tab: "drivers" | "teams" | "stats") => void;
+  activeTab: "drivers" | "teams" | "stats"|"f1Results";
+  onNavigate: (tab: "drivers" | "teams" | "stats"|"f1Results") => void;
 }
 
 const F1Sidebar: React.FC<Props> = ({ activeTab, onNavigate }) => {
@@ -39,6 +40,15 @@ const F1Sidebar: React.FC<Props> = ({ activeTab, onNavigate }) => {
             onClick={() => onNavigate("stats")}
           >
             <IoIosStats /> Stats
+          </button>
+        </li>
+        <li role="menuitem">
+          <button
+            className={activeTab === "f1Results" ? "active" : ""}
+            aria-current={activeTab === "f1Results" ? "page" : undefined}
+            onClick={() => onNavigate("f1Results")}
+          >
+            <CiTrophy />Results
           </button>
         </li>
       </ul>

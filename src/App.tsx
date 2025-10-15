@@ -16,6 +16,7 @@ import F1Dashboard from "./pages/f1/f1Dashboard";
 import F1DriversPage from "./pages/f1/F1DriversPage";
 import F1TeamsPage from "./pages/f1/F1TeamPage";
 import F1StatsPage from "./pages/f1/F1StatsPage";
+import F1ResultsPage from "./pages/f1/F1ResultsPage";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
             <Route path="drivers" element={<F1DriversPage />} />
             <Route path="teams" element={<F1TeamsPage />} />
             <Route path="stats" element={<F1StatsPage />} />
+            <Route path="f1Results" element={<F1ResultsPage />} />
             <Route index element={<F1DriversPage />} />
           </Route>
           {/* Fan Routes */}
