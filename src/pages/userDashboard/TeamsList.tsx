@@ -39,6 +39,10 @@ const TeamsList: React.FC<Props> = ({ teams, isFavorite, toggleFavorite, loading
       <header className="teams-section-header">
         <h2>Teams</h2>
       </header>
+      <div className="rs-actions">
+          <input  placeholder="Search for team"   />
+          <button className="rs-btn ghost" >Clear</button>
+        </div>
 
       <ul className="rs-list">
         {teams.map((t) => (
