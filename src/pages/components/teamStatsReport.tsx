@@ -22,6 +22,10 @@ interface Props {
   showPlayerSelector?: boolean;
   showBackButton?: boolean;
   onBack?: () => void;
+  startDate: string;
+  endDate: string;
+  setStartDate: (date: string) => void;
+  setEndDate: (date: string) => void;
 }
 
 const TeamStatsReport: React.FC<Props> = ({
@@ -34,6 +38,10 @@ const TeamStatsReport: React.FC<Props> = ({
   showPlayerSelector = false,
   showBackButton = false,
   onBack,
+  startDate,
+  endDate,
+  setStartDate,
+  setEndDate,
 }) => {
   const reportRef = useRef<HTMLElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -132,14 +140,10 @@ const TeamStatsReport: React.FC<Props> = ({
         <label htmlFor="start-date" aria-label="Start date input">
           From
         </label>
-        <input type="date" id="start-date" name="start-date" />
+        <input type="date" id="start-date" name="start-date" value={startDate} onChange={e => setStartDate(e.target.value)} />
 
         <label htmlFor="end-date">To</label>
-        <input type="date" id="end-date" name="end-date" aria-label="End date input" />
-
-        <button className="CoachBtn" aria-label="Apply Filter button">
-          Apply
-        </button>
+        <input type="date" id="end-date" name="end-date" aria-label="End date input" value={endDate} onChange={e => setEndDate(e.target.value)} />
       </section>
 
       <article ref={reportRef} className={isExporting ? "pdf-mode" : ""}>

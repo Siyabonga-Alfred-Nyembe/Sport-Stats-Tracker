@@ -29,6 +29,8 @@ const MyTeamTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
   
   // Fetch matches and players from database
   useEffect(() => {
@@ -57,7 +59,17 @@ const MyTeamTab: React.FC = () => {
     loadData();
   }, [team, currentTeamId]);
 
-  const stats = calculateTeamStats(matches);
+  const filteredMatches = matches.filter(match => {
+    if (startDate && new Date(match.date) < new Date(startDate)) {
+      return false;
+    }
+    if (endDate && new Date(match.date) > new Date(endDate)) {
+      return false;
+    }
+    return true;
+  });
+
+  const stats = calculateTeamStats(filteredMatches);
 
   const handleExportPdf = async () => {
     const contentToCapture = reportRef.current;
@@ -131,9 +143,6 @@ const MyTeamTab: React.FC = () => {
 
   return (
     <section className="team-stats-container">
-      
-
-
       {/* Player Stats Modal */}
       {selectedPlayer && (
         <PlayerStatsModal
@@ -143,14 +152,18 @@ const MyTeamTab: React.FC = () => {
       )}
 
       <TeamStatsReport
-  team={team}
-  matches={matches}
-  stats={stats}
-  players={players}
-  selectedPlayer={selectedPlayer}
-  onPlayerSelect={handlePlayerSelect}
-  showPlayerSelector
-/>
+        team={team}
+        matches={filteredMatches}
+        stats={stats}
+        players={players}
+        selectedPlayer={selectedPlayer}
+        onPlayerSelect={handlePlayerSelect}
+        showPlayerSelector
+        startDate={startDate}
+        endDate={endDate}
+        setStartDate={setStartDate}
+        setEndDate={setEndDate}
+      />
 
     </section>
   );
