@@ -26,6 +26,10 @@ interface Props {
   endDate: string;
   setStartDate: (date: string) => void;
   setEndDate: (date: string) => void;
+  totalInterceptions: number;
+  totalClearances: number;
+  totalYellowCards: number;
+  totalRedCards: number;
 }
 
 const TeamStatsReport: React.FC<Props> = ({
@@ -42,6 +46,10 @@ const TeamStatsReport: React.FC<Props> = ({
   endDate,
   setStartDate,
   setEndDate,
+  totalInterceptions,
+  totalClearances,
+  totalYellowCards,
+  totalRedCards,
 }) => {
   const reportRef = useRef<HTMLElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -210,12 +218,12 @@ const TeamStatsReport: React.FC<Props> = ({
         <BarChart
           title="General"
           label={["Tackles", "Interceptions", "Clearances"]}
-          values={[stats.totalTackles || 0, 50, 16]}
+          values={[stats.totalTackles || 0, totalInterceptions, totalClearances]}
         />
         <BarChart
           title="Discipline"
           label={["Fouls", "Yellow Cards", "Red Cards"]}
-          values={[13, 9, 1]}
+          values={[stats.totalFouls || 0, totalYellowCards, totalRedCards]}
         />
       </section>
     </section>

@@ -71,6 +71,11 @@ const MyTeamTab: React.FC = () => {
 
   const stats = calculateTeamStats(filteredMatches);
 
+  const totalInterceptions = players.reduce((sum, player) => sum + (player.stats.interceptions || 0), 0);
+  const totalClearances = players.reduce((sum, player) => sum + (player.stats.clearances || 0), 0);
+  const totalYellowCards = players.reduce((sum, player) => sum + (player.stats.yellowCards || 0), 0);
+  const totalRedCards = players.reduce((sum, player) => sum + (player.stats.redCards || 0), 0);
+
   const handleExportPdf = async () => {
     const contentToCapture = reportRef.current;
     if (!contentToCapture) return;
@@ -163,6 +168,10 @@ const MyTeamTab: React.FC = () => {
         endDate={endDate}
         setStartDate={setStartDate}
         setEndDate={setEndDate}
+        totalInterceptions={totalInterceptions}
+        totalClearances={totalClearances}
+        totalYellowCards={totalYellowCards}
+        totalRedCards={totalRedCards}
       />
 
     </section>
