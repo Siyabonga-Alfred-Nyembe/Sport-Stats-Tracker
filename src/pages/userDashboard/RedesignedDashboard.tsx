@@ -179,7 +179,13 @@ const RedesignedDashboard: React.FC = () => {
             {!loading && !error && activeTab === "overview" && (
               <>
                 <StatsCards teams={teams.length} players={players.length} matches={matches.length} playersWithStats={players} />
-                <MatchesList matches={recentMatches} teams={teams} query={query} setQuery={setQuery} onOpen={(id)=>{ setSelectedMatchId(id); navigate(`/matches/${id}`); setActiveTab("matches"); }} />
+                <MatchesList 
+                  matches={query.trim() ? filteredMatches.slice(0, 5) : recentMatches} 
+                  teams={teams} 
+                  query={query} 
+                  setQuery={setQuery} 
+                  onOpen={(id)=>{ setSelectedMatchId(id); navigate(`/matches/${id}`); setActiveTab("matches"); }} 
+                />
               </>
             )}
             {!loading && !error && activeTab === "matches" && (

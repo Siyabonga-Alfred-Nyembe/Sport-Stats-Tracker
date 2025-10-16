@@ -15,6 +15,7 @@ A React + TypeScript + Vite web application for tracking football statistics wit
 - [Testing](#testing)
 - [Deployment](#deployment)
 - [Technology Stack](#technology-stack)
+ - [Documentation](#documentation)
 
 ## Prerequisites
 
@@ -185,6 +186,13 @@ Example test file is included in `src/__test__/mock.test.js`.
 - **TypeScript ESLint** - Code linting
 - **Vitest** - Testing framework
 - **ts-jest** - TypeScript Jest preset
+
+## Documentation
+
+- See `docs/` for feature and architecture docs:
+  - [Chat component](docs/features/chat.md)
+  - [chatService API](docs/services/chatService.md)
+  - [Architecture overview](docs/architecture.md)
 
 ## Contributing
 

@@ -17,6 +17,7 @@ interface Props {
 
 const TeamsList: React.FC<Props> = ({ teams, isFavorite, toggleFavorite, loading }) => {
   const [togglingTeamId, setTogglingTeamId] = React.useState<string | null>(null);
+  const [query, setQuery] = React.useState("");
   const navigate = useNavigate();
 
   const handleStarClick = async (teamId: string) => {
@@ -40,8 +41,22 @@ const TeamsList: React.FC<Props> = ({ teams, isFavorite, toggleFavorite, loading
         <h2>Teams</h2>
       </header>
 
+      <div className="rs-actions" style={{ marginBottom: "12px" }}>
+        <input
+          placeholder="Search for team"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button className="rs-btn" onClick={() => setQuery(query)}>Search</button>
+        <button className="rs-btn ghost" onClick={() => setQuery("")}>Clear</button>
+      </div>
+
       <ul className="rs-list">
-        {teams.map((t) => (
+        {(React.useMemo(() => {
+          const q = query.trim().toLowerCase();
+          if (!q) return teams;
+          return teams.filter(t => t.name.toLowerCase().includes(q));
+        }, [teams, query])).map((t) => (
           <li key={t.id} className="rs-match">
             {/* Navigate to Team Stats */}
             <button
