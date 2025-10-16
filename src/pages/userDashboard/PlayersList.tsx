@@ -22,6 +22,10 @@ const PlayersList: React.FC<Props> = ({ players, teams }) => {
           <div className="subtitle">Click on a player to view detailed statistics</div>
         </div>
       </div>
+      <div className="rs-actions">
+          <input  placeholder="Search for player"   />
+          <button className="rs-btn ghost" >Clear</button>
+        </div>
       <div className="rs-list">
         {players.map(p => {
           const team = teams.find(t => t.id === p.teamId);
