@@ -76,6 +76,14 @@ const PlayerManagementPage: React.FC = () => {
       return;
     }
 
+    // Check for duplicate jersey number
+    if (jerseyNum && players.some(player => player.jerseyNum === jerseyNum)) {
+      setErrorMsg(`Jersey number ${jerseyNum} is already taken. Please choose another number.`);
+      // Clear error message after 3 seconds
+      setTimeout(() => setErrorMsg(null), 3000);
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('players')
