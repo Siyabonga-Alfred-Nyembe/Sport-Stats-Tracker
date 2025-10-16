@@ -9,10 +9,24 @@ interface Props { players: Player[]; teams: Team[] }
 
 const PlayersList: React.FC<Props> = ({ players, teams }) => {
   const navigate = useNavigate();
+  const [query, setQuery] = React.useState("");
 
   const handlePlayerClick = (playerId: string) => {
     navigate(`/players/${playerId}`);
   };
+
+  const filteredPlayers = React.useMemo(() => {
+    const search = query.trim().toLowerCase();
+    if (!search) return players;
+    return players.filter(p => {
+      const teamName = teams.find(t => t.id === p.teamId)?.name?.toLowerCase() || "";
+      return (
+        p.name.toLowerCase().includes(search) ||
+        (p.position || "").toLowerCase().includes(search) ||
+        teamName.includes(search)
+      );
+    });
+  }, [players, teams, query]);
 
   return (
     <div>
@@ -23,11 +37,18 @@ const PlayersList: React.FC<Props> = ({ players, teams }) => {
         </div>
       </div>
       <div className="rs-actions">
-          <input  placeholder="Search for player"   />
-          <button className="rs-btn ghost" >Clear</button>
+          <input
+            placeholder="Search by name, position, or team"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <button className="rs-btn" onClick={() => setQuery(query)}>
+            Search
+          </button>
+          <button className="rs-btn ghost" onClick={() => setQuery("")}>Clear</button>
         </div>
       <div className="rs-list">
-        {players.map(p => {
+        {filteredPlayers.map(p => {
           const team = teams.find(t => t.id === p.teamId);
           return (
             <div
