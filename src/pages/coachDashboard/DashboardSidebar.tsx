@@ -34,7 +34,6 @@ const DashboardSidebar: React.FC<Props> = ({ onNavigate }) => {
   return (
     <>
       {/* Header Area with App Name */}
-      <header className="dashboard-header">
         <div className="header-content">
           <button
             className="hamburger-menu"
@@ -46,7 +45,6 @@ const DashboardSidebar: React.FC<Props> = ({ onNavigate }) => {
             <div className="hamburger-line"></div>
           </button>
         </div>
-      </header>
 
       {/* Overlay */}
       {isOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}

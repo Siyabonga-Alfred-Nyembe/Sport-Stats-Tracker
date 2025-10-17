@@ -178,7 +178,7 @@ const F1ResultsPage: React.FC = () => {
                       <span>{race.winner}</span>
                     </div>
                   </td>
-                  <td className="team-name">{race.team}</td>
+                  <td className="f1-team-name">{race.team}</td>
                   <td className="text-center laps">{race.laps}</td>
                   <td className="race-time">{race.time}</td>
                   <td className="fastest-lap">{race.fastestLap}</td>

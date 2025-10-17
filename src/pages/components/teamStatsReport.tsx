@@ -100,49 +100,53 @@ const TeamStatsReport: React.FC<Props> = ({
 
   return (
     <main className="team-stats-container">
-      <header className="stats-header" aria-label="Team Stats header section">
-        <section>
-          <h1>{team.name}</h1>
-          <p>Performance Report</p>
-          <p className="stats-summary">Based on {stats.totalMatches || 0} matches</p>
-        </section>
+      
+<header className="stats-header" aria-label="Team Stats header section">
+  <div className="main-bar">
+    <section className="team-section">
+      {showBackButton && (
+        <button className="menu-btn" onClick={onBack}>
+          ←
+        </button>
+      )}
+      <div className="team-info">
+        <h1>{team.name}</h1>
+        <p>Performance Report · Based on {stats.totalMatches || 0} matches</p>
+      </div>
+    </section>
 
-        <section className="form-card">
-          <h2>Recent Form (Last 5)</h2>
-          <TeamFormGuide form={stats.form || []} />
-        </section>
+    <nav className="header-controls">
+      {showPlayerSelector && (
+        <div className="player-selector">
+          <select
+            id="player-select"
+            className="player-dropdown"
+            onChange={(e) => onPlayerSelect?.(e.target.value)}
+            value={selectedPlayer?.id || ""}
+          >
+            <option value="">Select a player...</option>
+            {players.map((player) => (
+              <option key={player.id} value={player.id}>
+                {player.name} - {player.position}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
-        <nav className="header-controls">
-          {showBackButton && (
-            <button className="CoachBtn" onClick={onBack}>
-              ← Back
-            </button>
-          )}
+      <button className="CoachBtn export-btn" onClick={handleExportPdf} disabled={isExporting}>
+        {isExporting ? "Exporting..." : "Export as PDF"}
+      </button>
+    </nav>
+  </div>
 
-          {showPlayerSelector && (
-            <div className="player-selector">
-              <label htmlFor="player-select">View Player Stats:</label>
-              <select
-                id="player-select"
-                className="player-dropdown"
-                onChange={(e) => onPlayerSelect?.(e.target.value)}
-                value={selectedPlayer?.id || ""}
-              >
-                <option value="">Select a player...</option>
-                {players.map((player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.name} - {player.position}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <button className="CoachBtn" onClick={handleExportPdf} disabled={isExporting}>
-            {isExporting ? "Exporting..." : "Export as PDF"}
-          </button>
-        </nav>
-      </header>
+  <div className="info-bar">
+    <div className="info-item">
+      <span className="info-label">Recent Form (Last 5):</span>
+      <TeamFormGuide form={stats.form || []} />
+    </div>
+  </div>
+</header>
 
       <section className="filter-by-date" aria-label="Filter By date section">
         <label htmlFor="start-date" aria-label="Start date input">

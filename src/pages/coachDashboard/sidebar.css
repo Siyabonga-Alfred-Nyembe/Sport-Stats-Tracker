@@ -3,10 +3,13 @@
 
 
 .header-content {
-  display: flex;
+  position: fixed;
+  left: 10px;
+  top: 25px;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  width: 50px;
+  z-index: 100;
   
 }
 .dashboard-header {

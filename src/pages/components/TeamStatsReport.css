@@ -7,119 +7,207 @@
   padding: 0;
   box-sizing: border-box;
   color: #1f2937; /* dark neutral for light theme */
-  background: radial-gradient(circle at top, #e0f7fa 0%, #d1fae5 50%, #bfdbfe 100%);
+  background: var(--bg);
   font-family: 'Inter', sans-serif;
 }
 
-/* === Header === */
+/* === Header - Card Style Layout === */
 .stats-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr; /* info | form | controls */
-  align-items: center;
-  gap: 1.5rem;
-  padding: .5rem 2rem;
-  margin-bottom: .5rem;
-  background: transparent;
-  border-bottom: 2px solid rgba(59, 130, 246, 0.25);
+  background: white;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
 }
 
-.stats-header section h1 {
-  margin: 0;
-  font-size: 2rem;
-  color: var(--primary);
-}
-
-.stats-header section p {
-  margin: 0.25rem 0;
-}
-
-.stats-summary {
-  font-style: italic;
-  color: #888;
-}
-
-/* === Form Card === */
-.form-card {
+/* Main bar with gradient */
+.main-bar {
+  background: var(--headback);
+  padding: 1.5rem 2rem;
   display: flex;
-  flex-direction: column;
-  border-radius: 10px;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  max-width: 400px;
-  max-height: 100px;
+  gap: 2rem;
 }
 
-/* === Header Controls Container === */
+.team-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.menu-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.team-info h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: var(--text-inverse);
+  font-weight: 700;
+}
+
+.team-info p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+  color: var(--text-inverse);
+  opacity: 0.9;
+}
+
+/* Header Controls */
 .header-controls {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: flex-end;
+  gap: 0.75rem;
+  align-items: center;
 }
 
-/* === Player Selector === */
 .player-selector {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-  min-width: 280px;
-}
-
-.player-selector label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--primary);
-  text-align: right;
+  min-width: 200px;
 }
 
 .player-dropdown {
-  padding: 8px 12px;
-  border: 2px solid #e1e8ef;
-  border-radius: 6px;
+  padding: 0.625rem 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  color: var(--text-inverse);
   font-size: 0.9rem;
-  background-color: #fff;
-  color: #333;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 100%;
+  width: 100%;
   box-sizing: border-box;
 }
+
+.player-dropdown option {
+  background-color: #0e7490;
+  color: white;
+  padding: 8px;
+}
+
+.player-dropdown:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.player-dropdown:focus {
+  outline: none;
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.CoachBtn.export-btn {
+  padding: 0.625rem 1.25rem;
+  background: white;
+  color: var(--primary);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.CoachBtn.export-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.CoachBtn.export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Info bar below main gradient bar */
+.info-bar {
+  background: #f0f9ff;
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Form Guide */
+.team-form-guide {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.form-bubble {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.form-bubble.form-w {
+  background-color: #10b981;
+}
+
+.form-bubble.form-l {
+  background-color: #ef4444;
+}
+
+.form-bubble.form-d {
+  background-color: #f59e0b;
+}
+
+/* Legacy form badge support (if still needed) */
+.form-badge {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.form-badge.W { background-color: #28a745; }
+.form-badge.L { background-color: #dc3545; }
+.form-badge.D { background-color: #ffc107; color: #000; }
 
 h2{
   color: var(--primary);
 }
 
-.player-dropdown:hover {
-  border-color: #b8d4ea;
-}
-
-.player-dropdown:focus {
-  outline: none;
-  border-color:var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 79, 139, 0.1);
-}
-
-.player-dropdown option {
-  padding: 8px;
-  background-color: #fff;
-  color: #333;
-}
-
-.filter-by-date input[type="date"] {
-  
-}
-
-.player-dropdown option:hover {
-  background-color: #f8fafc;
-}
-
 /* === Team Performance Section === */
-
-
-
-
 .pef-sec h2,
 .rep-stats-sec h2 {
   margin-bottom: 1rem;
@@ -134,25 +222,6 @@ h2{
   gap: 10px;
   padding: 5px;
 }
-
-/* === Form Guide === */
-.team-form-guide {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.form-badge {
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.form-badge.W { background-color: #28a745; }
-.form-badge.L { background-color: #dc3545; }
-.form-badge.D { background-color: #ffc107; color: #000; }
 
 /* === PDF Capture === */
 /* Keep minimal by default */
@@ -227,9 +296,6 @@ h2{
   grid-template-rows: 1fr 1fr;
 }
 
-
-
-
 .chart-container {
   width: 100%;
   max-width: 700px; 
@@ -248,7 +314,6 @@ h2{
   height: 100% !important;
 }
 
-
 .att-team-stats {
   display: grid;
   grid-template-columns: 1fr;
@@ -265,38 +330,60 @@ h2{
 
 /* === Responsive Design === */
 @media (max-width: 1200px) {
-  .stats-header {
-    grid-template-columns: 1fr 1fr;
+  .main-bar {
+    flex-wrap: wrap;
   }
-  .form-card {
-    justify-self: center;
+  
+  .header-controls {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 
 @media (max-width: 900px) {
-  .stats-header {
-    grid-template-columns: 1fr;
+  .main-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .team-section {
+    justify-content: center;
     text-align: center;
   }
-  .header-controls {
-    flex-direction: row;
-    justify-content: center;
-    gap: 1rem;
+  
+  .team-info h1 {
+    font-size: 1.5rem;
   }
+  
+  .header-controls {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
   .player-selector {
-    align-items: stretch;
+    width: 100%;
     min-width: auto;
   }
-  .player-selector label {
-    text-align: left;
+  
+  .CoachBtn.export-btn {
+    width: 100%;
   }
+  
+  .info-bar {
+    justify-content: center;
+    padding: 1rem 1.5rem;
+  }
+
   .chart-container {
     max-width: 100%;
     aspect-ratio: 4 / 3;
     max-width: 100%;
   }
+  
   .gen-team-stats,
-  .att-team-stats,.def-att {
+  .att-team-stats,
+  .def-att {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -304,19 +391,34 @@ h2{
   }
 }
 
-
-
 @media (max-width: 480px) {
-  .team-info h1 {
-    font-size: 1.5rem;
+  .main-bar {
+    padding: 1rem;
   }
+  
+  .team-info h1 {
+    font-size: 1.25rem;
+  }
+  
+  .team-info p {
+    font-size: 0.8rem;
+  }
+  
+  .info-bar {
+    padding: 0.75rem 1rem;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
   .player-dropdown {
     font-size: 0.85rem;
   }
+  
   .filter-by-date{
     flex-direction: column;
   }
 }
-
-
-

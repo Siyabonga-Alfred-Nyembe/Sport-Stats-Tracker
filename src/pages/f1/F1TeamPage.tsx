@@ -62,7 +62,7 @@ interface TeamCardProps {
 const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
   return (
     <div 
-      className="team-card"
+      className="f1-team-card"
       style={{
         background: `linear-gradient(135deg, ${team.color} 0%, ${team.color}dd 70%, ${team.color}aa 100%)`,
       }}
@@ -77,7 +77,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
         <img 
           src={team.logo} 
           alt={`${team.name} logo`}
-          className="team-logo"
+          className="f1-team-logo"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
           }}
@@ -85,7 +85,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
       </div>
 
       <div className="team-info">
-        <h2 className="team-name">{team.name}</h2>
+        <h2 className="f1-team-name">{team.name}</h2>
         <div className="team-drivers">
           {team.drivers.map((driver, idx) => (
             <span key={idx} className="driver-name">
