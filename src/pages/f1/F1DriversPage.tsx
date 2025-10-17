@@ -186,7 +186,7 @@ const F1DriversPage: React.FC = () => {
       <h1 className="page-main-title">2024 Drivers</h1>
 
       {Object.entries(groupedDrivers).map(([team, drivers]) => (
-        <div key={team} className="team-section">
+        <div key={team} className="f1-team-section">
           <div className="team-header">
             <h2>{team}</h2>
           </div>

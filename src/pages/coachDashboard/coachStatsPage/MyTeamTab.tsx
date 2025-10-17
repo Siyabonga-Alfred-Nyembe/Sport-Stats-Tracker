@@ -29,6 +29,8 @@ const MyTeamTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
   
   // Fetch matches and players from database
   useEffect(() => {
@@ -57,7 +59,22 @@ const MyTeamTab: React.FC = () => {
     loadData();
   }, [team, currentTeamId]);
 
-  const stats = calculateTeamStats(matches);
+  const filteredMatches = matches.filter(match => {
+    if (startDate && new Date(match.date) < new Date(startDate)) {
+      return false;
+    }
+    if (endDate && new Date(match.date) > new Date(endDate)) {
+      return false;
+    }
+    return true;
+  });
+
+  const stats = calculateTeamStats(filteredMatches);
+
+  const totalInterceptions = players.reduce((sum, player) => sum + (player.stats.interceptions || 0), 0);
+  const totalClearances = players.reduce((sum, player) => sum + (player.stats.clearances || 0), 0);
+  const totalYellowCards = players.reduce((sum, player) => sum + (player.stats.yellowCards || 0), 0);
+  const totalRedCards = players.reduce((sum, player) => sum + (player.stats.redCards || 0), 0);
 
   const handleExportPdf = async () => {
     const contentToCapture = reportRef.current;
@@ -131,9 +148,6 @@ const MyTeamTab: React.FC = () => {
 
   return (
     <section className="team-stats-container">
-      
-
-
       {/* Player Stats Modal */}
       {selectedPlayer && (
         <PlayerStatsModal
@@ -143,14 +157,22 @@ const MyTeamTab: React.FC = () => {
       )}
 
       <TeamStatsReport
-  team={team}
-  matches={matches}
-  stats={stats}
-  players={players}
-  selectedPlayer={selectedPlayer}
-  onPlayerSelect={handlePlayerSelect}
-  showPlayerSelector
-/>
+        team={team}
+        matches={filteredMatches}
+        stats={stats}
+        players={players}
+        selectedPlayer={selectedPlayer}
+        onPlayerSelect={handlePlayerSelect}
+        showPlayerSelector
+        startDate={startDate}
+        endDate={endDate}
+        setStartDate={setStartDate}
+        setEndDate={setEndDate}
+        totalInterceptions={totalInterceptions}
+        totalClearances={totalClearances}
+        totalYellowCards={totalYellowCards}
+        totalRedCards={totalRedCards}
+      />
 
     </section>
   );

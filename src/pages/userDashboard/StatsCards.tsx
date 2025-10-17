@@ -30,18 +30,7 @@ const StatsCards: React.FC<Props> = ({ teams, players, matches, playersWithStats
         <h3>Matches</h3>
         <div>{matches}</div>
       </div>
-      {totalGoals > 0 && (
-        <div className="rs-card">
-          <h3>Total Goals</h3>
-          <div>{totalGoals}</div>
-        </div>
-      )}
-      {totalAssists > 0 && (
-        <div className="rs-card">
-          <h3>Total Assists</h3>
-          <div>{totalAssists}</div>
-        </div>
-      )}
+     
       {totalMinutes > 0 && (
         <div className="rs-card">
           <h3>Total Minutes</h3>

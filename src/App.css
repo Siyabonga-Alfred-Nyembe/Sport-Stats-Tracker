@@ -1,8 +1,9 @@
 
 
 .App{
-    --bg: linear-gradient(to left, #e0f7fa 0%, #d1fae5 50%, #bfdbfe 100%);
+    --bg: linear-gradient(135deg, #d4f1f4 0%, #c8e9ec 100%);
   --card: #ffffff;
+  --headback: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
   --offwhite: #FAF9F6;
   --btnprimary: #06b6d4;
   --btngrad:linear-gradient(135deg, var(--primary) 0%,var(--secondary) 100%);

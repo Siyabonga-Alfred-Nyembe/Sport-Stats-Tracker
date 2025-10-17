@@ -1,6 +1,6 @@
 
 /* === Header === */
-.dashboard-header {
+.u-dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
@@ -30,7 +30,7 @@
   padding: 0 0.3rem;
   transition: all 0.3s ease;
 }
-.header-content {
+.u-header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;

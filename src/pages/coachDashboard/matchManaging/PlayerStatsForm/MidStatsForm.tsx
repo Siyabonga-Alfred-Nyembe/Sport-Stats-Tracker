@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 interface Props {
-  initialStats?: Record<string, number>; 
+  initialStats?: Record<string, number>;
   onSave: (stats: Record<string, number>) => void;
 }
 
@@ -39,8 +39,12 @@ const MidStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
     <div className="position-stats-form">
       {Object.keys(form).map((field) => (
         <div key={field} className="form-group">
-          <label style={{color:'blue'}}>{field}</label>
-          <input type="number" value={(form as any)[field]} onChange={e => handleInputChange(field, +e.target.value)} />
+          <label style={{ color: "blue" }}>{field}</label>
+          <input
+            type="number"
+            value={(form as any)[field]}
+            onChange={(e) => handleInputChange(field, +e.target.value)}
+          />
         </div>
       ))}
     </div>

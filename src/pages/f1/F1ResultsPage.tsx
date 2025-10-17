@@ -178,7 +178,7 @@ const F1ResultsPage: React.FC = () => {
                       <span>{race.winner}</span>
                     </div>
                   </td>
-                  <td className="team-name">{race.team}</td>
+                  <td className="f1-team-name">{race.team}</td>
                   <td className="text-center laps">{race.laps}</td>
                   <td className="race-time">{race.time}</td>
                   <td className="fastest-lap">{race.fastestLap}</td>
@@ -191,15 +191,15 @@ const F1ResultsPage: React.FC = () => {
 
       <aside className="results-stats" aria-labelledby="season-stats-heading">
         <h2 id="season-stats-heading" className="visually-hidden">Season Statistics Summary</h2>
-        <article className="stat-card" aria-labelledby="races-completed-stat">
+        <article className="f1-stat-card" aria-labelledby="races-completed-stat">
           <div className="stat-number" id="races-completed-stat" aria-label="10 races completed">10</div>
           <div className="stat-label">Races Completed</div>
         </article>
-        <article className="stat-card" aria-labelledby="different-winners-stat">
+        <article className="f1-stat-card" aria-labelledby="different-winners-stat">
           <div className="stat-number" id="different-winners-stat" aria-label="5 different winners">5</div>
           <div className="stat-label">Different Winners</div>
         </article>
-        <article className="stat-card" aria-labelledby="mclaren-wins-stat">
+        <article className="f1-stat-card" aria-labelledby="mclaren-wins-stat">
           <div className="stat-number" id="mclaren-wins-stat" aria-label="4 McLaren wins">4</div>
           <div className="stat-label">McLaren Wins</div>
         </article>
