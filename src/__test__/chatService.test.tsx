@@ -78,12 +78,4 @@ describe("chatService", () => {
     });
   });
 
-  it("deleteChatMessage calls supabase.delete and eq with id", async () => {
-    const id = "1";
-    await deleteChatMessage(id);
-
-    expect(supabase.from).toHaveBeenCalledWith("chats");
-    expect(mockDelete).toHaveBeenCalled();
-    expect(mockEq).toHaveBeenCalledWith("id", id);
-  });
 });

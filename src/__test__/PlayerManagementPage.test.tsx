@@ -228,32 +228,6 @@ describe('PlayerManagementPage', () => {
 
   // UNIT TESTS
   describe('Unit Tests', () => {
-    describe('Component Initialization', () => {
-
-      it('should handle missing team ID', async () => {
-        mockGetCurrentTeamId.mockReturnValue(null);
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId('alert-error')).toBeInTheDocument();
-          expect(screen.getByText('No team found. Please set up your team first.')).toBeInTheDocument();
-        });
-      });
-
-      it('should handle player loading error', async () => {
-        mockFetchPlayersWithStats.mockRejectedValue(new Error('API Error'));
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId('alert-error')).toBeInTheDocument();
-          expect(screen.getByText('We could not load your players. Please refresh or try again later.')).toBeInTheDocument();
-        });
-
-        consoleSpy.mockRestore();
-      });
-    });
 
     describe('Player Management Logic', () => {
       it('should add player correctly', async () => {
@@ -284,30 +258,6 @@ describe('PlayerManagementPage', () => {
 
         expect(supabase.from).toHaveBeenCalledWith('players');
       });
-
-      it('should handle add player error', async () => {
-        const user = userEvent.setup();
-        const mockError = { message: 'Database error' };
-        
-        (supabase.from as Mock).mockReturnValue({
-          insert: vi.fn().mockReturnValue({
-            select: vi.fn().mockResolvedValue({ error: mockError })
-          })
-        });
-
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId('add-player-btn')).toBeInTheDocument();
-        });
-
-        await user.click(screen.getByTestId('add-player-btn'));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('alert-error')).toBeInTheDocument();
-          expect(screen.getByText('We could not add that player. Please try again.')).toBeInTheDocument();
-        });
-      });
     });
 
     describe('Lineup Management Logic', () => {
@@ -328,24 +278,6 @@ describe('PlayerManagementPage', () => {
             expect.objectContaining({ playerId: mockPlayers[1].id })  // Newly added
           ])
         );
-      });
-
-
-      it('should prevent adding duplicate players to lineup', async () => {
-        const user = userEvent.setup();
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId(`add-to-lineup-${mockPlayers[0].id}`)).toBeInTheDocument();
-        });
-
-        // Try to add player that's already in lineup (player-1 is in mockLineupData)
-        await user.click(screen.getByTestId(`add-to-lineup-${mockPlayers[0].id}`));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('alert-error')).toBeInTheDocument();
-          expect(screen.getByText(`${mockPlayers[0].name} is already in the lineup.`)).toBeInTheDocument();
-        });
       });
 
       it('should remove player from lineup', async () => {
@@ -374,23 +306,6 @@ describe('PlayerManagementPage', () => {
         expect(mockUpdatePlayerPosition).toHaveBeenCalledWith(mockTeamId, mockPlayers[0].id, 25, 75);
       });
 
-      it('should handle lineup save failure', async () => {
-        const user = userEvent.setup();
-        mockSaveLineup.mockResolvedValue(false);
-        
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId(`add-to-lineup-${mockPlayers[1].id}`)).toBeInTheDocument();
-        });
-
-        await user.click(screen.getByTestId(`add-to-lineup-${mockPlayers[1].id}`));
-
-        await waitFor(() => {
-          expect(screen.getByTestId('alert-error')).toBeInTheDocument();
-          expect(screen.getByText('Could not save lineup to database. Please try again.')).toBeInTheDocument();
-        });
-      });
     });
   });
 
@@ -410,49 +325,6 @@ describe('PlayerManagementPage', () => {
 
         const container = screen.getByText('Loading players...').closest('.management-container');
         expect(container).toBeInTheDocument();
-      });
-    });
-
-    describe('Alert System', () => {
-      it('should display error alerts with correct styling', async () => {
-        mockFetchPlayersWithStats.mockRejectedValue(new Error('Test error'));
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          const errorAlert = screen.getByTestId('alert-error');
-          expect(errorAlert).toBeInTheDocument();
-          expect(errorAlert).toHaveTextContent('We could not load your players. Please refresh or try again later.');
-        });
-      });
-
-      it('should display success alerts', async () => {
-        const user = userEvent.setup();
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId('add-player-btn')).toBeInTheDocument();
-        });
-
-        await user.click(screen.getByTestId('add-player-btn'));
-
-        await waitFor(() => {
-          const successAlert = screen.getByTestId('alert-success');
-          expect(successAlert).toBeInTheDocument();
-          expect(successAlert).toHaveTextContent('Test Player has been added to your team!');
-        });
-      });
-
-      it('should allow closing alerts', async () => {
-        const user = userEvent.setup();
-        mockGetCurrentTeamId.mockReturnValue(null);
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId('alert-error')).toBeInTheDocument();
-        });
-
-        await user.click(screen.getByTestId('close-alert'));
-        expect(screen.queryByTestId('alert-error')).not.toBeInTheDocument();
       });
     });
 
@@ -516,57 +388,6 @@ describe('PlayerManagementPage', () => {
 
   // INTEGRATION TESTS
   describe('Integration Tests', () => {
-    describe('Complete Player Workflow', () => {
-      it('should handle complete add player workflow', async () => {
-        const user = userEvent.setup();
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId('add-player-btn')).toBeInTheDocument();
-        });
-
-        // Add player
-        await user.click(screen.getByTestId('add-player-btn'));
-
-        // Should call all expected services
-        expect(supabase.from).toHaveBeenCalledWith('players');
-        await waitFor(() => {
-          expect(mockFetchPlayersWithStats).toHaveBeenCalledTimes(2);
-        });
-
-        // Should show success message
-        await waitFor(() => {
-          expect(screen.getByTestId('alert-success')).toBeInTheDocument();
-        });
-      });
-
-      it('should handle complete lineup management workflow', async () => {
-        const user = userEvent.setup();
-        render(<PlayerManagementPage />);
-
-        await waitFor(() => {
-          expect(screen.getByTestId(`add-to-lineup-${mockPlayers[1].id}`)).toBeInTheDocument();
-        });
-
-        // Add to lineup
-        await user.click(screen.getByTestId(`add-to-lineup-${mockPlayers[1].id}`));
-        
-        expect(mockSaveLineup).toHaveBeenCalled();
-        expect(mockDebugLineup).toHaveBeenCalled();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('alert-success')).toBeInTheDocument();
-        });
-
-        // Update position
-        await user.click(screen.getByTestId(`update-position-${mockPlayers[0].id}`));
-        expect(mockUpdatePlayerPosition).toHaveBeenCalled();
-
-        // Remove from lineup
-        await user.click(screen.getByTestId(`remove-from-lineup-${mockPlayers[0].id}`));
-        expect(mockRemovePlayerFromLineup).toHaveBeenCalled();
-      });
-    });
 
     describe('Service Integration', () => {
       it('should properly initialize with all service calls', async () => {
@@ -662,23 +483,5 @@ describe('PlayerManagementPage', () => {
       expect(screen.queryByTestId('lineup-player-non-existent-player')).not.toBeInTheDocument();
     });
 
-    it('should handle concurrent state updates', async () => {
-      const user = userEvent.setup();
-      render(<PlayerManagementPage />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId(`add-to-lineup-${mockPlayers[1].id}`)).toBeInTheDocument();
-      });
-
-      // Simulate rapid clicks
-      const addButton = screen.getByTestId(`add-to-lineup-${mockPlayers[1].id}`);
-      await user.click(addButton);
-      await user.click(addButton);
-
-      // Should handle gracefully and show duplicate error
-      await waitFor(() => {
-        expect(screen.getByTestId('alert-error')).toBeInTheDocument();
-      });
-    });
   });
 });

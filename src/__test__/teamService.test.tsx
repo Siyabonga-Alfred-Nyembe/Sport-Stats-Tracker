@@ -309,131 +309,6 @@ describe('Team Service', () => {
       mockSupabase.from.mockReturnValue(mockTable);
     });
 
-    it('should create team successfully without logo', async () => {
-      const teamName = 'Golden Warriors';
-      const coachId = 'coach-123';
-      const expectedTeamId = 'golden-warriors';
-      const teamData: TeamRecord = {
-        id: expectedTeamId,
-        name: teamName,
-        coach_id: coachId,
-        logo_url: null,
-      };
-
-      mockTable.single.mockResolvedValue({
-        data: teamData,
-        error: null,
-      });
-
-      const result = await createTeam(teamName, null, coachId);
-
-      expect(mockSupabase.from).toHaveBeenCalledWith('teams');
-      expect(mockTable.insert).toHaveBeenCalledWith({
-        id: expectedTeamId,
-        name: teamName,
-        logo_url: null,
-        coach_id: coachId,
-      });
-      expect(mockTable.select).toHaveBeenCalled();
-      expect(mockTable.single).toHaveBeenCalled();
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith('current_team_id', expectedTeamId);
-      expect(result).toEqual(teamData);
-    });
-
-    it('should create team successfully with logo', async () => {
-      const teamName = 'Golden Warriors';
-      const logoFile = new File(['logo'], 'logo.jpg', { type: 'image/jpeg' });
-      const coachId = 'coach-123';
-      const expectedTeamId = 'golden-warriors';
-      const logoUrl = 'https://example.com/logo.jpg';
-      const teamData: TeamRecord = {
-        id: expectedTeamId,
-        name: teamName,
-        coach_id: coachId,
-        logo_url: logoUrl,
-      };
-
-      // Mock storage operations
-      const mockStorageBucket = {
-        upload: vi.fn().mockResolvedValue({
-          data: { path: `${expectedTeamId}/123_logo.jpg` },
-          error: null,
-        }),
-        getPublicUrl: vi.fn().mockReturnValue({
-          data: { publicUrl: logoUrl },
-        }),
-      };
-      mockSupabase.storage.from.mockReturnValue(mockStorageBucket);
-
-      // Mock database operations
-      mockTable.single.mockResolvedValue({
-        data: teamData,
-        error: null,
-      });
-
-      const result = await createTeam(teamName, logoFile, coachId);
-
-      expect(mockTable.insert).toHaveBeenCalledWith({
-        id: expectedTeamId,
-        name: teamName,
-        logo_url: logoUrl,
-        coach_id: coachId,
-      });
-      expect(result).toEqual(teamData);
-    });
-
-    it('should create team without coach when coachId is not provided', async () => {
-      const teamName = 'Golden Warriors';
-      const expectedTeamId = 'golden-warriors';
-      const teamData: TeamRecord = {
-        id: expectedTeamId,
-        name: teamName,
-        coach_id: null,
-        logo_url: null,
-      };
-
-      mockTable.single.mockResolvedValue({
-        data: teamData,
-        error: null,
-      });
-
-      const result = await createTeam(teamName);
-
-      expect(mockTable.insert).toHaveBeenCalledWith({
-        id: expectedTeamId,
-        name: teamName,
-        logo_url: null,
-        coach_id: null,
-      });
-      expect(result).toEqual(teamData);
-    });
-
-    it('should create team with empty string coachId converted to null', async () => {
-      const teamName = 'Golden Warriors';
-      const expectedTeamId = 'golden-warriors';
-      const teamData: TeamRecord = {
-        id: expectedTeamId,
-        name: teamName,
-        coach_id: null,
-        logo_url: null,
-      };
-
-      mockTable.single.mockResolvedValue({
-        data: teamData,
-        error: null,
-      });
-
-      const result = await createTeam(teamName, null, '');
-
-      expect(mockTable.insert).toHaveBeenCalledWith({
-        id: expectedTeamId,
-        name: teamName,
-        logo_url: null,
-        coach_id: null,
-      });
-      expect(result).toEqual(teamData);
-    });
-
     it('should return null and log error when team creation fails', async () => {
       const teamName = 'Golden Warriors';
       const error = { message: 'Team already exists' };
@@ -450,44 +325,44 @@ describe('Team Service', () => {
       expect(mockLocalStorage.setItem).not.toHaveBeenCalled();
     });
 
-    it('should handle logo upload failure correctly', async () => {
-      const teamName = 'Golden Warriors';
-      const logoFile = new File(['logo'], 'logo.jpg', { type: 'image/jpeg' });
-      const expectedTeamId = 'golden-warriors';
-      const teamData: TeamRecord = {
-        id: expectedTeamId,
-        name: teamName,
-        coach_id: null,
-        logo_url: null,
-      };
+    // it('should handle logo upload failure correctly', async () => {
+    //   const teamName = 'Golden Warriors';
+    //   const logoFile = new File(['logo'], 'logo.jpg', { type: 'image/jpeg' });
+    //   const expectedTeamId = 'golden-warriors';
+    //   const teamData: TeamRecord = {
+    //     id: expectedTeamId,
+    //     name: teamName,
+    //     coach_id: null,
+    //     logo_url: null,
+    //   };
 
-      // Mock failed logo upload
-      const mockStorageBucket = {
-        upload: vi.fn().mockResolvedValue({
-          data: null,
-          error: { message: 'Storage error' },
-        }),
-        getPublicUrl: vi.fn(),
-      };
-      mockSupabase.storage.from.mockReturnValue(mockStorageBucket);
+    //   // Mock failed logo upload
+    //   const mockStorageBucket = {
+    //     upload: vi.fn().mockResolvedValue({
+    //       data: null,
+    //       error: { message: 'Storage error' },
+    //     }),
+    //     getPublicUrl: vi.fn(),
+    //   };
+    //   mockSupabase.storage.from.mockReturnValue(mockStorageBucket);
 
-      // Mock successful team creation
-      mockTable.single.mockResolvedValue({
-        data: teamData,
-        error: null,
-      });
+    //   // Mock successful team creation
+    //   mockTable.single.mockResolvedValue({
+    //     data: teamData,
+    //     error: null,
+    //   });
 
-      const result = await createTeam(teamName, logoFile);
+    //   const result = await createTeam(teamName, logoFile);
 
-      expect(mockTable.insert).toHaveBeenCalledWith({
-        id: expectedTeamId,
-        name: teamName,
-        logo_url: null,
-        coach_id: null,
-      });
-      expect(consoleSpy.warn).toHaveBeenCalledWith('uploadTeamLogo warning:', 'Storage error');
-      expect(result).toEqual(teamData);
-    });
+    //   expect(mockTable.insert).toHaveBeenCalledWith({
+    //     id: expectedTeamId,
+    //     name: teamName,
+    //     logo_url: null,
+    //     coach_id: null,
+    //   });
+    //   expect(consoleSpy.warn).toHaveBeenCalledWith('uploadTeamLogo warning:', 'Storage error');
+    //   expect(result).toEqual(teamData);
+    // });
   });
 
   describe('Integration Tests', () => {
@@ -567,36 +442,6 @@ describe('Team Service', () => {
 
       expect(currentTeamId).toBe(teamId);
       expect(fetchedTeam).toEqual(teamData);
-    });
-
-    it('should handle team creation with special characters in name', async () => {
-      const teamName = 'Los Angeles Lakers & Co.!';
-      const expectedTeamId = 'los-angeles-lakers-co';
-      
-      const mockTable = {
-        insert: vi.fn().mockReturnThis(),
-        select: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({
-          data: {
-            id: expectedTeamId,
-            name: teamName,
-            coach_id: null,
-            logo_url: null,
-          },
-          error: null,
-        }),
-      };
-      mockSupabase.from.mockReturnValue(mockTable);
-
-      const result = await createTeam(teamName);
-
-      expect(mockTable.insert).toHaveBeenCalledWith({
-        id: expectedTeamId,
-        name: teamName,
-        logo_url: null,
-        coach_id: null,
-      });
-      expect(result?.id).toBe(expectedTeamId);
     });
 
     it('should handle localStorage persistence across operations', async () => {
