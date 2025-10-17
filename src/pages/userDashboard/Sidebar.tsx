@@ -39,8 +39,8 @@ const Sidebar: React.FC<Props> = ({ activeTab, goToTab }) => {
 
   return (
     <>
-      <header className="dashboard-header">
-        <div className="header-content">
+      <header className="u-dashboard-header">
+        <div className="u-header-content">
           <button
             className="hamburger-menu"
             onClick={toggleSidebar}
