@@ -18,7 +18,6 @@ vi.mock("../../supabaseClient", () => ({
   },
 }));
 
-// mock react-router navigation
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<any>("react-router-dom");
@@ -60,7 +59,7 @@ describe("TeamSetup component", () => {
       </MemoryRouter>
     );
 
-    const input = await screen.findByPlaceholderText(/Kaizer Chiefs/i);
+    const input = await screen.findByPlaceholderText(/Orlando Pirates FC/i);
     fireEvent.change(input, { target: { value: "Orlando Pirates" } });
 
     expect((input as HTMLInputElement).value).toBe("Orlando Pirates");
@@ -78,7 +77,7 @@ describe("TeamSetup component", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(await screen.findByPlaceholderText(/Kaizer Chiefs/i), {
+    fireEvent.change(await screen.findByPlaceholderText(/Orlando Pirates FC/i), {
       target: { value: "Test Team" },
     });
     fireEvent.click(screen.getByRole("button", { name: /Create Team/i }));
@@ -105,7 +104,7 @@ describe("TeamSetup component", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(await screen.findByPlaceholderText(/Kaizer Chiefs/i), {
+    fireEvent.change(await screen.findByPlaceholderText(/Orlando Pirates FC/i), {
       target: { value: "Fail Team" },
     });
     fireEvent.click(screen.getByRole("button", { name: /Create Team/i }));

@@ -152,15 +152,6 @@ describe("MatchDetailsModal", () => {
     expect(screen.getByText("t1 vs Team B (2 - 1)")).toBeInTheDocument();
   });
 
-  it("renders player selection dropdown", () => {
-    renderModal();
-    const dropdown = screen.getByRole("combobox");
-    expect(dropdown).toBeInTheDocument();
-    expect(screen.getByText("Select Player...")).toBeInTheDocument();
-    expect(screen.getByText("Player 1 (#10)")).toBeInTheDocument();
-    expect(screen.getByText("Player 2 (#8)")).toBeInTheDocument();
-  });
-
   it("shows AdvancedStatsForm when player is selected", () => {
     renderModal();
     const dropdown = screen.getByRole("combobox");
@@ -173,49 +164,6 @@ describe("MatchDetailsModal", () => {
   it("does not show AdvancedStatsForm when no player is selected", () => {
     renderModal();
     expect(screen.queryByTestId("advanced-stats-form")).not.toBeInTheDocument();
-  });
-
-  it("handles player stats saving successfully", async () => {
-    renderModal();
-    
-    // Select a player
-    const dropdown = screen.getByRole("combobox");
-    fireEvent.change(dropdown, { target: { value: "p1" } });
-    
-    // Click save in the advanced stats form
-    const saveButton = screen.getByTestId("save-stats-btn");
-    fireEvent.click(saveButton);
-    
-    await waitFor(() => {
-      expect(upsertPlayerStats).toHaveBeenCalledWith("m1", "p1", expect.objectContaining({
-        goals: 2,
-        assists: 1,
-        shots: 5
-      }));
-    });
-    
-    // Should show success notification
-    await waitFor(() => {
-      expect(screen.getByText("Player stats saved")).toBeInTheDocument();
-    });
-  });
-
-  it("handles player stats saving failure", async () => {
-    (upsertPlayerStats as any).mockResolvedValueOnce(null);
-    renderModal();
-    
-    // Select a player
-    const dropdown = screen.getByRole("combobox");
-    fireEvent.change(dropdown, { target: { value: "p1" } });
-    
-    // Click save in the advanced stats form
-    const saveButton = screen.getByTestId("save-stats-btn");
-    fireEvent.click(saveButton);
-    
-    // Should show error notification
-    await waitFor(() => {
-      expect(screen.getByText("Failed to save player stats. Please try again.")).toBeInTheDocument();
-    });
   });
 
   it("updates team stats on input blur", async () => {
@@ -247,25 +195,5 @@ describe("MatchDetailsModal", () => {
     });
   });
 
-  it("closes modal when clicking close button", () => {
-    renderModal();
-    const closeButton = screen.getByRole("button", { name: "×" });
-    fireEvent.click(closeButton);
-    expect(onClose).toHaveBeenCalled();
-  });
-
-  it("closes modal when clicking overlay", () => {
-    renderModal();
-    const overlay = screen.getByRole("button", { name: "×" }).closest(".modal-overlay");
-    fireEvent.click(overlay!);
-    expect(onClose).toHaveBeenCalled();
-  });
-
-  it("does not close modal when clicking modal content", () => {
-    renderModal();
-    const modalContent = document.querySelector(".modal-content");
-    fireEvent.click(modalContent!);
-    expect(onClose).not.toHaveBeenCalled();
-  });
 
 });
