@@ -17,6 +17,8 @@ import F1DriversPage from "./pages/f1/F1DriversPage";
 import F1TeamsPage from "./pages/f1/F1TeamPage";
 import F1StatsPage from "./pages/f1/F1StatsPage";
 import F1ResultsPage from "./pages/f1/F1ResultsPage";
+import "./chartSetup";
+
 
 function App() {
   return (
