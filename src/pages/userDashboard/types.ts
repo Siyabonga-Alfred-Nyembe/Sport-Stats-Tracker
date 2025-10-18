@@ -75,7 +75,7 @@ export interface Match {
 }
 
 // Helper function to create position-specific default stats
-export const createPositionDefaultStats = (position: string): PlayerStats => {
+export const createPositionDefaultStats = (_position: string): PlayerStats => {
   const baseStats: PlayerStats = {
     // General stats for all positions
     goals: 0,

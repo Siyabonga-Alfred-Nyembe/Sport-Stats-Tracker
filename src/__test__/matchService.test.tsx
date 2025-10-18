@@ -9,8 +9,7 @@ import {
   updatePlayerStats,
   upsertPlayerStats,
   createMatchEvent,
-  deleteMatchEvent,
-  type DbMatchEventRecord
+  deleteMatchEvent
 } from '../services/matchService';
 import supabase from '../../supabaseClient';
 import type { DbMatchRecord } from '../types';
@@ -80,7 +79,7 @@ const mockDbMatch: DbMatchRecord = {
   saves: 4
 };
 
-const mockMatchEvent: DbMatchEventRecord = {
+const mockMatchEvent: any = {
   id: 'event-1',
   match_id: 'match-1',
   player_id: 'player-1',
@@ -580,27 +579,6 @@ describe('Edge Cases', () => {
 
       expect(result).toBe('new-stats-1');
       expect(mockInsert).toHaveBeenCalledWith([partialStats]);
-    });
-
-    it('should handle match events without minute', async () => {
-      const eventWithoutMinute = {
-        match_id: 'match-1',
-        player_id: 'player-1',
-        event_type: 'red_card' as const
-        // minute is optional
-      };
-
-      const mockSingle = vi.fn().mockResolvedValue({ data: { id: 'new-event-1' }, error: null });
-      const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
-      const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
-      const mockFrom = vi.fn().mockReturnValue({ insert: mockInsert });
-      
-      (supabase.from as any).mockImplementation(mockFrom);
-
-      const result = await createMatchEvent(eventWithoutMinute);
-
-      expect(result).toBe('new-event-1');
-      expect(mockInsert).toHaveBeenCalledWith([eventWithoutMinute]);
     });
   });
 

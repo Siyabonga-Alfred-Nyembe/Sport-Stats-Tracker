@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { fetchMatches } from "../../services/matchService";
 import type { Match } from "../../types";
 import type { UiTeam } from "./hooks/useDbData";
@@ -13,7 +13,6 @@ interface MatchDetailsPageProps {
 
 const MatchDetailsPage: React.FC<MatchDetailsPageProps> = ({ onBack, username, teams }) => {
   const { id: matchId } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [match, setMatch] = useState<Match | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -257,7 +256,7 @@ const MatchDetailsPage: React.FC<MatchDetailsPageProps> = ({ onBack, username, t
       {/* Chat System */}
       <div style={{ marginTop: "32px" }}>
         <h3 style={{ margin: "0 0 16px 0", fontSize: "18px" }}>Match Chat</h3>
-        <Chat matchId={matchId} username={username} />
+        <Chat matchId={matchId!} username={username} />
       </div>
     </div>
   );

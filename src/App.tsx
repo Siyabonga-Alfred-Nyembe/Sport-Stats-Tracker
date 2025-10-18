@@ -12,11 +12,13 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 import TeamStatsPage from "./pages/userDashboard/TeamStatsPage";
-import F1Dashboard from "./pages/f1/f1Dashboard";
+import F1Dashboard from "./pages/f1/F1Dashboard";
 import F1DriversPage from "./pages/f1/F1DriversPage";
 import F1TeamsPage from "./pages/f1/F1TeamPage";
 import F1StatsPage from "./pages/f1/F1StatsPage";
 import F1ResultsPage from "./pages/f1/F1ResultsPage";
+import "./chartSetup";
+
 
 function App() {
   return (

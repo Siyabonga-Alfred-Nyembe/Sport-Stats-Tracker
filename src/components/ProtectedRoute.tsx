@@ -5,7 +5,7 @@ import supabase from '../../supabaseClient';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'Fan' | 'Coach';
+  requiredRole?: 'Fan' | 'Coach' | 'Admin';
   redirectTo?: string;
 }
 

@@ -120,7 +120,7 @@ const mockEvents: MatchEvent[] = [
 ];
 
 // Import the actual services for mocking
-import { upsertPlayerStats, updateMatch } from "../services/matchService";
+import { updateMatch } from "../services/matchService";
 
 describe("MatchDetailsModal", () => {
   const onClose = vi.fn();

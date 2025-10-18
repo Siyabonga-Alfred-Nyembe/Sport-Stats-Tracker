@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   fetchChatForMatch,
   sendChatMessage,
-  deleteChatMessage,
   type DbChatRecord,
 } from "../services/chatService";
 
