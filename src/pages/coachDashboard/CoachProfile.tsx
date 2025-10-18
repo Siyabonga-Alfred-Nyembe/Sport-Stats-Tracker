@@ -4,7 +4,6 @@ import "./CoachProfile.css";
 import Logo from "../../images/7435680.jpg";
 import { fetchTeamById, updateTeam, uploadTeamLogo } from "../../services/teamService";
 import { getCurrentTeamId } from "../../services/teamService";
-import supabase from "../../../supabaseClient";
 interface CoachProfileProps {
   initialCoachName?: string;
   initialTeamName?: string;
@@ -169,39 +168,6 @@ export default function CoachProfile({
     }
   };
 
-  const handleRefreshData = async () => {
-    if (!teamId) return;
-    
-    setIsLoading(true);
-    setMessage("");
-    
-    try {
-      const team = await fetchTeamById(teamId);
-      console.log("Refreshed team data:", team);
-      
-      if (team) {
-        setTeamName(team.name || "");
-        if (team.logo_url) {
-          setTeamLogo(team.logo_url);
-        }
-        if (team.coach_name) {
-          console.log("Refreshed coach name from DB:", team.coach_name);
-          setCoachName(team.coach_name);
-        } else {
-          console.log("No coach name found in database after refresh");
-          setCoachName("");
-        }
-        setMessage("Data refreshed successfully!");
-      } else {
-        setMessage("No team data found");
-      }
-    } catch (error) {
-      console.error("Error refreshing data:", error);
-      setMessage("Error refreshing data");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (isLoading) {
     return (

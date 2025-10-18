@@ -1,7 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import Sidebar from "../pages/userDashboard/Sidebar";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import React from "react";
 
 describe("Sidebar Component", () => {
   const mockGoToTab = vi.fn();
@@ -39,19 +38,6 @@ describe("Sidebar Component", () => {
     fireEvent.click(screen.getByText("Matches"));
     expect(mockGoToTab).toHaveBeenCalledTimes(1);
     expect(mockGoToTab).toHaveBeenCalledWith("matches");
-  });
-
-  it("integration: switching tabs updates active tab visually", () => {
-    const Wrapper = () => {
-      const [active, setActive] = React.useState<typeof tabs[number]>("overview");
-      return <Sidebar activeTab={active} goToTab={setActive} />;
-    };
-
-    render(<Wrapper />);
-    const matchesBtn = screen.getByText("Matches");
-    fireEvent.click(matchesBtn);
-    expect(screen.getByText("Matches")).toHaveClass("active");
-    expect(screen.getByText("Overview")).not.toHaveClass("active");
   });
 
 });

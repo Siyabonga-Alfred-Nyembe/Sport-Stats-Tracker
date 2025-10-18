@@ -1,6 +1,6 @@
 // pages/userDashboard/PlayerDetails.tsx
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { fetchPlayerStatsByMatch, fetchPlayers } from "../../services/playerService";
 import { fetchTeamById } from "../../services/teamService";
 import { fetchMatches } from "../../services/matchService";
@@ -21,7 +21,6 @@ interface Props {
 
 const PlayerDetails: React.FC<Props> = ({ onBack }) => {
   const { playerId } = useParams<{ playerId: string }>();
-  const navigate = useNavigate();
   const [playerStats, setPlayerStats] = useState<PlayerStatsWithMatch[]>([]);
   const [playerInfo, setPlayerInfo] = useState<{ name: string; position: string; teamId: string } | null>(null);
   const [teams, setTeams] = useState<Map<string, Team>>(new Map());
@@ -270,7 +269,7 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
             </tr>
           </thead>
           <tbody>
-            {playerStats.filter(stat => stat.match).map((stat, index) => {
+            {playerStats.filter(stat => stat.match).map((stat) => {
               const match = stat.match!;
               
               const yellowCards = stat.yellow_cards || 0;

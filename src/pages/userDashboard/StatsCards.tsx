@@ -12,8 +12,6 @@ interface Props {
 
 const StatsCards: React.FC<Props> = ({ teams, players, matches, playersWithStats = [] }) => {
   // Calculate some basic stats from players
-  const totalGoals = playersWithStats.reduce((sum, player) => sum + (player.stats?.goals || 0), 0);
-  const totalAssists = playersWithStats.reduce((sum, player) => sum + (player.stats?.assists || 0), 0);
   const totalMinutes = playersWithStats.reduce((sum, player) => sum + (player.stats?.minutesPlayed || 0), 0);
   
   return (

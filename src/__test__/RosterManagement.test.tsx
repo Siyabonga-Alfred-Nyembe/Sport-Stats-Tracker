@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import RosterManagement from '../pages/coachDashboard/playerManagement/RosterManagement';
 import type { Player } from '../types';
+import type { SetStateAction } from 'react';
 
 // Mock PlayerCard component
 vi.mock('../../components/playerCard', () => ({
@@ -87,13 +88,21 @@ describe('RosterManagement Component', () => {
 
   describe('Unit Tests - Rendering', () => {
     it('should render the component with correct title', () => {
-      render(<RosterManagement {...defaultProps} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} />);
       expect(screen.getByText('Team Roster')).toBeInTheDocument();
       expect(screen.getByText('Add New Player')).toBeInTheDocument();
     });
 
     it('should render add player form with all required fields', () => {
-      render(<RosterManagement {...defaultProps} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} />);
       
       expect(screen.getByPlaceholderText('Player Name')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Select Position')).toBeInTheDocument();
@@ -120,14 +129,22 @@ describe('RosterManagement Component', () => {
     // });
 
     it('should not render position groups when no players exist', () => {
-      render(<RosterManagement {...defaultProps} players={[]} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={[]} />);
       
       expect(screen.queryByText('Goalkeepers (1)')).not.toBeInTheDocument();
       expect(screen.queryByText('Defenders')).not.toBeInTheDocument();
     });
 
     it('should render players grouped by position categories', () => {
-      render(<RosterManagement {...defaultProps} players={mockPlayers} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={mockPlayers} />);
       
       expect(screen.getByText('Goalkeepers (1)')).toBeInTheDocument();
       expect(screen.getByText('Defenders (3)')).toBeInTheDocument();
@@ -141,7 +158,11 @@ describe('RosterManagement Component', () => {
 
     it('should call onAddPlayer when form is submitted with valid data', async () => {
       const onAddPlayer = vi.fn();
-      render(<RosterManagement {...defaultProps} onAddPlayer={onAddPlayer} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} onAddPlayer={onAddPlayer} />);
       
       const nameInput = screen.getByPlaceholderText('Player Name');
       const positionSelect = screen.getByDisplayValue('Select Position');
@@ -164,7 +185,11 @@ describe('RosterManagement Component', () => {
 
     it('should not submit form with empty name', async () => {
       const onAddPlayer = vi.fn();
-      render(<RosterManagement {...defaultProps} onAddPlayer={onAddPlayer} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} onAddPlayer={onAddPlayer} />);
       
       const positionSelect = screen.getByDisplayValue('Select Position');
       const jerseyInput = screen.getByPlaceholderText('Jersey Number');
@@ -179,7 +204,11 @@ describe('RosterManagement Component', () => {
 
     it('should not submit form with whitespace-only name', async () => {
       const onAddPlayer = vi.fn();
-      render(<RosterManagement {...defaultProps} onAddPlayer={onAddPlayer} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} onAddPlayer={onAddPlayer} />);
       
       const nameInput = screen.getByPlaceholderText('Player Name');
       const positionSelect = screen.getByDisplayValue('Select Position');
@@ -196,7 +225,11 @@ describe('RosterManagement Component', () => {
 
     it('should not submit form with empty position', async () => {
       const onAddPlayer = vi.fn();
-      render(<RosterManagement {...defaultProps} onAddPlayer={onAddPlayer} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} onAddPlayer={onAddPlayer} />);
       
       const nameInput = screen.getByPlaceholderText('Player Name');
       const jerseyInput = screen.getByPlaceholderText('Jersey Number');
@@ -211,7 +244,11 @@ describe('RosterManagement Component', () => {
 
     it('should not submit form with empty jersey number', async () => {
       const onAddPlayer = vi.fn();
-      render(<RosterManagement {...defaultProps} onAddPlayer={onAddPlayer} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} onAddPlayer={onAddPlayer} />);
       
       const nameInput = screen.getByPlaceholderText('Player Name');
       const positionSelect = screen.getByDisplayValue('Select Position');
@@ -230,7 +267,11 @@ describe('RosterManagement Component', () => {
 
     it('should call onAddToLineup when Add to Lineup button is clicked', async () => {
       const onAddToLineup = vi.fn();
-      render(<RosterManagement {...defaultProps} players={[mockPlayers[0]]} onAddToLineup={onAddToLineup} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={[mockPlayers[0]]} onAddToLineup={onAddToLineup} />);
       
       const addToLineupButton = screen.getByText('Add to Lineup');
       await user.click(addToLineupButton);
@@ -241,7 +282,11 @@ describe('RosterManagement Component', () => {
 
     it('should call onRemovePlayer when Remove button is clicked', async () => {
       const onRemovePlayer = vi.fn();
-      render(<RosterManagement {...defaultProps} players={[mockPlayers[0]]} onRemovePlayer={onRemovePlayer} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={[mockPlayers[0]]} onRemovePlayer={onRemovePlayer} />);
       
       const removeButton = screen.getByText('Remove');
       await user.click(removeButton);
@@ -252,7 +297,11 @@ describe('RosterManagement Component', () => {
 
     it('should disable Add to Lineup button for players already in lineup', () => {
       const lineupIds = new Set([mockPlayers[0].id]);
-      render(<RosterManagement {...defaultProps} players={[mockPlayers[0]]} lineupIds={lineupIds} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={[mockPlayers[0]]} lineupIds={lineupIds} />);
       
       const addToLineupButton = screen.getByText('Add to Lineup');
       expect(addToLineupButton).toBeDisabled();
@@ -260,7 +309,11 @@ describe('RosterManagement Component', () => {
 
     it('should enable Add to Lineup button for players not in lineup', () => {
       const lineupIds = new Set(['different-player-id']);
-      render(<RosterManagement {...defaultProps} players={[mockPlayers[0]]} lineupIds={lineupIds} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={[mockPlayers[0]]} lineupIds={lineupIds} />);
       
       const addToLineupButton = screen.getByText('Add to Lineup');
       expect(addToLineupButton).toBeEnabled();
@@ -273,12 +326,14 @@ describe('RosterManagement Component', () => {
       
       render(
         <RosterManagement 
-          {...defaultProps} 
-          players={[mockPlayers[0]]} 
-          onPlayerClick={onPlayerClick}
-          onAddToLineup={onAddToLineup}
-          onRemovePlayer={onRemovePlayer}
-        />
+        errorMsg={null} setErrorMsg={function (): void {
+          throw new Error('Function not implemented.');
+        } } successMsg={null} setSuccessMsg={function (): void {
+          throw new Error('Function not implemented.');
+        } } {...defaultProps}
+        players={[mockPlayers[0]]}
+        onAddToLineup={onAddToLineup}
+        onRemovePlayer={onRemovePlayer}        />
       );
       
       const addToLineupButton = screen.getByText('Add to Lineup');
@@ -305,7 +360,11 @@ describe('RosterManagement Component', () => {
         createMockPlayer({ id: 'lw1', position: 'LW' }),
       ];
       
-      render(<RosterManagement {...defaultProps} players={testPlayers} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={testPlayers} />);
       
       expect(screen.getByText('Goalkeepers (1)')).toBeInTheDocument();
       expect(screen.getByText('Defenders (2)')).toBeInTheDocument();
@@ -314,7 +373,11 @@ describe('RosterManagement Component', () => {
     });
 
     it('should display position groups in correct order', () => {
-      render(<RosterManagement {...defaultProps} players={mockPlayers} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={mockPlayers} />);
       
       const positionGroups = screen.getAllByText(/\(\d+\)$/);
       const groupTexts = positionGroups.map(group => group.textContent);
@@ -329,7 +392,11 @@ describe('RosterManagement Component', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty players array', () => {
-      render(<RosterManagement {...defaultProps} players={[]} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={[]} />);
       
       expect(screen.queryByText(/\(\d+\)$/)).not.toBeInTheDocument();
       expect(screen.getByText('Add New Player')).toBeInTheDocument();
@@ -341,14 +408,22 @@ describe('RosterManagement Component', () => {
         createMockPlayer({ id: `player-${i}`, name: `Player ${i}`, jerseyNum: `${i}` })
       );
       
-      render(<RosterManagement {...defaultProps} players={manyPlayers} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={manyPlayers} />);
       
       expect(screen.getByText('Midfielders (100)')).toBeInTheDocument();
     });
 
     it('should handle special characters in player names', async () => {
       const onAddPlayer = vi.fn();
-      render(<RosterManagement {...defaultProps} onAddPlayer={onAddPlayer} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} onAddPlayer={onAddPlayer} />);
       
       const nameInput = screen.getByPlaceholderText('Player Name');
       const positionSelect = screen.getByDisplayValue('Select Position');
@@ -369,7 +444,11 @@ describe('RosterManagement Component', () => {
 
     it('should handle form submission with Enter key', async () => {
       const onAddPlayer = vi.fn();
-      render(<RosterManagement {...defaultProps} onAddPlayer={onAddPlayer} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} onAddPlayer={onAddPlayer} />);
       
       const nameInput = screen.getByPlaceholderText('Player Name');
       const positionSelect = screen.getByDisplayValue('Select Position');
@@ -389,7 +468,11 @@ describe('RosterManagement Component', () => {
 
     it('should handle rapid form submissions', async () => {
       const onAddPlayer = vi.fn();
-      render(<RosterManagement {...defaultProps} onAddPlayer={onAddPlayer} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} onAddPlayer={onAddPlayer} />);
       
       const nameInput = screen.getByPlaceholderText('Player Name');
       const positionSelect = screen.getByDisplayValue('Select Position');
@@ -424,7 +507,11 @@ describe('RosterManagement Component', () => {
 
   describe('Accessibility Tests', () => {
     it('should have proper form labels and structure', () => {
-      render(<RosterManagement {...defaultProps} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} />);
       
       const nameInput = screen.getByPlaceholderText('Player Name');
       const positionSelect = screen.getByDisplayValue('Select Position');
@@ -439,7 +526,11 @@ describe('RosterManagement Component', () => {
 
 
     it('should have proper heading hierarchy', () => {
-      render(<RosterManagement {...defaultProps} players={mockPlayers} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} players={mockPlayers} />);
       
       const mainHeading = screen.getByRole('heading', { level: 2, name: 'Team Roster' });
       const formHeading = screen.getByRole('heading', { level: 3, name: 'Add New Player' });
@@ -453,7 +544,11 @@ describe('RosterManagement Component', () => {
     });
 
     it('should handle keyboard navigation properly', async () => {
-      render(<RosterManagement {...defaultProps} />);
+      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
+        throw new Error('Function not implemented.');
+      } } {...defaultProps} />);
       
       const nameInput = screen.getByPlaceholderText('Player Name');
       const positionSelect = screen.getByDisplayValue('Select Position');

@@ -14,7 +14,6 @@ import MatchDetailsPage from "./MatchDetailsPage.tsx";
 import { useLocalStorage } from "./hooks/useLocalStorage.ts";
 import { useDbData } from "./hooks/useDbData.ts";
 import "../../Styles/user-dashboard.css";
-import menImg from "../../images/menu.png"
 
 
 const USERNAME_KEY = "rs_dashboard_username_v2";
@@ -100,8 +99,6 @@ const RedesignedDashboard: React.FC = () => {
   }, [location.pathname]);
 
   const selectedMatch = selectedMatchId ? matches.find(m => m.id === selectedMatchId) || null : null;
-  const homeTeam = selectedMatch ? teams.find(t => t.id === selectedMatch.homeTeamId) : null;
-  const awayTeam = selectedMatch ? teams.find(t => t.id === selectedMatch.awayTeamId) : null;
 
   // Handle navigation including F1 dashboard
   const handleTabNavigation = (t: Tab) => {

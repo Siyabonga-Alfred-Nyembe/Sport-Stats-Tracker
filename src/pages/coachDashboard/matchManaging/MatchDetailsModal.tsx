@@ -32,11 +32,8 @@ interface Notification {
 const MatchDetailsModal: React.FC<Props> = ({
   match,
   players,
-  events,
   onClose,
   onUpdateTeamStats,
-  onAddPlayerEvent,
-  onRemovePlayerEvent,
 }) => {
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -362,7 +359,7 @@ const MatchDetailsModal: React.FC<Props> = ({
                 <p className="mdm-legend">Advanced Statistics</p>
                 <AdvancedStatsForm
                   player={players.find((p) => p.id === selectedPlayerId)!}
-                  onSave={(playerId, stats) => setAdvancedStats(stats)}
+                  onSave={(_playerId, stats) => setAdvancedStats(stats)}
                   initialStats={advancedStats}
                 />
               </div>

@@ -197,7 +197,6 @@ const mockFetchPlayersWithStats = playerService.fetchPlayersWithStats as Mock;
 const mockLoadLineup = lineupService.loadLineup as Mock;
 const mockSaveLineup = lineupService.saveLineup as Mock;
 const mockUpdatePlayerPosition = lineupService.updatePlayerPosition as Mock;
-const mockDebugLineup = lineupService.debugLineup as Mock;
 const mockRemovePlayerFromLineup = lineupService.removePlayerFromLineup as Mock;
 
 describe('PlayerManagementPage', () => {

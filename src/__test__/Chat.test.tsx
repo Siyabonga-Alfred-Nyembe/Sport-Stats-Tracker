@@ -237,7 +237,6 @@ describe("Chat Component", () => {
     });
 
     it("does not show delete button for messages from other users", async () => {
-      const user = userEvent.setup();
       // Create messages where none belong to the current user
       const messagesFromOtherUsers = [
         {
