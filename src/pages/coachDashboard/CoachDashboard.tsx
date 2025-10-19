@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import DashboardSidebar from "./DashboardSidebar";
 import MyTeamTab from "./coachStatsPage/MyTeamTab";
 // Updated import to use the correct name for clarity
@@ -13,11 +13,27 @@ import Profile from "./CoachProfile"
 
 const CoachDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("myTeam");
 
+  // Initialize activeTab from URL params or localStorage
   useEffect(() => {
-    // No-op user fetch needed here currently
-  }, []);
+    const tabFromUrl = searchParams.get('tab');
+    const savedTab = localStorage.getItem('coach-dashboard-tab');
+    
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    } else if (savedTab) {
+      setActiveTab(savedTab);
+    }
+  }, [searchParams]);
+
+  // Update URL and localStorage when activeTab changes
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+    localStorage.setItem('coach-dashboard-tab', tab);
+  };
 
   useEffect(() => {
     const ensureTeamForCoach = async () => {
@@ -45,7 +61,7 @@ const CoachDashboard: React.FC = () => {
 
   return (
     <section className="dashboard coach-dashboard">
-      <DashboardSidebar onNavigate={setActiveTab} />
+      <DashboardSidebar onNavigate={handleTabChange} />
       <section className="dashboard-content">
         {activeTab === "myTeam" && (
           <MyTeamTab />

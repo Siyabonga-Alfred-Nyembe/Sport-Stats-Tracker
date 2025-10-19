@@ -34,7 +34,7 @@ const TeamSetup: React.FC = () => {
     
     if (team) {
       setErrorMsg(null);
-      navigate('/coach-dashboard');
+      navigate('/coach-dashboard?tab=players');
     } else {
       setErrorMsg('We could not create your team right now. Please check your internet and try again.');
     }
