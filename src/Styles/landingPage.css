@@ -575,9 +575,15 @@
 
 @media (max-width: 480px) {
   .hero-title {
+    margin-top: 2rem;
     font-size: 2rem;
   }
-  
+  .landing-nav{
+    padding: 5px;
+  }
+  .nav-actions{
+    gap: 5px;
+  }
   .section-title {
     font-size: 2rem;
   }

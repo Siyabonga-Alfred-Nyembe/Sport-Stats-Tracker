@@ -130,22 +130,7 @@ function LandingPage() {
               The ultimate platform for football statistics, team management, and performance analytics. 
               Whether you're a passionate fan or a dedicated coach, get the insights you need to succeed.
             </p>
-            <section className="hero-actions">
-              {!isLoggedIn ? (
-                <>
-                  <button className="cta-btn primary" onClick={() => navigate('/signup')}>
-                    Sign Up
-                  </button>
-                  <button className="cta-btn secondary" onClick={() => navigate('/login')}>
-                    Sign In
-                  </button>
-                </>
-              ) : (
-                <button className="cta-btn primary" onClick={() => navigate('/user-dashboard')}>
-                  Go to Dashboard
-                </button>
-              )}
-            </section>
+    
           </section>
           <section className="hero-visual">
             <section className="stats-dashboard-preview">
