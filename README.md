@@ -2,7 +2,7 @@
 
 A React + TypeScript + Vite web application for tracking football statistics with user authentication powered by Supabase.
 
-**Live Demo:** [https://sport-stats-dab7d6aaf0cqeyef.southafricanorth-01.azurewebsites.net/](https://sport-stats-dab7d6aaf0cqeyef.southafricanorth-01.azurewebsites.net/)
+**Live Demo:** [https://blue-ocean-09d10ab03.1.azurestaticapps.net/](https://blue-ocean-09d10ab03.1.azurestaticapps.net/)
 
 ## Table of Contents
 
@@ -93,8 +93,6 @@ sporty.com/
 │   │   ├── land.tsx           # User dashboard
 │   │   ├── login.tsx          # Login page
 │   │   ├── signup.tsx         # Registration page
-│   │   ├── forgot.tsx         # Password reset request
-│   │   └── reset.tsx          # Password reset form
 │   ├── Styles/            # CSS stylesheets
 │   │   ├── landingPage.css
 │   │   └── signUpLogin.css
