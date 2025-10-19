@@ -56,7 +56,7 @@ export async function isFan(userId: string): Promise<boolean> {
   return userRole?.role === 'Fan';
 }
 
-export async function createUserProfile(userId: string, email: string, role: 'Fan' | 'Coach' | 'Admin' = 'Fan'): Promise<boolean> {
+export async function createUserProfile(userId: string, email: string, role: 'Fan' | 'Coach' | 'Admin'): Promise<boolean> {
   try {
     // Insert into users table
     const { error: userError } = await supabase
