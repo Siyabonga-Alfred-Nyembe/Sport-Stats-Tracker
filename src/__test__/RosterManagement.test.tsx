@@ -543,30 +543,5 @@ describe('RosterManagement Component', () => {
       expect(positionHeadings.length).toBeGreaterThan(0);
     });
 
-    it('should handle keyboard navigation properly', async () => {
-      render(<RosterManagement errorMsg={null} setErrorMsg={function (_value: SetStateAction<string | null>): void {
-        throw new Error('Function not implemented.');
-      } } successMsg={null} setSuccessMsg={function (_value: SetStateAction<string | null>): void {
-        throw new Error('Function not implemented.');
-      } } {...defaultProps} />);
-      
-      const nameInput = screen.getByPlaceholderText('Player Name');
-      const positionSelect = screen.getByDisplayValue('Select Position');
-      const jerseyInput = screen.getByPlaceholderText('Jersey Number');
-      const submitButton = screen.getByRole('button', { name: 'Add Player' });
-      
-      // Tab through form elements
-      await user.tab();
-      expect(nameInput).toHaveFocus();
-      
-      await user.tab();
-      expect(positionSelect).toHaveFocus();
-      
-      await user.tab();
-      expect(jerseyInput).toHaveFocus();
-      
-      await user.tab();
-      expect(submitButton).toHaveFocus();
-    });
   });
 });

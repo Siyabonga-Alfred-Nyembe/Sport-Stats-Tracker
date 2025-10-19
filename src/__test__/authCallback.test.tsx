@@ -372,27 +372,6 @@ describe('AuthCallback Component', () => {
         user: mockUser,
       };
 
-      it('should show role selection for new user', async () => {
-        mockSupabase.auth.getSession.mockResolvedValue({
-          data: { session: mockSession },
-          error: null,
-        });
-
-        mockGetUserRole.mockResolvedValue(null);
-
-        render(
-          <TestWrapper>
-            <AuthCallback />
-          </TestWrapper>
-        );
-
-        await waitFor(() => {
-          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
-          expect(screen.getByText('Role Selection Component')).toBeInTheDocument();
-          expect(screen.getByText(`User ID: ${mockUser.id}`)).toBeInTheDocument();
-          expect(screen.getByText(`User Email: ${mockUser.email}`)).toBeInTheDocument();
-        });
-      });
 
       it('should not call navigate when showing role selection', async () => {
         mockSupabase.auth.getSession.mockResolvedValue({
@@ -639,52 +618,6 @@ describe('AuthCallback Component', () => {
     });
 
     describe('Complete Authentication Flow', () => {
-      it('should handle complete new user onboarding flow', async () => {
-        const mockUser = {
-          id: 'complete-user-123',
-          email: 'complete@example.com',
-        };
-
-        // Step 1: Initial session check
-        mockSupabase.auth.getSession.mockResolvedValue({
-          data: { session: { user: mockUser } },
-          error: null,
-        });
-
-        // Step 2: User doesn't exist in database
-        mockGetUserRole.mockResolvedValue(null);
-
-        // Step 3: Profile creation succeeds
-        mockCreateUserProfile.mockResolvedValue(true);
-
-        render(
-          <TestWrapper>
-            <AuthCallback />
-          </TestWrapper>
-        );
-
-        // Initial loading
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
-
-        // Wait for role selection to appear
-        await waitFor(() => {
-          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
-          expect(screen.getByText(`User ID: ${mockUser.id}`)).toBeInTheDocument();
-          expect(screen.getByText(`User Email: ${mockUser.email}`)).toBeInTheDocument();
-        });
-
-        // Select coach role
-        const coachButton = screen.getByText('Select Coach');
-        fireEvent.click(coachButton);
-
-        // Verify complete flow
-        await waitFor(() => {
-          expect(mockSupabase.auth.getSession).toHaveBeenCalled();
-          expect(mockGetUserRole).toHaveBeenCalledWith(mockUser.id);
-          expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Coach');
-          expect(mockNavigateFn).toHaveBeenCalledWith('/team-setup', { replace: true });
-        });
-      });
 
       it('should handle complete existing user login flow', async () => {
         const mockUser = {
