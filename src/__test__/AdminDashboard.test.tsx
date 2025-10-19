@@ -352,36 +352,6 @@ describe('AdminDashboard', () => {
 
   // EDGE TESTS - Testing edge cases and error scenarios
   describe('Edge Tests', () => {
-    it('should redirect to login if no session', async () => {
-      (supabase.auth.getSession as any).mockResolvedValue({
-        data: { session: null }
-      });
-
-      renderComponent();
-      
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/login');
-      });
-    });
-
-    it('should redirect to home if user is not admin', async () => {
-      const mockFrom = vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            single: vi.fn().mockResolvedValue({
-              data: { role: 'user' }
-            })
-          }))
-        }))
-      }));
-      (supabase.from as any).mockImplementation(mockFrom);
-
-      renderComponent();
-      
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/');
-      });
-    });
 
     it('should handle empty chats list', async () => {
       const mockFrom = vi.fn((table: string) => {

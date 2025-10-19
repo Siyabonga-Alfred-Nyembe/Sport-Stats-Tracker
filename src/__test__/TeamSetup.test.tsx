@@ -88,7 +88,7 @@ describe("TeamSetup component", () => {
         null,
         "user-123"
       );
-      expect(mockNavigate).toHaveBeenCalledWith("/coach-dashboard");
+      expect(mockNavigate).toHaveBeenCalledWith("/coach-dashboard?tab=players");
     });
   });
 
