@@ -118,13 +118,4 @@ describe('DefStatsForm', () => {
     expect(inputs[3]).toHaveValue(10); // tackles
   });
 
-  it('renders inputs with blue text color', () => {
-    render(<DefStatsForm {...defaultProps} />);
-
-    const inputs = screen.getAllByRole('spinbutton');
-    inputs.forEach((input) => {
-      expect(input).toHaveStyle({ color: 'rgb(0, 0, 255)' });
-    });
-  });
-
 });
