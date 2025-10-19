@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import AuthCallback from '../pages/authCallback';
 import { getUserRole, createUserProfile } from '../services/roleService';
@@ -35,13 +35,16 @@ vi.mock('../components/RoleSelection', () => ({
       <div>User Email: {userEmail}</div>
       <button onClick={() => onRoleSelected('Fan')}>Select Fan</button>
       <button onClick={() => onRoleSelected('Coach')}>Select Coach</button>
+      <button onClick={() => onRoleSelected('Admin')}>Select Admin</button>
     </div>
   ),
 }));
 
 // Mock console methods
 const consoleSpy = {
+  log: vi.spyOn(console, 'log').mockImplementation(() => {}),
   error: vi.spyOn(console, 'error').mockImplementation(() => {}),
+  warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
 };
 
 // Import mocked modules
@@ -53,6 +56,41 @@ const mockSupabase = supabase as any;
 const mockGetUserRole = getUserRole as any;
 const mockCreateUserProfile = createUserProfile as any;
 
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+});
+
+// Mock window.location
+const mockLocation = {
+  href: 'http://localhost:3000/auth/callback',
+  search: '',
+  origin: 'http://localhost:3000',
+};
+
+Object.defineProperty(window, 'location', {
+  value: mockLocation,
+  writable: true,
+});
+
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <BrowserRouter>{children}</BrowserRouter>
@@ -63,7 +101,11 @@ describe('AuthCallback Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorageMock.clear();
+    mockLocation.search = '';
+    consoleSpy.log.mockClear();
     consoleSpy.error.mockClear();
+    consoleSpy.warn.mockClear();
     mockNavigate.mockReturnValue(mockNavigateFn);
   });
 
@@ -87,7 +129,47 @@ describe('AuthCallback Component', () => {
       });
     });
 
+    describe('OAuth Error Handling', () => {
+      it('should navigate to login when OAuth error occurs', async () => {
+        mockLocation.search = '?error=access_denied&error_description=User%20cancelled';
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
+        });
+
+        expect(consoleSpy.error).toHaveBeenCalledWith(
+          '[AuthCallback] OAuth provider returned error:',
+          expect.objectContaining({
+            error: 'access_denied',
+            description: 'User cancelled'
+          })
+        );
+      });
+    });
+
     describe('Session Error Handling', () => {
+      it('should navigate to login when session fetch returns error', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: null },
+          error: { message: 'Session error' },
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
+        });
+      });
 
       it('should navigate to login when no session exists', async () => {
         mockSupabase.auth.getSession.mockResolvedValue({
@@ -102,7 +184,7 @@ describe('AuthCallback Component', () => {
         );
 
         await waitFor(() => {
-          expect(mockNavigateFn).toHaveBeenCalledWith('/login');
+          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
         });
       });
 
@@ -119,7 +201,7 @@ describe('AuthCallback Component', () => {
         );
 
         await waitFor(() => {
-          expect(mockNavigateFn).toHaveBeenCalledWith('/login');
+          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
         });
       });
     });
@@ -155,6 +237,7 @@ describe('AuthCallback Component', () => {
         await waitFor(() => {
           expect(mockGetUserRole).toHaveBeenCalledWith(mockUser.id);
           expect(mockNavigateFn).toHaveBeenCalledWith('/coach-dashboard', {
+            replace: true,
             state: {
               username: mockUser.email,
               userId: mockUser.id,
@@ -162,6 +245,9 @@ describe('AuthCallback Component', () => {
             },
           });
         });
+
+        expect(localStorage.getItem('user_role')).toBe('Coach');
+        expect(localStorage.getItem('user_id')).toBe(mockUser.id);
       });
 
       it('should redirect existing fan to user dashboard', async () => {
@@ -185,6 +271,7 @@ describe('AuthCallback Component', () => {
         await waitFor(() => {
           expect(mockGetUserRole).toHaveBeenCalledWith(mockUser.id);
           expect(mockNavigateFn).toHaveBeenCalledWith('/user-dashboard', {
+            replace: true,
             state: {
               username: mockUser.email,
               userId: mockUser.id,
@@ -192,6 +279,43 @@ describe('AuthCallback Component', () => {
             },
           });
         });
+
+        expect(localStorage.getItem('user_role')).toBe('Fan');
+        expect(localStorage.getItem('user_id')).toBe(mockUser.id);
+      });
+
+      it('should redirect existing admin to admin dashboard', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockGetUserRole.mockResolvedValue({
+          id: mockUser.id,
+          email: mockUser.email,
+          role: 'Admin',
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(mockGetUserRole).toHaveBeenCalledWith(mockUser.id);
+          expect(mockNavigateFn).toHaveBeenCalledWith('/admin-dashboard', {
+            replace: true,
+            state: {
+              username: mockUser.email,
+              userId: mockUser.id,
+              isGoogleUser: true,
+            },
+          });
+        });
+
+        expect(localStorage.getItem('user_role')).toBe('Admin');
+        expect(localStorage.getItem('user_id')).toBe(mockUser.id);
       });
 
       it('should handle user with unknown email', async () => {
@@ -215,6 +339,25 @@ describe('AuthCallback Component', () => {
 
         await waitFor(() => {
           expect(screen.getByText('User Email: Unknown')).toBeInTheDocument();
+        });
+      });
+
+      it('should navigate to login when getUserRole throws error', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockGetUserRole.mockRejectedValue(new Error('Database error'));
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
         });
       });
     });
@@ -272,8 +415,64 @@ describe('AuthCallback Component', () => {
         // Should not have navigated anywhere yet
         expect(mockNavigateFn).not.toHaveBeenCalled();
       });
-    });
 
+      it('should show role selection when from=signup parameter is present', async () => {
+        mockLocation.search = '?from=signup';
+        
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        // Even with existing role, should show role selection
+        mockGetUserRole.mockResolvedValue({
+          id: mockUser.id,
+          email: mockUser.email,
+          role: 'Fan',
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
+        });
+
+        // getUserRole should not be called when from=signup
+        expect(mockGetUserRole).not.toHaveBeenCalled();
+      });
+
+      it('should show role selection when cameFromSignup localStorage flag is set', async () => {
+        localStorage.setItem('cameFromSignup', '1');
+        
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockGetUserRole.mockResolvedValue({
+          id: mockUser.id,
+          email: mockUser.email,
+          role: 'Fan',
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
+        });
+
+        // localStorage flag should be removed
+        expect(localStorage.getItem('cameFromSignup')).toBeNull();
+      });
+    });
   });
 
   describe('Integration Tests', () => {
@@ -311,12 +510,15 @@ describe('AuthCallback Component', () => {
 
         // Click fan role selection
         const fanButton = screen.getByText('Select Fan');
-        fanButton.click();
+        fireEvent.click(fanButton);
 
         await waitFor(() => {
           expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Fan');
-          expect(mockNavigateFn).toHaveBeenCalledWith('/user-dashboard');
+          expect(mockNavigateFn).toHaveBeenCalledWith('/user-dashboard', { replace: true });
         });
+
+        expect(localStorage.getItem('user_role')).toBe('Fan');
+        expect(localStorage.getItem('user_id')).toBe(mockUser.id);
       });
 
       it('should handle successful coach role selection', async () => {
@@ -334,11 +536,83 @@ describe('AuthCallback Component', () => {
 
         // Click coach role selection
         const coachButton = screen.getByText('Select Coach');
-        coachButton.click();
+        fireEvent.click(coachButton);
 
         await waitFor(() => {
           expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Coach');
-          expect(mockNavigateFn).toHaveBeenCalledWith('/team-setup');
+          expect(mockNavigateFn).toHaveBeenCalledWith('/team-setup', { replace: true });
+        });
+
+        expect(localStorage.getItem('user_role')).toBe('Coach');
+        expect(localStorage.getItem('user_id')).toBe(mockUser.id);
+      });
+
+      it('should handle successful admin role selection', async () => {
+        mockCreateUserProfile.mockResolvedValue(true);
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
+        });
+
+        // Click admin role selection
+        const adminButton = screen.getByText('Select Admin');
+        fireEvent.click(adminButton);
+
+        await waitFor(() => {
+          expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Admin');
+          expect(mockNavigateFn).toHaveBeenCalledWith('/admin-dashboard', { replace: true });
+        });
+
+        expect(localStorage.getItem('user_role')).toBe('Admin');
+        expect(localStorage.getItem('user_id')).toBe(mockUser.id);
+      });
+
+      it('should navigate to login when role creation fails', async () => {
+        mockCreateUserProfile.mockResolvedValue(false);
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
+        });
+
+        const fanButton = screen.getByText('Select Fan');
+        fireEvent.click(fanButton);
+
+        await waitFor(() => {
+          expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Fan');
+          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
+        });
+      });
+
+      it('should navigate to login when role creation throws error', async () => {
+        mockCreateUserProfile.mockRejectedValue(new Error('Database error'));
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
+        });
+
+        const fanButton = screen.getByText('Select Fan');
+        fireEvent.click(fanButton);
+
+        await waitFor(() => {
+          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
         });
       });
 
@@ -356,7 +630,7 @@ describe('AuthCallback Component', () => {
         );
 
         await waitFor(() => {
-          expect(mockNavigateFn).toHaveBeenCalledWith('/login');
+          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
         });
 
         // Since there's no userData, role selection should not be shown
@@ -401,14 +675,14 @@ describe('AuthCallback Component', () => {
 
         // Select coach role
         const coachButton = screen.getByText('Select Coach');
-        coachButton.click();
+        fireEvent.click(coachButton);
 
         // Verify complete flow
         await waitFor(() => {
           expect(mockSupabase.auth.getSession).toHaveBeenCalled();
           expect(mockGetUserRole).toHaveBeenCalledWith(mockUser.id);
           expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Coach');
-          expect(mockNavigateFn).toHaveBeenCalledWith('/team-setup');
+          expect(mockNavigateFn).toHaveBeenCalledWith('/team-setup', { replace: true });
         });
       });
 
@@ -445,6 +719,7 @@ describe('AuthCallback Component', () => {
           expect(mockSupabase.auth.getSession).toHaveBeenCalled();
           expect(mockGetUserRole).toHaveBeenCalledWith(mockUser.id);
           expect(mockNavigateFn).toHaveBeenCalledWith('/coach-dashboard', {
+            replace: true,
             state: {
               username: mockUser.email,
               userId: mockUser.id,
@@ -461,12 +736,14 @@ describe('AuthCallback Component', () => {
         const userTypes = [
           { role: 'Coach', expectedPath: '/coach-dashboard' },
           { role: 'Fan', expectedPath: '/user-dashboard' },
+          { role: 'Admin', expectedPath: '/admin-dashboard' },
         ];
 
         for (const userType of userTypes) {
           // Reset mocks for each iteration
           vi.clearAllMocks();
           mockNavigateFn.mockClear();
+          localStorageMock.clear();
 
           const mockUser = {
             id: `${userType.role.toLowerCase()}-user-123`,
@@ -484,7 +761,7 @@ describe('AuthCallback Component', () => {
             role: userType.role,
           });
 
-          render(
+          const { unmount } = render(
             <TestWrapper>
               <AuthCallback />
             </TestWrapper>
@@ -492,6 +769,7 @@ describe('AuthCallback Component', () => {
 
           await waitFor(() => {
             expect(mockNavigateFn).toHaveBeenCalledWith(userType.expectedPath, {
+              replace: true,
               state: {
                 username: mockUser.email,
                 userId: mockUser.id,
@@ -499,6 +777,11 @@ describe('AuthCallback Component', () => {
               },
             });
           });
+
+          expect(localStorage.getItem('user_role')).toBe(userType.role);
+          expect(localStorage.getItem('user_id')).toBe(mockUser.id);
+
+          unmount();
         }
       });
     });

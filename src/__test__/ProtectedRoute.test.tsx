@@ -1,120 +1,137 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import ProtectedRoute from '../components/ProtectedRoute';
-import supabase from '../../supabaseClient';
-import * as roleService from '../services/roleService';
-import { MemoryRouter } from 'react-router-dom';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import ProtectedRoute from "../components/ProtectedRoute";
+import supabase from "../../supabaseClient";
+import { MemoryRouter } from "react-router-dom";
+import { getUserRole } from "../services/roleService";
 
-vi.mock('../../supabaseClient', () => ({
+const mockNavigate = vi.fn();
+
+// Mock Supabase client
+vi.mock("../../supabaseClient", () => ({
+  __esModule: true,
   default: {
-    auth: { getSession: vi.fn() },
+    auth: {
+      getSession: vi.fn(),
+    },
   },
 }));
 
-vi.mock('../services/roleService', () => ({
-  isCoach: vi.fn(),
-  isFan: vi.fn(),
-}));
-
-const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return { ...actual, useNavigate: () => mockNavigate };
+// Mock react-router-dom
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual<any>("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useLocation: () => ({ pathname: "/" }),
+  };
 });
 
-describe('ProtectedRoute UI Tests', () => {
+// Mock roleService
+vi.mock("../services/roleService", () => ({
+  getUserRole: vi.fn(),
+}));
+
+describe("ProtectedRoute component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('displays the loading screen initially', () => {
-    (supabase.auth.getSession as any).mockResolvedValue({ data: { session: null } });
-
-    render(
-      <MemoryRouter>
-        <ProtectedRoute>Child</ProtectedRoute>
-      </MemoryRouter>
-    );
-
-    expect(screen.getByText(/Checking access/i)).toBeInTheDocument();
-  });
-
-  it('renders child content when access granted (no requiredRole)', async () => {
+  it("renders child content when requiredRole matches", async () => {
     (supabase.auth.getSession as any).mockResolvedValue({
-      data: { session: { user: { id: 'u1' } } },
+      data: { session: { user: { id: "user-123" } } },
+      error: null,
     });
+    (getUserRole as any).mockResolvedValue({ role: "Coach" });
 
     render(
       <MemoryRouter>
-        <ProtectedRoute>Child Content Visible</ProtectedRoute>
+        <ProtectedRoute requiredRole="Coach">
+          <div>Coach Content</div>
+        </ProtectedRoute>
       </MemoryRouter>
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('Child Content Visible')).toBeInTheDocument();
-    });
+    expect(await screen.findByText("Coach Content")).toBeInTheDocument();
   });
 
-  it('renders child content when requiredRole matches', async () => {
+  it("redirects to login when user is not logged in", async () => {
     (supabase.auth.getSession as any).mockResolvedValue({
-      data: { session: { user: { id: 'u1' } } },
+      data: { session: null },
+      error: null,
     });
-    (roleService.isCoach as any).mockResolvedValue(true);
 
     render(
       <MemoryRouter>
-        <ProtectedRoute requiredRole="Coach">Coach Content</ProtectedRoute>
+        <ProtectedRoute requiredRole="Coach">
+          <div>Should not render</div>
+        </ProtectedRoute>
       </MemoryRouter>
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('Coach Content')).toBeInTheDocument();
-    });
+    // wait for useEffect to run
+    await screen.findByText(/Checking access/i);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/login", { replace: true });
+    expect(screen.queryByText("Should not render")).not.toBeInTheDocument();
   });
 
-  it('does not render child content when role mismatch', async () => {
+  it("redirects to redirectTo if user role does not match", async () => {
     (supabase.auth.getSession as any).mockResolvedValue({
-      data: { session: { user: { id: 'u1' } } },
+      data: { session: { user: { id: "user-123" } } },
+      error: null,
     });
-    (roleService.isCoach as any).mockResolvedValue(false);
+    (getUserRole as any).mockResolvedValue({ role: "Fan" });
 
     render(
       <MemoryRouter>
-        <ProtectedRoute requiredRole="Coach">Hidden Content</ProtectedRoute>
+        <ProtectedRoute requiredRole="Coach" redirectTo="/role-selection">
+          <div>Should not render</div>
+        </ProtectedRoute>
       </MemoryRouter>
     );
 
-    await waitFor(() => {
-      // Child content should not be in the document
-      expect(screen.queryByText('Hidden Content')).not.toBeInTheDocument();
-    });
+    await screen.findByText(/Checking access/i);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/role-selection", { replace: true });
+    expect(screen.queryByText("Should not render")).not.toBeInTheDocument();
   });
 
-  it('renders loading screen during async role check', async () => {
-    const promise = new Promise((resolve) => setTimeout(() => resolve({ data: { session: { user: { id: 'u1' } } } }), 50));
-    (supabase.auth.getSession as any).mockReturnValue(promise);
+  it("renders children if no role is required and user is logged in", async () => {
+    (supabase.auth.getSession as any).mockResolvedValue({
+      data: { session: { user: { id: "user-123" } } },
+      error: null,
+    });
 
     render(
       <MemoryRouter>
-        <ProtectedRoute requiredRole="Fan">Fan Content</ProtectedRoute>
+        <ProtectedRoute>
+          <div>No Role Required</div>
+        </ProtectedRoute>
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Checking access/i)).toBeInTheDocument();
+    expect(await screen.findByText("No Role Required")).toBeInTheDocument();
   });
 
-  it('redirects when user not logged in and does not render children', async () => {
-    (supabase.auth.getSession as any).mockResolvedValue({ data: { session: null } });
+  it("handles getUserRole returning null and redirects to redirectTo", async () => {
+    (supabase.auth.getSession as any).mockResolvedValue({
+      data: { session: { user: { id: "user-123" } } },
+      error: null,
+    });
+    (getUserRole as any).mockResolvedValue(null);
 
     render(
       <MemoryRouter>
-        <ProtectedRoute>Should not render</ProtectedRoute>
+        <ProtectedRoute requiredRole="Coach" redirectTo="/role-selection">
+          <div>Should not render</div>
+        </ProtectedRoute>
       </MemoryRouter>
     );
 
-    await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
-      expect(screen.queryByText('Should not render')).not.toBeInTheDocument();
-    });
+    await screen.findByText(/Checking access/i);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/role-selection", { replace: true });
+    expect(screen.queryByText("Should not render")).not.toBeInTheDocument();
   });
 });

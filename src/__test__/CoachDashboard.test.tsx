@@ -7,9 +7,14 @@ import supabase from '../../supabaseClient';
 // Create mock navigate function
 const mockNavigate = vi.fn();
 
+// Create mock search params
+const mockSetSearchParams = vi.fn();
+const mockSearchParams = new URLSearchParams();
+
 // Mock React Router
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useSearchParams: () => [mockSearchParams, mockSetSearchParams],
 }));
 
 // Mock child components
@@ -19,6 +24,7 @@ vi.mock('../pages/coachDashboard/DashboardSidebar', () => ({
       <button data-testid="players-btn" onClick={() => onNavigate('players')}>Players</button>
       <button data-testid="matches-btn" onClick={() => onNavigate('matches')}>Matches</button>
       <button data-testid="myteam-btn" onClick={() => onNavigate('myTeam')}>My Team</button>
+      <button data-testid="profile-btn" onClick={() => onNavigate('profile')}>Profile</button>
     </div>
   ),
 }));
@@ -33,6 +39,10 @@ vi.mock('../pages/coachDashboard/matchManaging/MatchesPage', () => ({
 
 vi.mock('../pages/coachDashboard/playerManagement/PlayerManagementPage', () => ({
   default: () => <div data-testid="player-management-page">Player Management Content</div>,
+}));
+
+vi.mock('../pages/coachDashboard/CoachProfile', () => ({
+  default: () => <div data-testid="coach-profile">Coach Profile Content</div>,
 }));
 
 // Mock services
@@ -50,12 +60,36 @@ vi.mock('../../supabaseClient', () => ({
   },
 }));
 
-// Mock CSS import
-vi.mock('../Styles/coach-dashboard.css', () => ({}));
+// Mock CSS import with correct path
+vi.mock('../../Styles/coach-dashboard.css', () => ({}));
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
 
 describe('CoachDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorageMock.clear();
+    mockSearchParams.delete('tab');
   });
 
   afterEach(() => {
@@ -89,6 +123,16 @@ describe('CoachDashboard', () => {
       const contentSection = container.querySelector('.dashboard-content');
       expect(contentSection).toBeInTheDocument();
     });
+
+    it('renders myTeam tab by default', () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+
+      renderCoachDashboard();
+
+      expect(screen.getByTestId('my-team-tab')).toBeInTheDocument();
+      expect(screen.queryByTestId('player-management-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('matches-page')).not.toBeInTheDocument();
+    });
   });
 
   // UI Tests
@@ -107,6 +151,8 @@ describe('CoachDashboard', () => {
 
       expect(screen.queryByTestId('player-management-page')).not.toBeInTheDocument();
       expect(screen.queryByTestId('my-team-tab')).not.toBeInTheDocument();
+      expect(mockSetSearchParams).toHaveBeenCalledWith({ tab: 'matches' });
+      expect(localStorage.getItem('coach-dashboard-tab')).toBe('matches');
     });
 
     it('switches to myTeam tab when sidebar navigates to myTeam', async () => {
@@ -114,6 +160,15 @@ describe('CoachDashboard', () => {
 
       renderCoachDashboard();
 
+      // Start from matches tab
+      const matchesButton = screen.getByTestId('matches-btn');
+      fireEvent.click(matchesButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('matches-page')).toBeInTheDocument();
+      });
+
+      // Then navigate to myTeam
       const myTeamButton = screen.getByTestId('myteam-btn');
       fireEvent.click(myTeamButton);
 
@@ -125,7 +180,23 @@ describe('CoachDashboard', () => {
       expect(screen.queryByTestId('matches-page')).not.toBeInTheDocument();
     });
 
-    it('switches back to players tab', async () => {
+    it('switches to players tab', async () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+
+      renderCoachDashboard();
+
+      const playersButton = screen.getByTestId('players-btn');
+      fireEvent.click(playersButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('player-management-page')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('my-team-tab')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('matches-page')).not.toBeInTheDocument();
+    });
+
+    it('switches back to players tab from matches', async () => {
       vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
 
       renderCoachDashboard();
@@ -138,7 +209,7 @@ describe('CoachDashboard', () => {
         expect(screen.getByTestId('matches-page')).toBeInTheDocument();
       });
 
-      // Then switch back to players
+      // Then switch to players
       const playersButton = screen.getByTestId('players-btn');
       fireEvent.click(playersButton);
 
@@ -147,6 +218,26 @@ describe('CoachDashboard', () => {
       });
 
       expect(screen.queryByTestId('matches-page')).not.toBeInTheDocument();
+    });
+
+    it('initializes tab from URL search params', () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+      mockSearchParams.set('tab', 'players');
+
+      renderCoachDashboard();
+
+      expect(screen.getByTestId('player-management-page')).toBeInTheDocument();
+      expect(screen.queryByTestId('my-team-tab')).not.toBeInTheDocument();
+    });
+
+    it('initializes tab from localStorage when no URL param', () => {
+      vi.mocked(getCurrentTeamId).mockReturnValue('team-123');
+      localStorage.setItem('coach-dashboard-tab', 'matches');
+
+      renderCoachDashboard();
+
+      expect(screen.getByTestId('matches-page')).toBeInTheDocument();
+      expect(screen.queryByTestId('my-team-tab')).not.toBeInTheDocument();
     });
   });
 
