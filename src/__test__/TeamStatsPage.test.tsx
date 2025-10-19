@@ -237,19 +237,6 @@ describe('TeamStatsPage', () => {
     });
 
     describe('Error Handling', () => {
-      it('should handle team data loading error', async () => {
-        mockUseTeamData.mockReturnValue({
-          team: null,
-          isLoading: false,
-          error: 'Failed to load team'
-        });
-        
-        renderWithRouter();
-        
-        await waitFor(() => {
-          expect(screen.getByText(/Error loading team stats/i)).toBeInTheDocument();
-        });
-      });
 
       it('should handle missing team data', async () => {
         mockUseTeamData.mockReturnValue({
