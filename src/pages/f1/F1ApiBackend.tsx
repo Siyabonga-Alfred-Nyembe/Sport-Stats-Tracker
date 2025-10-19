@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type {ReactNode} from 'react'
+import { createContext, useContext, useState, useEffect, useCallback} from 'react';
+import type{  ReactNode  } from 'react';
 
 // ==================== TYPE DEFINITIONS ====================
 
@@ -154,7 +154,12 @@ async function fetchWithRetry<T>(
 ): Promise<T> {
   for (let i = 0; i < retries; i++) {
     try {
-      const response = await fetch(url, {
+      // Use CORS proxy for production, direct for development
+      const proxyUrl = url.startsWith('http') 
+        ? `https://corsproxy.io/?${encodeURIComponent(url)}`
+        : url;
+      
+      const response = await fetch(proxyUrl, {
         ...options,
         headers: {
           'accept': 'application/json',
