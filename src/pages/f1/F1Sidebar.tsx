@@ -8,11 +8,16 @@ import { CiTrophy } from "react-icons/ci";
 interface Props {
   activeTab: "drivers" | "teams" | "stats"|"f1Results";
   onNavigate: (tab: "drivers" | "teams" | "stats"|"f1Results") => void;
+  isMobileMenuOpen?: boolean;
+  onCloseMobileMenu?: () => void;
 }
 
-const F1Sidebar: React.FC<Props> = ({ activeTab, onNavigate }) => {
+const F1Sidebar: React.FC<Props> = ({ activeTab, onNavigate, isMobileMenuOpen = false }) => {
   return (
-    <nav className="f1-sidebar" aria-label="Formula 1 section navigation">
+    <nav 
+      className={`f1-sidebar ${isMobileMenuOpen ? 'f1-sidebar--mobile-open' : ''}`} 
+      aria-label="Formula 1 section navigation"
+    >
       <h1 className="f1-logo">F1 Tracker</h1>
       <ul className="f1-nav-list" role="menu">
         <li role="menuitem">

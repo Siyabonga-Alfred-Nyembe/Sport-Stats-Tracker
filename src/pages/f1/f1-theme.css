@@ -377,14 +377,76 @@
   background: #ff0800;
 }
 
+/* Mobile Toggle Button */
+.f1-mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  background: var(--f1-red);
+  color: var(--f1-text);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 15px rgba(225, 6, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.f1-mobile-toggle:hover {
+  background: #c40500;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(225, 6, 0, 0.4);
+}
+
+.f1-mobile-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(225, 6, 0, 0.3);
+}
+
+/* Mobile Overlay */
+.f1-mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  backdrop-filter: blur(2px);
+}
+
 /* Responsive */
 @media (max-width: 700px) {
+  .f1-mobile-toggle {
+    display: block;
+  }
+
+  .f1-mobile-overlay {
+    display: block;
+  }
+
   .f1-sidebar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    width: 280px;
+    z-index: 999;
+    transition: left 0.3s ease-in-out;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .f1-sidebar--mobile-open {
+    left: 0;
   }
 
   .f1-main {
     width: 100%;
+    margin-left: 0;
   }
 
   .f1-card-grid {
@@ -394,5 +456,26 @@
 
   .f1-content {
     padding: 1rem;
+    padding-top: 4rem; /* Space for mobile toggle button */
+  }
+
+  /* Ensure content is accessible when sidebar is open */
+  .f1-sidebar--mobile-open + .f1-main {
+    pointer-events: none;
+  }
+
+  .f1-sidebar--mobile-open + .f1-main .f1-content {
+    pointer-events: auto;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1024px) and (min-width: 701px) {
+  .f1-sidebar {
+    width: 200px;
+  }
+
+  .f1-content {
+    padding: 1.5rem;
   }
 }
