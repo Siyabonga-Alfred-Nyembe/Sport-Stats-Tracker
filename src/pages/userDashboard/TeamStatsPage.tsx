@@ -1,34 +1,65 @@
-// src/pages/fanDashboard/TeamStatsPage.tsx
-import React, { useState } from "react";
+// src/pages/userDashboard/TeamStatsPage.tsx
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useTeamData } from "../coachDashboard/hooks/useTeamData";
+import { fetchTeamById } from "../../services/teamService";
 import { fetchTeamMatches } from "../../services/matchService";
 import { calculateTeamStats } from "../coachDashboard/coachStatsPage/team-stats-helper";
 import TeamStatsReport from "../components/teamStatsReport";
-import type {Match} from "../../types"
-
+import type { Match, Team } from "../../types";
 
 const TeamStatsPage: React.FC = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
   const [matches, setMatches] = useState<Match[]>([]);
-  const { team, isLoading, error } = useTeamData();
+  const [team, setTeam] = useState<Team | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [_isExporting, _setIsExporting] = useState(false);
 
-  React.useEffect(() => {
-    if (!teamId) return;
+  useEffect(() => {
+    if (!teamId) {
+      setError('No team ID provided');
+      setIsLoading(false);
+      return;
+    }
+
     const loadData = async () => {
-      const teamMatches = await fetchTeamMatches(teamId);
-      setMatches(teamMatches);
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch team data and matches in parallel
+        const [teamData, teamMatches] = await Promise.all([
+          fetchTeamById(teamId),
+          fetchTeamMatches(teamId)
+        ]);
+
+        if (!teamData) {
+          setError('Team not found');
+          return;
+        }
+
+        setTeam({
+          id: teamData.id,
+          name: teamData.name,
+          coachId: teamData.coach_id || 'unknown'
+        });
+        setMatches(teamMatches);
+      } catch (err) {
+        console.error('Error loading team data:', err);
+        setError('Failed to load team data');
+      } finally {
+        setIsLoading(false);
+      }
     };
+
     loadData();
   }, [teamId]);
 
   const stats = calculateTeamStats(matches);
 
-
   if (isLoading) return <p>Loading team stats...</p>;
-  if (error || !team) return <p>Error loading team stats.</p>;
+  if (error || !team) return <p>Error loading team stats: {error}</p>;
 
   return (
     <main className="team-stats-container">
