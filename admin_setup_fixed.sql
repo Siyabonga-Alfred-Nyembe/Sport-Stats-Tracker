@@ -68,3 +68,4 @@ ON CONFLICT (email) DO NOTHING;
 
 -- Verify the data was inserted
 SELECT * FROM admin_whitelist WHERE email = 'sd.access.25@gmail.com';
+
