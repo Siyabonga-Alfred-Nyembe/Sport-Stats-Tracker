@@ -17,15 +17,15 @@ function LandingPage() {
         setIsLoggedIn(true);
         setUsername(session.user.email || 'User');
         
-        // Get user role
-        const { data: profile } = await supabase
-          .from('profiles')
+        // Get user role from users table
+        const { data: user } = await supabase
+          .from('users')
           .select('role')
           .eq('id', session.user.id)
           .single();
         
-        if (profile) {
-          setUserRole(profile.role);
+        if (user) {
+          setUserRole(user.role);
         }
       }
     };

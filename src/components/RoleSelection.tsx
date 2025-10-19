@@ -27,22 +27,10 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({
     setError(null);
 
     try {
-      const success = await updateUserRole(userId, role);
-      if (success) {
-        onRoleSelected(role);
-        if (role === 'Coach') {
-          navigate('/team-setup');
-        } else if (role === 'Admin') {
-          navigate('/admin-dashboard');
-        } else {
-          navigate('/user-dashboard');
-        }
-      } else {
-        setError('Failed to update role. Please try again.');
-      }
+      // Call the parent's role selection handler instead of doing navigation here
+      onRoleSelected(role);
     } catch (err) {
       setError('An error occurred. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
