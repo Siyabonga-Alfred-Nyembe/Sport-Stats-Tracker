@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useConstructors, useDrivers } from './F1ApiBackend';
 
-interface DriverStanding {
-  name: string;
-  team: string;
-  points: number;
-  position: number;
-}
+const countryFlags: Record<string, string> = {
+  'NLD': '🇳🇱', 'MEX': '🇲🇽', 'GBR': '🇬🇧', 'AUS': '🇦🇺', 
+  'MCO': '🇲🇨', 'ESP': '🇪🇸', 'GER': '🇩🇪', 'CAN': '🇨🇦',
+  'FRA': '🇫🇷', 'THA': '🇹🇭', 'CHN': '🇨🇳', 'JPN': '🇯🇵',
+  'FIN': '🇫🇮', 'DNK': '🇩🇰', 'USA': '🇺🇸', 'ITA': '🇮🇹',
+  'DEU': '🇩🇪', 'AUT': '🇦🇹', 'BEL': '🇧🇪', 'BRA': '🇧🇷',
+};
+
+const teamColors: Record<string, { primary: string; accent: string }> = {
+  'Red Bull': { primary: '#0600EF', accent: '#FF1801' },
+  'McLaren': { primary: '#FF8700', accent: '#47C7FC' },
+  'Ferrari': { primary: '#DC0000', accent: '#FFF500' },
+  'Mercedes': { primary: '#00D2BE', accent: '#00D2BE' },
+  'Aston Martin': { primary: '#006F62', accent: '#00D2BE' },
+  'Alpine F1 Team': { primary: '#0090FF', accent: '#FF1801' },
+  'Williams': { primary: '#005AFF', accent: '#FFFFFF' },
+  'RB F1 Team': { primary: '#2B4562', accent: '#6692FF' },
+  'Haas F1 Team': { primary: '#FFFFFF', accent: '#B6BABD' },
+  'Sauber': { primary: '#00E701', accent: '#000000' },
+};
 
 const F1StatsPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear.toString());
   const { constructorStats, loading: constructorsLoading, refetchStats } = useConstructors();
   const { drivers, loading: driversLoading } = useDrivers();
-  const [driverStandings, setDriverStandings] = useState<DriverStanding[]>([]);
 
   // Fetch constructor stats when year changes
   useEffect(() => {
@@ -21,25 +34,6 @@ const F1StatsPage: React.FC = () => {
       refetchStats(parseInt(year));
     }
   }, [year, refetchStats]);
-
-  // Calculate driver standings from API data
-  useEffect(() => {
-    if (!drivers || !constructorStats) return;
-
-    // This is a simplified version - in reality you'd want to call a dedicated
-    // driver standings API endpoint if available
-    const standings: DriverStanding[] = drivers
-      .filter(d => d.current_team_name)
-      .map((driver, index) => ({
-        name: driver.full_name,
-        team: driver.current_team_name || 'Unknown',
-        points: 0, // You'd need actual points from API
-        position: index + 1,
-      }))
-      .slice(0, 10); // Top 10
-
-    setDriverStandings(standings);
-  }, [drivers, constructorStats]);
 
   const loading = constructorsLoading || driversLoading;
 
@@ -58,6 +52,9 @@ const F1StatsPage: React.FC = () => {
   const sortedConstructors = [...(constructorStats || [])].sort(
     (a, b) => a.stats.position - b.stats.position
   );
+
+  // Get active drivers with team info
+  const activeDrivers = drivers?.filter(d => d.current_team_name) || [];
 
   return (
     <section className="f1-page" aria-labelledby="stats-title">
@@ -78,40 +75,11 @@ const F1StatsPage: React.FC = () => {
         ))}
       </select>
 
-      <section aria-labelledby="driver-standings">
-        <h4 id="driver-standings">Driver Standings ({year})</h4>
-        <table className="f1-table" aria-describedby="driver-standings">
-          <thead>
-            <tr>
-              <th scope="col">Pos</th>
-              <th scope="col">Driver</th>
-              <th scope="col">Team</th>
-              <th scope="col">Points</th>
-            </tr>
-          </thead>
-          <tbody>
-            {driverStandings.length > 0 ? (
-              driverStandings.map((d, i) => (
-                <tr key={d.name}>
-                  <td>{i + 1}</td>
-                  <td>{d.name}</td>
-                  <td>{d.team}</td>
-                  <td>{d.points}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
-                  No driver standings available for {year}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </section>
-
+      {/* Constructor Standings */}
       <section aria-labelledby="constructor-standings">
-        <h4 id="constructor-standings">Constructor Standings ({year})</h4>
+        <h4 id="constructor-standings" style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#fff' }}>
+          Constructor Standings ({year})
+        </h4>
         <table className="f1-table" aria-describedby="constructor-standings">
           <thead>
             <tr>
