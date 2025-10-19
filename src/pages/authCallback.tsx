@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
-import { getUserRole, createUserProfile } from "../services/roleService";
+import { getUserRole, createUserProfile, checkUserExists, isAdminEligible } from "../services/roleService";
 import RoleSelection from "../components/RoleSelection";
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [userData, setUserData] = useState<{ id: string; email: string } | null>(null);
+  const [existingAccountMessage, setExistingAccountMessage] = useState<string | null>(null);
+  const [includeAdminOption, setIncludeAdminOption] = useState(false);
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -58,14 +60,68 @@ const AuthCallback: React.FC = () => {
             } catch {}
           }
 
+          // Check if user exists in our database
+          const userCheck = await checkUserExists(session.user.email || '');
+          console.log("[AuthCallback] User check result:", userCheck);
+          
           if (cameFromSignup) {
-            console.log("[AuthCallback] Detected first-time signup; forcing role selection");
+            console.log("[AuthCallback] Detected first-time signup; checking if user already exists");
+            console.log("[AuthCallback] cameFromSignup flag:", cameFromSignup);
+            console.log("[AuthCallback] URL search params:", window.location.search);
+            
+            if (userCheck.exists && userCheck.role) {
+              console.log("[AuthCallback] User already exists with role:", userCheck.role);
+              setExistingAccountMessage(
+                `You already have an account as a ${userCheck.role}. Please sign in instead.`
+              );
+              // Redirect to login after 3 seconds
+              setTimeout(() => {
+                navigate('/login');
+              }, 3000);
+              return;
+            }
+            
+            // If user exists but has no role, treat as incomplete signup and proceed with role selection
+            if (userCheck.exists && !userCheck.role) {
+              console.log("[AuthCallback] User exists but has no role; checking admin eligibility");
+              const adminEligible = await isAdminEligible(session.user.email || '');
+              console.log("[AuthCallback] Admin eligible:", adminEligible);
+              
+              setUserData({
+                id: session.user.id,
+                email: session.user.email || 'Unknown'
+              });
+              setIncludeAdminOption(adminEligible);
+              setShowRoleSelection(true);
+              return;
+            }
+            
+            console.log("[AuthCallback] No existing account found; checking admin eligibility");
+            const adminEligible = await isAdminEligible(session.user.email || '');
+            console.log("[AuthCallback] Admin eligible:", adminEligible);
+            
             setUserData({
               id: session.user.id,
               email: session.user.email || 'Unknown'
             });
+            setIncludeAdminOption(adminEligible);
             setShowRoleSelection(true);
-            return;
+            return; // IMPORTANT: Return here to prevent further execution
+          } else {
+            // This is a sign-in attempt, check if user exists
+            console.log("[AuthCallback] Detected sign-in attempt; checking if user exists");
+            
+            if (!userCheck.exists) {
+              console.log("[AuthCallback] User does not exist; showing no account message");
+              setExistingAccountMessage(
+                "You don't have an account yet. Please sign up first before you can sign in."
+              );
+              // Redirect to signup after 3 seconds
+              setTimeout(() => {
+                navigate('/signup');
+              }, 3000);
+              return;
+            }
           }
 
           const userRole = await getUserRole(session.user.id);
@@ -155,13 +211,68 @@ const AuthCallback: React.FC = () => {
     }
   };
 
+  if (existingAccountMessage) {
+    const isNoAccountError = existingAccountMessage.includes("don't have an account yet");
+    const redirectPath = isNoAccountError ? '/signup' : '/login';
+    const redirectText = isNoAccountError ? 'sign up page' : 'sign in page';
+    const buttonText = isNoAccountError ? 'Go to Sign Up Now' : 'Go to Sign In Now';
+    const title = isNoAccountError ? 'No Account Found' : 'Account Already Exists';
+    const backgroundColor = isNoAccountError ? '#f8d7da' : '#fff3cd';
+    const borderColor = isNoAccountError ? '#f5c6cb' : '#ffeaa7';
+    const titleColor = isNoAccountError ? '#721c24' : '#856404';
+
+    return (
+      <section style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#333',
+        textAlign: 'center',
+        padding: '2rem'
+      }}>
+        <div style={{
+          backgroundColor,
+          border: `1px solid ${borderColor}`,
+          borderRadius: '8px',
+          padding: '2rem',
+          maxWidth: '500px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+        }}>
+          <h2 style={{ color: titleColor, marginBottom: '1rem' }}>{title}</h2>
+          <p style={{ marginBottom: '1.5rem' }}>{existingAccountMessage}</p>
+          <p style={{ fontSize: '1rem', color: '#666' }}>
+            Redirecting to {redirectText} in a few seconds...
+          </p>
+          <button 
+            onClick={() => navigate(redirectPath)}
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '4px',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              marginTop: '1rem'
+            }}
+          >
+            {buttonText}
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   if (showRoleSelection && userData) {
     return (
       <RoleSelection
         userId={userData.id}
         userEmail={userData.email}
         onRoleSelected={handleRoleSelected}
-        includeAdminOption={true}
+        includeAdminOption={includeAdminOption}
       />
     );
   }

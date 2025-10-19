@@ -14,6 +14,12 @@ vi.mock("../../supabaseClient", () => ({
   },
 }));
 
+// Mock role service
+vi.mock("../services/roleService", () => ({
+  getUserRole: vi.fn().mockResolvedValue(null),
+}));
+
+
 describe("UI Tests / LandingPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -55,8 +61,75 @@ describe("UI Tests / LandingPage", () => {
     const navSignInButton = within(nav).getByRole("button", { name: /Sign In/i });
 
     fireEvent.click(navSignInButton);
-    // We can’t check navigate directly without mocking useNavigate,
+    // We can't check navigate directly without mocking useNavigate,
     // but we assert button exists and is clickable
     expect(navSignInButton).toBeInTheDocument();
+  });
+
+  it("displays welcome message when logged in", async () => {
+    const mockSession = {
+      user: {
+        id: "test-user-id",
+        email: "test@example.com"
+      }
+    };
+
+    const mockUserRole = {
+      id: "test-user-id",
+      email: "test@example.com",
+      role: "Fan" as const
+    };
+
+    // Mock supabase to return a session
+    const { default: supabase } = await import("../../supabaseClient");
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({ data: { session: mockSession } });
+
+    // Mock role service to return user role
+    const { getUserRole } = await import("../services/roleService");
+    vi.mocked(getUserRole).mockResolvedValue(mockUserRole);
+
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>
+    );
+
+    // Wait for the component to load and check for welcome text
+    await screen.findByText("Welcome");
+    expect(screen.getByText("Welcome")).toBeInTheDocument();
+  });
+
+  it("navigates to correct dashboard based on user role", async () => {
+    const mockSession = {
+      user: {
+        id: "test-user-id",
+        email: "test@example.com"
+      }
+    };
+
+    const mockUserRole = {
+      id: "test-user-id",
+      email: "test@example.com",
+      role: "Coach" as const
+    };
+
+    // Mock supabase to return a session
+    const { default: supabase } = await import("../../supabaseClient");
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({ data: { session: mockSession } });
+
+    // Mock role service to return user role
+    const { getUserRole } = await import("../services/roleService");
+    vi.mocked(getUserRole).mockResolvedValue(mockUserRole);
+
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>
+    );
+
+    // Wait for the component to load and check for dashboard button
+    await screen.findByText("Dashboard");
+    const dashboardButton = screen.getByText("Dashboard");
+    expect(dashboardButton).toBeInTheDocument();
   });
 });

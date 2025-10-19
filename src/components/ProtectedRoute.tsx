@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isCoach, isFan } from '../services/roleService';
+import { isCoach, isFan, getUserRole } from '../services/roleService';
 import supabase from '../../supabaseClient';
 
 interface ProtectedRouteProps {
@@ -40,6 +40,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           hasRequiredRole = await isCoach(session.user.id);
         } else if (requiredRole === 'Fan') {
           hasRequiredRole = await isFan(session.user.id);
+        } else if (requiredRole === 'Admin') {
+          const userRole = await getUserRole(session.user.id);
+          hasRequiredRole = userRole?.role === 'Admin';
         }
 
         if (hasRequiredRole) {

@@ -56,32 +56,162 @@ export async function isFan(userId: string): Promise<boolean> {
   return userRole?.role === 'Fan';
 }
 
-export async function createUserProfile(userId: string, email: string, role: 'Fan' | 'Coach' | 'Admin' = 'Fan'): Promise<boolean> {
+export async function checkUserExists(email: string): Promise<{ exists: boolean; role?: 'Fan' | 'Coach' | 'Admin' }> {
   try {
-    // Insert into users table
-    const { error: userError } = await supabase
+    const { data, error } = await supabase
       .from('users')
-      .insert({
-        id: userId,
-        email,
-        role
-      });
+      .select('role')
+      .eq('email', email)
+      .maybeSingle();
 
-    if (userError) {
-      console.error('Error creating user:', userError);
+    if (error) {
+      console.error('Error checking if user exists:', error);
+      return { exists: false };
+    }
+
+    return { 
+      exists: !!data, 
+      role: data?.role as 'Fan' | 'Coach' | 'Admin' | undefined 
+    };
+  } catch (error) {
+    console.error('Error in checkUserExists:', error);
+    return { exists: false };
+  }
+}
+
+export async function isAdminEligible(email: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('admin_whitelist')
+      .select('email')
+      .eq('email', email)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking admin eligibility:', error);
       return false;
     }
 
-    // Insert into user_profiles table
+    return !!data;
+  } catch (error) {
+    console.error('Error in isAdminEligible:', error);
+    return false;
+  }
+}
+
+export async function addAdminToWhitelist(email: string, addedBy: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('admin_whitelist')
+      .insert({
+        email,
+        added_by: addedBy,
+        is_active: true,
+        created_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error('Error adding admin to whitelist:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error in addAdminToWhitelist:', error);
+    return false;
+  }
+}
+
+export async function removeAdminFromWhitelist(email: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('admin_whitelist')
+      .update({ is_active: false })
+      .eq('email', email);
+
+    if (error) {
+      console.error('Error removing admin from whitelist:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error in removeAdminFromWhitelist:', error);
+    return false;
+  }
+}
+
+export async function getAdminWhitelist(): Promise<Array<{email: string, added_by: string, created_at: string, is_active: boolean}>> {
+  try {
+    const { data, error } = await supabase
+      .from('admin_whitelist')
+      .select('email, added_by, created_at, is_active')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching admin whitelist:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in getAdminWhitelist:', error);
+    return [];
+  }
+}
+
+export async function createUserProfile(userId: string, email: string, role: 'Fan' | 'Coach' | 'Admin' = 'Fan'): Promise<boolean> {
+  try {
+    // First check if user already exists
+    const { data: existingUser, error: checkError } = await supabase
+      .from('users')
+      .select('id, role')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Error checking existing user:', checkError);
+      return false;
+    }
+
+    let userError;
+    if (existingUser) {
+      // Update existing user with role
+      console.log('Updating existing user with role:', role);
+      const { error } = await supabase
+        .from('users')
+        .update({ role })
+        .eq('id', userId);
+      userError = error;
+    } else {
+      // Insert new user
+      console.log('Creating new user with role:', role);
+      const { error } = await supabase
+        .from('users')
+        .insert({
+          id: userId,
+          email,
+          role
+        });
+      userError = error;
+    }
+
+    if (userError) {
+      console.error('Error creating/updating user:', userError);
+      return false;
+    }
+
+    // Insert or update user_profiles table
     const { error: profileError } = await supabase
       .from('user_profiles')
-      .insert({
+      .upsert({
         id: userId,
         display_name: email.split('@')[0] // Use email prefix as display name
       });
 
     if (profileError) {
-      console.error('Error creating user profile:', profileError);
+      console.error('Error creating/updating user profile:', profileError);
       return false;
     }
 

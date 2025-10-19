@@ -5,6 +5,7 @@ import {
   isCoach,
   isFan,
   createUserProfile,
+  checkUserExists,
   type UserRole
 } from '../services/roleService';
 
@@ -357,6 +358,104 @@ describe('User Role Service', () => {
       });
     });
 
+    describe('checkUserExists', () => {
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn(),
+      };
+
+      beforeEach(() => {
+        mockSupabase.from.mockReturnValue(mockQuery);
+      });
+
+      it('should return exists true and role when user exists', async () => {
+        const email = 'coach@example.com';
+        const userData = { role: 'Coach' };
+
+        mockQuery.maybeSingle.mockResolvedValue({
+          data: userData,
+          error: null,
+        });
+
+        const result = await checkUserExists(email);
+
+        expect(mockSupabase.from).toHaveBeenCalledWith('users');
+        expect(mockQuery.select).toHaveBeenCalledWith('role');
+        expect(mockQuery.eq).toHaveBeenCalledWith('email', email);
+        expect(mockQuery.maybeSingle).toHaveBeenCalled();
+        expect(result).toEqual({ exists: true, role: 'Coach' });
+      });
+
+      it('should return exists false when user does not exist', async () => {
+        const email = 'nonexistent@example.com';
+
+        mockQuery.maybeSingle.mockResolvedValue({
+          data: null,
+          error: null,
+        });
+
+        const result = await checkUserExists(email);
+
+        expect(result).toEqual({ exists: false });
+      });
+
+      it('should return exists false when database error occurs', async () => {
+        const email = 'error@example.com';
+        const error = { message: 'Database error' };
+
+        mockQuery.maybeSingle.mockResolvedValue({
+          data: null,
+          error,
+        });
+
+        const result = await checkUserExists(email);
+
+        expect(result).toEqual({ exists: false });
+        expect(consoleSpy.error).toHaveBeenCalledWith('Error checking if user exists:', error);
+      });
+
+      it('should handle exceptions in try-catch block', async () => {
+        const email = 'exception@example.com';
+        const error = new Error('Network error');
+
+        mockQuery.maybeSingle.mockRejectedValue(error);
+
+        const result = await checkUserExists(email);
+
+        expect(result).toEqual({ exists: false });
+        expect(consoleSpy.error).toHaveBeenCalledWith('Error in checkUserExists:', error);
+      });
+
+      it('should return correct role for Fan user', async () => {
+        const email = 'fan@example.com';
+        const userData = { role: 'Fan' };
+
+        mockQuery.maybeSingle.mockResolvedValue({
+          data: userData,
+          error: null,
+        });
+
+        const result = await checkUserExists(email);
+
+        expect(result).toEqual({ exists: true, role: 'Fan' });
+      });
+
+      it('should return correct role for Admin user', async () => {
+        const email = 'admin@example.com';
+        const userData = { role: 'Admin' };
+
+        mockQuery.maybeSingle.mockResolvedValue({
+          data: userData,
+          error: null,
+        });
+
+        const result = await checkUserExists(email);
+
+        expect(result).toEqual({ exists: true, role: 'Admin' });
+      });
+    });
+
     describe('createUserProfile', () => {
       beforeEach(() => {
         // Reset the mock to return different instances for each call
@@ -378,15 +477,23 @@ describe('User Role Service', () => {
         const userId = 'user-123';
         const email = 'john.doe@example.com';
 
+        const usersSelect = vi.fn().mockResolvedValue({ data: null, error: null }); // No existing user
         const usersInsert = vi.fn().mockResolvedValue({ error: null });
-        const profilesInsert = vi.fn().mockResolvedValue({ error: null });
+        const profilesUpsert = vi.fn().mockResolvedValue({ error: null });
 
         mockSupabase.from.mockImplementation((table: string) => {
           if (table === 'users') {
-            return { insert: usersInsert };
+            return { 
+              select: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({
+                  maybeSingle: usersSelect
+                })
+              }),
+              insert: usersInsert 
+            };
           }
           if (table === 'user_profiles') {
-            return { insert: profilesInsert };
+            return { upsert: profilesUpsert };
           }
         });
 
@@ -399,7 +506,47 @@ describe('User Role Service', () => {
           email,
           role: 'Fan',
         });
-        expect(profilesInsert).toHaveBeenCalledWith({
+        expect(profilesUpsert).toHaveBeenCalledWith({
+          id: userId,
+          display_name: 'john.doe',
+        });
+        expect(result).toBe(true);
+      });
+
+      it('should update existing user with no role when creating profile', async () => {
+        const userId = 'user-123';
+        const email = 'john.doe@example.com';
+        const role = 'Coach';
+
+        const usersSelect = vi.fn().mockResolvedValue({ 
+          data: { id: userId, role: null }, // Existing user with no role
+          error: null 
+        });
+        const usersUpdate = vi.fn().mockResolvedValue({ error: null });
+        const profilesUpsert = vi.fn().mockResolvedValue({ error: null });
+
+        mockSupabase.from.mockImplementation((table: string) => {
+          if (table === 'users') {
+            return { 
+              select: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({
+                  maybeSingle: usersSelect
+                })
+              }),
+              update: usersUpdate 
+            };
+          }
+          if (table === 'user_profiles') {
+            return { upsert: profilesUpsert };
+          }
+        });
+
+        const result = await createUserProfile(userId, email, role);
+
+        expect(mockSupabase.from).toHaveBeenCalledWith('users');
+        expect(mockSupabase.from).toHaveBeenCalledWith('user_profiles');
+        expect(usersUpdate).toHaveBeenCalledWith({ role });
+        expect(profilesUpsert).toHaveBeenCalledWith({
           id: userId,
           display_name: 'john.doe',
         });

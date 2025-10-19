@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import AuthCallback from '../pages/authCallback';
-import { getUserRole, createUserProfile } from '../services/roleService';
+import { getUserRole, createUserProfile, checkUserExists } from '../services/roleService';
 import supabase from '../../supabaseClient';
 
 // Mock dependencies
@@ -25,6 +25,7 @@ vi.mock('../../supabaseClient', () => ({
 vi.mock('../services/roleService', () => ({
   getUserRole: vi.fn(),
   createUserProfile: vi.fn(),
+  checkUserExists: vi.fn(),
 }));
 
 vi.mock('../components/RoleSelection', () => ({
@@ -52,6 +53,7 @@ const mockNavigate = useNavigate as any;
 const mockSupabase = supabase as any;
 const mockGetUserRole = getUserRole as any;
 const mockCreateUserProfile = createUserProfile as any;
+const mockCheckUserExists = checkUserExists as any;
 
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -216,6 +218,371 @@ describe('AuthCallback Component', () => {
         await waitFor(() => {
           expect(screen.getByText('User Email: Unknown')).toBeInTheDocument();
         });
+      });
+    });
+
+    describe('Duplicate Account Prevention', () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'existing@example.com',
+      };
+
+      const mockSession = {
+        user: mockUser,
+      };
+
+      beforeEach(() => {
+        // Mock localStorage for cameFromSignup
+        Object.defineProperty(window, 'localStorage', {
+          value: {
+            getItem: vi.fn().mockReturnValue('1'),
+            removeItem: vi.fn(),
+          },
+          writable: true,
+        });
+
+        // Mock URLSearchParams to simulate coming from signup
+        Object.defineProperty(window, 'location', {
+          value: {
+            href: 'http://localhost:3000/auth-callback?from=signup',
+            origin: 'http://localhost:3000',
+            search: '?from=signup',
+          },
+          writable: true,
+        });
+      });
+
+      it('should show existing account message for Coach user trying to sign up again', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: true,
+          role: 'Coach'
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(mockCheckUserExists).toHaveBeenCalledWith(mockUser.email);
+          expect(screen.getByText('Account Already Exists')).toBeInTheDocument();
+          expect(screen.getByText('You already have an account as a Coach. Please sign in instead.')).toBeInTheDocument();
+          expect(screen.getByText('Go to Sign In Now')).toBeInTheDocument();
+        });
+      });
+
+      it('should show existing account message for Fan user trying to sign up again', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: true,
+          role: 'Fan'
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByText('You already have an account as a Fan. Please sign in instead.')).toBeInTheDocument();
+        });
+      });
+
+      it('should show existing account message for Admin user trying to sign up again', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: true,
+          role: 'Admin'
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByText('You already have an account as a Admin. Please sign in instead.')).toBeInTheDocument();
+        });
+      });
+
+      it('should redirect to login after 3 seconds when existing account detected', async () => {
+        vi.useFakeTimers();
+        
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: true,
+          role: 'Coach'
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByText('Account Already Exists')).toBeInTheDocument();
+        });
+
+        // Fast-forward time by 3 seconds
+        vi.advanceTimersByTime(3000);
+
+        await waitFor(() => {
+          expect(mockNavigateFn).toHaveBeenCalledWith('/login');
+        });
+
+        vi.useRealTimers();
+      });
+
+      it('should allow immediate navigation to login when button is clicked', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: true,
+          role: 'Coach'
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByText('Account Already Exists')).toBeInTheDocument();
+        });
+
+        const signInButton = screen.getByText('Go to Sign In Now');
+        signInButton.click();
+
+        expect(mockNavigateFn).toHaveBeenCalledWith('/login');
+      });
+
+      it('should proceed with role selection when no existing account is found during signup', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: false
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(mockCheckUserExists).toHaveBeenCalledWith(mockUser.email);
+          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
+        });
+
+        // Should not show existing account message
+        expect(screen.queryByText('Account Already Exists')).not.toBeInTheDocument();
+      });
+
+      it('should proceed with role selection when user exists but has no role during signup', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: true,
+          role: undefined // User exists but has no role
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(mockCheckUserExists).toHaveBeenCalledWith(mockUser.email);
+          expect(screen.getByTestId('role-selection')).toBeInTheDocument();
+        });
+
+        // Should not show existing account message
+        expect(screen.queryByText('Account Already Exists')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('Sign-in Scenarios', () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+      };
+
+      const mockSession = {
+        user: mockUser,
+      };
+
+      beforeEach(() => {
+        // Mock URLSearchParams to simulate coming from login (no from=signup param)
+        Object.defineProperty(window, 'location', {
+          value: {
+            href: 'http://localhost:3000/auth-callback',
+            origin: 'http://localhost:3000',
+            search: '',
+          },
+          writable: true,
+        });
+
+        // Mock localStorage to not have cameFromSignup
+        Object.defineProperty(window, 'localStorage', {
+          value: {
+            getItem: vi.fn().mockReturnValue(null),
+            removeItem: vi.fn(),
+          },
+          writable: true,
+        });
+      });
+
+      it('should show no account message when user tries to sign in without an account', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: false
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(mockCheckUserExists).toHaveBeenCalledWith(mockUser.email);
+          expect(screen.getByText('No Account Found')).toBeInTheDocument();
+          expect(screen.getByText("You don't have an account yet. Please sign up first before you can sign in.")).toBeInTheDocument();
+          expect(screen.getByText('Go to Sign Up Now')).toBeInTheDocument();
+        });
+      });
+
+      it('should redirect to signup after 3 seconds when no account found during sign-in', async () => {
+        vi.useFakeTimers();
+        
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: false
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByText('No Account Found')).toBeInTheDocument();
+        });
+
+        // Fast-forward time by 3 seconds
+        vi.advanceTimersByTime(3000);
+
+        await waitFor(() => {
+          expect(mockNavigateFn).toHaveBeenCalledWith('/signup');
+        });
+
+        vi.useRealTimers();
+      });
+
+      it('should allow immediate navigation to signup when button is clicked', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: false
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByText('No Account Found')).toBeInTheDocument();
+        });
+
+        const signUpButton = screen.getByText('Go to Sign Up Now');
+        signUpButton.click();
+
+        expect(mockNavigateFn).toHaveBeenCalledWith('/signup');
+      });
+
+      it('should proceed with normal login flow when user exists during sign-in', async () => {
+        mockSupabase.auth.getSession.mockResolvedValue({
+          data: { session: mockSession },
+          error: null,
+        });
+
+        mockCheckUserExists.mockResolvedValue({
+          exists: true,
+          role: 'Fan'
+        });
+
+        mockGetUserRole.mockResolvedValue({
+          id: mockUser.id,
+          email: mockUser.email,
+          role: 'Fan',
+        });
+
+        render(
+          <TestWrapper>
+            <AuthCallback />
+          </TestWrapper>
+        );
+
+        await waitFor(() => {
+          expect(mockCheckUserExists).toHaveBeenCalledWith(mockUser.email);
+          expect(mockGetUserRole).toHaveBeenCalledWith(mockUser.id);
+          expect(mockNavigateFn).toHaveBeenCalledWith('/user-dashboard', {
+            state: {
+              username: mockUser.email,
+              userId: mockUser.id,
+              isGoogleUser: true,
+            },
+          });
+        });
+
+        // Should not show no account message
+        expect(screen.queryByText('No Account Found')).not.toBeInTheDocument();
       });
     });
 

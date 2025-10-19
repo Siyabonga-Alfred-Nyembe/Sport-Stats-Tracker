@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
 import { type DbChatRecord } from "../services/chatService";
 import { deleteUserCompletely } from "../services/adminService";
+import { getAdminWhitelist, addAdminToWhitelist, removeAdminFromWhitelist } from "../services/roleService";
 import "../Styles/admin-dashboard.css";
 
 interface User {
@@ -26,6 +27,8 @@ const AdminDashboard: React.FC = () => {
     totalChats: 0,
     activeUsers: 0
   });
+  const [adminWhitelist, setAdminWhitelist] = useState<Array<{email: string, added_by: string, created_at: string, is_active: boolean}>>([]);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
 
   useEffect(() => {
     checkAdminStatus();
@@ -40,12 +43,12 @@ const AdminDashboard: React.FC = () => {
     }
 
     const { data: profile } = await supabase
-      .from('profiles')
+      .from('users')
       .select('role')
       .eq('id', session.user.id)
       .single();
 
-    if (profile?.role !== 'admin') {
+    if (profile?.role !== 'Admin') {
       navigate('/');
       console.log('Not an admin');
       return;
@@ -103,6 +106,10 @@ const AdminDashboard: React.FC = () => {
 
       if (usersData) setUsers(usersData as unknown as User[]);
 
+      // Fetch admin whitelist
+      const whitelist = await getAdminWhitelist();
+      setAdminWhitelist(whitelist);
+
       setStats({
         totalUsers: usersData?.length || 0,
         totalChats: chatsData?.length || 0,
@@ -116,6 +123,32 @@ const AdminDashboard: React.FC = () => {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddAdmin = async () => {
+    if (!newAdminEmail.trim()) return;
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
+    const success = await addAdminToWhitelist(newAdminEmail.trim(), session.user.email || '');
+    if (success) {
+      setNewAdminEmail("");
+      fetchData(); // Refresh the list
+    } else {
+      alert('Failed to add admin. Please try again.');
+    }
+  };
+
+  const handleRemoveAdmin = async (email: string) => {
+    if (!confirm(`Are you sure you want to remove ${email} from the admin whitelist?`)) return;
+    
+    const success = await removeAdminFromWhitelist(email);
+    if (success) {
+      fetchData(); // Refresh the list
+    } else {
+      alert('Failed to remove admin. Please try again.');
     }
   };
 
@@ -188,6 +221,12 @@ const AdminDashboard: React.FC = () => {
           onClick={() => setActiveTab('users')}
         >
           User Management
+        </button>
+        <button 
+          className={activeTab === 'admins' ? 'active' : ''}
+          onClick={() => setActiveTab('admins')}
+        >
+          Admin Management
         </button>
       </nav>
 
@@ -263,6 +302,74 @@ const AdminDashboard: React.FC = () => {
           </section>
         )}
 
+        {activeTab === 'admins' && (
+          <section className="admins-tab">
+            <h2>Admin Management</h2>
+            
+            <section className="add-admin-section">
+              <h3>Add New Admin</h3>
+              <section className="add-admin-form">
+                <input
+                  type="email"
+                  placeholder="Enter admin email address"
+                  value={newAdminEmail}
+                  onChange={(e) => setNewAdminEmail(e.target.value)}
+                  className="admin-email-input"
+                />
+                <button 
+                  onClick={handleAddAdmin}
+                  className="add-admin-btn"
+                  disabled={!newAdminEmail.trim()}
+                >
+                  Add Admin
+                </button>
+              </section>
+            </section>
+
+            <section className="admin-whitelist-section">
+              <h3>Admin Whitelist</h3>
+              {adminWhitelist.length === 0 ? (
+                <p>No admins in whitelist.</p>
+              ) : (
+                <table className="admin-whitelist-table">
+                  <thead>
+                    <tr>
+                      <th>Email</th>
+                      <th>Added By</th>
+                      <th>Added Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {adminWhitelist.map((admin, index) => (
+                      <tr key={index}>
+                        <td>{admin.email}</td>
+                        <td>{admin.added_by}</td>
+                        <td>{new Date(admin.created_at).toLocaleDateString()}</td>
+                        <td>
+                          <span className={`status-badge ${admin.is_active ? 'active' : 'inactive'}`}>
+                            {admin.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td>
+                          {admin.is_active && (
+                            <button 
+                              className="remove-admin-btn"
+                              onClick={() => handleRemoveAdmin(admin.email)}
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </section>
+          </section>
+        )}
         
       </section>
     </section>

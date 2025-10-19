@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
+import { getUserRole } from "../services/roleService";
 import "../Styles/landingPage.css";
 
 function LandingPage() {
   const navigate = useNavigate();
   const sectionsRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
   const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
@@ -15,17 +15,15 @@ function LandingPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setIsLoggedIn(true);
-        setUsername(session.user.email || 'User');
         
-        // Get user role
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (profile) {
-          setUserRole(profile.role);
+        // Get user role from the correct table
+        try {
+          const userRole = await getUserRole(session.user.id);
+          if (userRole) {
+            setUserRole(userRole.role);
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
         }
       }
     };
@@ -72,12 +70,13 @@ function LandingPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleAdminNavigation = () => {
-    if (userRole === 'admin') {
+  const handleDashboardNavigation = () => {
+    if (userRole === 'Admin') {
       navigate('/admin-dashboard');
+    } else if (userRole === 'Coach') {
+      navigate('/coach-dashboard');
     } else {
-      // Optionally show a message or redirect to unauthorized page
-      navigate('/');
+      navigate('/user-dashboard');
     }
   };
 
@@ -92,17 +91,9 @@ function LandingPage() {
           <section className="nav-actions">
             {isLoggedIn ? (
               <>
-                <span className="welcome-text">Welcome, {username}</span>
-                <button className="nav-btn secondary" onClick={() => navigate('/user-dashboard')}>
+                <span className="welcome-text">Welcome</span>
+                <button className="nav-btn secondary" onClick={handleDashboardNavigation}>
                   Dashboard
-                </button>
-                {userRole === 'admin' && (
-                  <button className="nav-btn admin" onClick={handleAdminNavigation}>
-                    Admin
-                  </button>
-                )}
-                <button className="nav-btn secondary" onClick={() => supabase.auth.signOut().then(() => navigate('/'))}>
-                  Sign Out
                 </button>
               </>
             ) : (
@@ -141,7 +132,7 @@ function LandingPage() {
                   </button>
                 </>
               ) : (
-                <button className="cta-btn primary" onClick={() => navigate('/user-dashboard')}>
+                <button className="cta-btn primary" onClick={handleDashboardNavigation}>
                   Go to Dashboard
                 </button>
               )}
@@ -262,7 +253,7 @@ function LandingPage() {
               Get Started Today
             </button>
           ) : (
-            <button className="cta-btn primary large" onClick={() => navigate('/user-dashboard')}>
+            <button className="cta-btn primary large" onClick={handleDashboardNavigation}>
               Go to Dashboard
             </button>
           )}
