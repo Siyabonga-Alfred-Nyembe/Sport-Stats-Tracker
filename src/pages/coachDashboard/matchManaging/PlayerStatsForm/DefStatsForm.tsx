@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 interface Props {
-  initialStats?: Record<string, number>; 
+  initialStats?: Record<string, number>;
   onSave: (stats: Record<string, number>) => void;
 }
 
@@ -24,7 +24,6 @@ const DefStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
     }
   }, [initialStats]);
 
-  // Save when form data changes
   const handleInputChange = (field: string, value: number) => {
     const newForm = { ...form, [field]: value };
     setForm(newForm);
@@ -35,8 +34,16 @@ const DefStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
     <div className="position-stats-form">
       {Object.keys(form).map((field) => (
         <div key={field} className="form-group">
-          <label>{field}</label>
-          <input type="number" style={{color:'blue'}} value={(form as any)[field]} onChange={e => handleInputChange(field, +e.target.value)} />
+          <label htmlFor={field}>{field}</label>
+          <input
+            id={field}
+            type="number"
+            min={0}
+            aria-label={`${field} value`}
+            style={{ color: "blue" }}
+            value={(form as any)[field]}
+            onChange={(e) => handleInputChange(field, +e.target.value)}
+          />
         </div>
       ))}
     </div>

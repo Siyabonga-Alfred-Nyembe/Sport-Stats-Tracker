@@ -19,39 +19,7 @@
 
 
 /* === Hamburger Menu === */
-.hamburger-menu {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  border-radius: 8px;
-  padding: 10px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.25s ease;
-}
 
-.hamburger-line {
-  width: 22px;
-  height: 3px;
-  background: white;
-  border-radius: 2px;
-  transition: all 0.25s ease;
-}
-
-.hamburger-menu:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.05);
-}
-
-.hamburger-menu:hover .hamburger-line:nth-child(1) {
-  transform: translateY(2px);
-}
-.hamburger-menu:hover .hamburger-line:nth-child(3) {
-  transform: translateY(-2px);
-}
 
 /* === Sidebar Overlay === */
 .sidebar-overlay {

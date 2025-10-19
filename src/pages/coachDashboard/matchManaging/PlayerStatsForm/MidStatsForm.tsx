@@ -28,7 +28,6 @@ const MidStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
     }
   }, [initialStats]);
 
-  // Save when form data changes
   const handleInputChange = (field: string, value: number) => {
     const newForm = { ...form, [field]: value };
     setForm(newForm);
@@ -39,9 +38,14 @@ const MidStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
     <div className="position-stats-form">
       {Object.keys(form).map((field) => (
         <div key={field} className="form-group">
-          <label style={{ color: "blue" }}>{field}</label>
+          <label htmlFor={field} style={{ color: "blue" }}>
+            {field}
+          </label>
           <input
+            id={field}
             type="number"
+            min={0}
+            aria-label={`${field} value`}
             value={(form as any)[field]}
             onChange={(e) => handleInputChange(field, +e.target.value)}
           />

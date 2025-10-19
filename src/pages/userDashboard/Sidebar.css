@@ -39,10 +39,10 @@
 
 /* === Hamburger Menu === */
 .hamburger-menu {
-  background: rgba(255, 255, 255, 0.15);
+  background: transparent;
   border: none;
   border-radius: 8px;
-  padding: 10px;
+  padding: 5px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -55,7 +55,7 @@
 .hamburger-line {
   width: 22px;
   height: 3px;
-  background: var(--primary);
+  background: var(--card);
   border-radius: 2px;
   transition: all 0.25s ease;
 }

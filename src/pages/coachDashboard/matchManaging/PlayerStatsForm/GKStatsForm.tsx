@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 interface Props {
-  initialStats?: Record<string, number>; 
+  initialStats?: Record<string, number>;
   onSave: (stats: Record<string, number>) => void;
 }
 
@@ -22,7 +22,6 @@ const GKStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
     }
   }, [initialStats]);
 
-  // Save when form data changes
   const handleInputChange = (field: string, value: number) => {
     const newForm = { ...form, [field]: value };
     setForm(newForm);
@@ -32,16 +31,37 @@ const GKStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
   return (
     <div className="position-stats-form">
       <div className="form-group">
-        <label>Saves</label>
-        <input type="number" value={form.saves} onChange={e => handleInputChange('saves', +e.target.value)} />
+        <label htmlFor="saves">Saves</label>
+        <input
+          id="saves"
+          type="number"
+          min={0}
+          aria-label="Number of saves"
+          value={form.saves}
+          onChange={(e) => handleInputChange("saves", +e.target.value)}
+        />
       </div>
       <div className="form-group">
-        <label>Clearances</label>
-        <input type="number" value={form.clearances} onChange={e => handleInputChange('clearances', +e.target.value)} />
+        <label htmlFor="clearances">Clearances</label>
+        <input
+          id="clearances"
+          type="number"
+          min={0}
+          aria-label="Number of clearances"
+          value={form.clearances}
+          onChange={(e) => handleInputChange("clearances", +e.target.value)}
+        />
       </div>
       <div className="form-group">
-        <label>Goals Conceded</label>
-        <input type="number" value={form.goalsConceded} onChange={e => handleInputChange('goalsConceded', +e.target.value)} />
+        <label htmlFor="goalsConceded">Goals Conceded</label>
+        <input
+          id="goalsConceded"
+          type="number"
+          min={0}
+          aria-label="Number of goals conceded"
+          value={form.goalsConceded}
+          onChange={(e) => handleInputChange("goalsConceded", +e.target.value)}
+        />
       </div>
     </div>
   );

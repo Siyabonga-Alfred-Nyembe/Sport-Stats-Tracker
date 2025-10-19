@@ -22,7 +22,9 @@
 /* Main bar with gradient */
 .main-bar {
   background: var(--headback);
-  padding: 1.5rem 2rem;
+  padding: 2.5rem;
+  padding-left: 3rem;
+  padding-top:1rem ;
   display: flex;
   justify-content: space-between;
   align-items: center;
