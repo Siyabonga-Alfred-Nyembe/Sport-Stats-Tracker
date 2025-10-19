@@ -92,7 +92,7 @@ function LandingPage() {
           <section className="nav-actions">
             {isLoggedIn ? (
               <>
-                <span className="welcome-text">Welcome, {username}</span>
+                <span className="welcome-text">Welcome</span>
                 <button className="nav-btn secondary" onClick={() => navigate('/user-dashboard')}>
                   Dashboard
                 </button>
@@ -101,9 +101,6 @@ function LandingPage() {
                     Admin
                   </button>
                 )}
-                <button className="nav-btn secondary" onClick={() => supabase.auth.signOut().then(() => navigate('/'))}>
-                  Sign Out
-                </button>
               </>
             ) : (
               <>
