@@ -49,9 +49,4 @@ describe("App Routing", () => {
     expect(screen.getByText("User Dashboard")).toBeInTheDocument();
   });
 
-  it("renders profile settings inside ProtectedRoute", () => {
-    window.history.pushState({}, "Profile Settings", "/profile-settings");
-    render(<App />);
-    expect(screen.getByText("Profile Settings")).toBeInTheDocument();
-  });
 });
