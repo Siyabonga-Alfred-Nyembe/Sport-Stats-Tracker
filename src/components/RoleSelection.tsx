@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { updateUserRole } from '../services/roleService';
 import './RoleSelection.css';
 
 interface RoleSelectionProps {
-  userId: string;
   userEmail: string;
   onRoleSelected: (role: 'Fan' | 'Coach' | 'Admin') => void;
   includeAdminOption?: boolean;
 }
 
 const RoleSelection: React.FC<RoleSelectionProps> = ({ 
-  userId, 
   userEmail, 
   onRoleSelected,
   includeAdminOption = false
@@ -19,7 +15,6 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({
   const [selectedRole, setSelectedRole] = useState<'Fan' | 'Coach' | 'Admin' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   const handleRoleSelect = async (role: 'Fan' | 'Coach' | 'Admin') => {
     setSelectedRole(role);

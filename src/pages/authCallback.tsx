@@ -184,7 +184,6 @@ const AuthCallback: React.FC = () => {
   if (showRoleSelection && userData) {
     return (
       <RoleSelection
-        userId={userData.id}
         userEmail={userData.email}
         onRoleSelected={handleRoleSelected}
         includeAdminOption={true}

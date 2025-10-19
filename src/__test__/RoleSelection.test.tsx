@@ -1,21 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, vi, beforeEach, expect } from 'vitest';
 import RoleSelection from '../components/RoleSelection';
-import * as roleService from '../services/roleService';
 import { MemoryRouter } from 'react-router-dom';
 
-vi.mock('../services/roleService', () => ({
-  updateUserRole: vi.fn(),
-}));
-
-const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return { ...actual, useNavigate: () => mockNavigate };
-});
-
 describe('RoleSelection Component', () => {
-  const userId = 'u1';
   const userEmail = 'test@example.com';
   const onRoleSelected = vi.fn();
 
@@ -26,7 +14,7 @@ describe('RoleSelection Component', () => {
   it('renders component with both roles', () => {
     render(
       <MemoryRouter>
-        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -38,7 +26,7 @@ describe('RoleSelection Component', () => {
   it('selects Fan role when clicked', () => {
     render(
       <MemoryRouter>
-        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -50,7 +38,7 @@ describe('RoleSelection Component', () => {
   it('selects Coach role when clicked', () => {
     render(
       <MemoryRouter>
-        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -59,12 +47,10 @@ describe('RoleSelection Component', () => {
     expect(continueBtn).toBeInTheDocument();
   });
 
-  it('calls updateUserRole and navigates for Fan', async () => {
-    (roleService.updateUserRole as any).mockResolvedValue(true);
-
+  it('calls onRoleSelected for Fan', async () => {
     render(
       <MemoryRouter>
-        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -72,18 +58,14 @@ describe('RoleSelection Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Continue as Fan/i }));
 
     await waitFor(() => {
-      expect(roleService.updateUserRole).toHaveBeenCalledWith(userId, 'Fan');
       expect(onRoleSelected).toHaveBeenCalledWith('Fan');
-      expect(mockNavigate).toHaveBeenCalledWith('/user-dashboard');
     });
   });
 
-  it('calls updateUserRole and navigates for Coach', async () => {
-    (roleService.updateUserRole as any).mockResolvedValue(true);
-
+  it('calls onRoleSelected for Coach', async () => {
     render(
       <MemoryRouter>
-        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -91,20 +73,14 @@ describe('RoleSelection Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Continue as Coach/i }));
 
     await waitFor(() => {
-      expect(roleService.updateUserRole).toHaveBeenCalledWith(userId, 'Coach');
       expect(onRoleSelected).toHaveBeenCalledWith('Coach');
-      expect(mockNavigate).toHaveBeenCalledWith('/team-setup');
     });
   });
 
-  it('displays loading state while updating role', async () => {
-    let resolvePromise: any;
-    const promise = new Promise((resolve) => (resolvePromise = resolve));
-    (roleService.updateUserRole as any).mockReturnValue(promise);
-
+  it('displays loading state while processing', async () => {
     render(
       <MemoryRouter>
-        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -113,19 +89,15 @@ describe('RoleSelection Component', () => {
 
     expect(screen.getByRole('button', { name: /Setting up.../i })).toBeDisabled();
 
-    resolvePromise(true);
-
     await waitFor(() => {
       expect(onRoleSelected).toHaveBeenCalled();
     });
   });
 
-  it('displays error message if updateUserRole fails', async () => {
-    (roleService.updateUserRole as any).mockResolvedValue(false);
-
+  it('handles role selection without errors', async () => {
     render(
       <MemoryRouter>
-        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -133,16 +105,14 @@ describe('RoleSelection Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Continue as Fan/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Failed to update role/i)).toBeInTheDocument();
+      expect(onRoleSelected).toHaveBeenCalledWith('Fan');
     });
   });
 
-  it('displays error message on exception', async () => {
-    (roleService.updateUserRole as any).mockRejectedValue(new Error('Server error'));
-
+  it('handles role selection successfully', async () => {
     render(
       <MemoryRouter>
-        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -150,7 +120,7 @@ describe('RoleSelection Component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Continue as Fan/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/An error occurred/i)).toBeInTheDocument();
+      expect(onRoleSelected).toHaveBeenCalledWith('Fan');
     });
   });
 });
