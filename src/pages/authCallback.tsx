@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
 import { getUserRole, createUserProfile } from "../services/roleService";
@@ -8,28 +8,34 @@ const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [userData, setUserData] = useState<{ id: string; email: string } | null>(null);
+  const hasProcessed = useRef(false); // Prevent double execution
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      // Supabase client is configured with detectSessionInUrl: true, so it
-      // will exchange the code automatically when the page loads.
+      // Prevent double execution in React Strict Mode
+      if (hasProcessed.current) {
+        console.log("[AuthCallback] Already processed, skipping");
+        return;
+      }
+      hasProcessed.current = true;
+
       console.log("[AuthCallback] Handling auth callback", {
         location: window.location.href,
         origin: window.location.origin
       });
 
-      // Detect OAuth error returned in the callback URL and if we came from signup
+      // Detect OAuth error
       const searchParams = new URLSearchParams(window.location.search);
       const oauthError = searchParams.get('error');
       const oauthErrorDescription = searchParams.get('error_description');
       const fromParam = searchParams.get('from');
+      
       if (oauthError) {
         console.error("[AuthCallback] OAuth provider returned error:", {
           error: oauthError,
           description: oauthErrorDescription
         });
-        // Optionally surface to user; keeping console-only to avoid extra UI right now
-        navigate("/login");
+        navigate("/login", { replace: true });
         return;
       }
 
@@ -38,7 +44,7 @@ const AuthCallback: React.FC = () => {
       
       if (error) {
         console.error("[AuthCallback] Error getting session:", error);
-        navigate("/login");
+        navigate("/login", { replace: true });
         return;
       }
 
@@ -49,7 +55,7 @@ const AuthCallback: React.FC = () => {
             email: session.user.email
           });
 
-          // If we came directly from signup (query param or localStorage), force role selection once
+          // Check if came from signup
           let cameFromSignup = fromParam === 'signup';
           if (!cameFromSignup) {
             try {
@@ -81,9 +87,19 @@ const AuthCallback: React.FC = () => {
             return;
           }
 
+          // Store session info in localStorage before navigating
+          try {
+            localStorage.setItem('user_role', userRole.role);
+            localStorage.setItem('user_id', session.user.id);
+          } catch (e) {
+            console.warn("[AuthCallback] Could not store in localStorage:", e);
+          }
+
+          // Use replace: true to prevent back button issues
           if (userRole.role === "Coach") {
             console.log("[AuthCallback] Navigating to coach dashboard");
             navigate("/coach-dashboard", {
+              replace: true,
               state: { 
                 username: session.user.email, 
                 userId: session.user.id,
@@ -93,6 +109,7 @@ const AuthCallback: React.FC = () => {
           } else if (userRole.role === "Admin") {
             console.log("[AuthCallback] Navigating to admin dashboard");
             navigate("/admin-dashboard", {
+              replace: true,
               state: { 
                 username: session.user.email, 
                 userId: session.user.id,
@@ -102,6 +119,7 @@ const AuthCallback: React.FC = () => {
           } else {
             console.log("[AuthCallback] Navigating to user dashboard");
             navigate("/user-dashboard", {
+              replace: true,
               state: { 
                 username: session.user.email, 
                 userId: session.user.id,
@@ -111,11 +129,11 @@ const AuthCallback: React.FC = () => {
           }
         } catch (error) {
           console.error("[AuthCallback] Error checking user role:", error);
-          navigate("/login");
+          navigate("/login", { replace: true });
         }
       } else {
         console.warn("[AuthCallback] No session found; redirecting to /login");
-        navigate("/login");
+        navigate("/login", { replace: true });
       }
     };
 
@@ -135,23 +153,31 @@ const AuthCallback: React.FC = () => {
       console.log("[AuthCallback] createUserProfile result", { success });
       
       if (success) {
+        // Store role in localStorage
+        try {
+          localStorage.setItem('user_role', role);
+          localStorage.setItem('user_id', userData.id);
+        } catch (e) {
+          console.warn("[AuthCallback] Could not store in localStorage:", e);
+        }
+
         if (role === 'Coach') {
           console.log("[AuthCallback] Navigating to team setup");
-          navigate('/team-setup');
+          navigate('/team-setup', { replace: true });
         } else if (role === 'Admin') {
           console.log("[AuthCallback] Navigating to admin dashboard after profile creation");
-          navigate('/admin-dashboard');
+          navigate('/admin-dashboard', { replace: true });
         } else {
           console.log("[AuthCallback] Navigating to user dashboard after profile creation");
-          navigate('/user-dashboard');
+          navigate('/user-dashboard', { replace: true });
         }
       } else {
         console.error('[AuthCallback] Failed to create user profile');
-        navigate('/login');
+        navigate('/login', { replace: true });
       }
     } catch (error) {
       console.error('[AuthCallback] Error creating user profile:', error);
-      navigate('/login');
+      navigate('/login', { replace: true });
     }
   };
 

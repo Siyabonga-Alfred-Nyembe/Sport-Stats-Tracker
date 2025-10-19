@@ -28,29 +28,9 @@ const AdminDashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    checkAdminStatus();
+    // No need for checkAdminStatus - ProtectedRoute already handles this
     fetchData();
   }, []);
-
-  const checkAdminStatus = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      navigate('/login');
-      return;
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single();
-
-    if (profile?.role !== 'admin') {
-      navigate('/');
-      console.log('Not an admin');
-      return;
-    }
-  };
 
   const handleLogout = async () => {
     if (loggingOut) return;
@@ -80,26 +60,11 @@ const AdminDashboard: React.FC = () => {
 
       if (chatsData) setChats(chatsData as unknown as DbChatRecord[]);
 
-      // Try fetching from 'users' first (primary source)
-      let usersData: any[] | null = null;
-      try {
-        const { data } = await supabase
-          .from('users')
-          .select('*')
-          .order('created_at', { ascending: false });
-        usersData = data ?? null;
-      } catch (e) {
-        usersData = null;
-      }
-
-      // Fallback to 'profiles' if 'users' returns empty/null
-      if (!usersData || usersData.length === 0) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('created_at', { ascending: false });
-        usersData = data ?? [];
-      }
+      // Fetch from 'users' table (primary source)
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (usersData) setUsers(usersData as unknown as User[]);
 
@@ -262,8 +227,6 @@ const AdminDashboard: React.FC = () => {
             )}
           </section>
         )}
-
-        
       </section>
     </section>
   );
