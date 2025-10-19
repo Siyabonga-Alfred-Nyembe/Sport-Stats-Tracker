@@ -26,6 +26,8 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
   const [teams, setTeams] = useState<Map<string, Team>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   useEffect(() => {
     const loadPlayerData = async () => {
@@ -127,6 +129,33 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
     return teams.get(teamId)?.name || teamId;
   };
 
+  // Filter player stats by date range
+  const filteredPlayerStats = playerStats.filter(stat => {
+    if (!stat.match) return false;
+    
+    const matchDate = stat.match.date;
+    if (!matchDate) return false;
+    
+    // Convert match date to YYYY-MM-DD format for comparison
+    const matchDateStr = matchDate.slice(0, 10);
+    
+    // Check if date is within range
+    const afterStart = !startDate || matchDateStr >= startDate;
+    const beforeEnd = !endDate || matchDateStr <= endDate;
+    
+    return afterStart && beforeEnd;
+  });
+
+  const handleApplyFilter = () => {
+    // The filtering is handled by the filteredPlayerStats computed value
+    // This function can be used for additional logic if needed
+  };
+
+  const handleClearFilter = () => {
+    setStartDate("");
+    setEndDate("");
+  };
+
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)" }}>
@@ -171,13 +200,39 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
         <label htmlFor="start-date" aria-label="Start date input">
           From
         </label>
-        <input type="date" id="start-date" name="start-date" />
+        <input 
+          type="date" 
+          id="start-date" 
+          name="start-date" 
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
 
         <label htmlFor="end-date">To</label>
-        <input type="date" id="end-date" name="end-date" aria-label="End date input" />
+        <input 
+          type="date" 
+          id="end-date" 
+          name="end-date" 
+          aria-label="End date input"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
 
-        <button className="CoachBtn" aria-label="Apply Filter button">
+        <button 
+          className="CoachBtn" 
+          aria-label="Apply Filter button"
+          onClick={handleApplyFilter}
+        >
           Apply
+        </button>
+        
+        <button 
+          className="CoachBtn" 
+          aria-label="Clear Filter button"
+          onClick={handleClearFilter}
+          style={{ marginLeft: '8px', backgroundColor: 'var(--muted)' }}
+        >
+          Clear
         </button>
       </section>
     <div className="rs-card">
@@ -221,29 +276,36 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
 
       {/* Summary Stats */}
       <div style={{ marginBottom: "24px", padding: "16px", backgroundColor: "var(--bg)", borderRadius: "8px" }}>
-        <h3 style={{ margin: "0 0 12px 0", fontSize: "16px" }}>Season Summary</h3>
+        <h3 style={{ margin: "0 0 12px 0", fontSize: "16px" }}>
+          {startDate || endDate ? 'Filtered Period Summary' : 'Season Summary'}
+          {(startDate || endDate) && (
+            <span style={{ fontSize: "12px", color: "var(--muted)", marginLeft: "8px" }}>
+              ({startDate ? formatDate(startDate) : 'Start'} - {endDate ? formatDate(endDate) : 'End'})
+            </span>
+          )}
+        </h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "12px" }}>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "24px", fontWeight: "bold", color: "var(--primary)" }}>
-              {playerStats.reduce((sum, stat) => sum + (stat.goals || 0), 0)}
+              {filteredPlayerStats.reduce((sum, stat) => sum + (stat.goals || 0), 0)}
             </div>
             <div style={{ fontSize: "12px", color: "var(--muted)" }}>Goals</div>
           </div>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "24px", fontWeight: "bold", color: "var(--primary)" }}>
-              {playerStats.reduce((sum, stat) => sum + (stat.assists || 0), 0)}
+              {filteredPlayerStats.reduce((sum, stat) => sum + (stat.assists || 0), 0)}
             </div>
             <div style={{ fontSize: "12px", color: "var(--muted)" }}>Assists</div>
           </div>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "24px", fontWeight: "bold", color: "var(--primary)" }}>
-              {playerStats.length}
+              {filteredPlayerStats.length}
             </div>
             <div style={{ fontSize: "12px", color: "var(--muted)" }}>Matches</div>
           </div>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "24px", fontWeight: "bold", color: "var(--primary)" }}>
-              {playerStats.reduce((sum, stat) => sum + (stat.minutes_played || 0), 0)}
+              {filteredPlayerStats.reduce((sum, stat) => sum + (stat.minutes_played || 0), 0)}
             </div>
             <div style={{ fontSize: "12px", color: "var(--muted)" }}>Minutes</div>
           </div>
@@ -251,8 +313,16 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
       </div>
 
       {/* Stats Table */}
-      <div style={{ overflowX: "auto" }}>
-        <table className="player-stats-table">
+      {filteredPlayerStats.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)" }}>
+          <div>No matches found for the selected date range</div>
+          <div style={{ fontSize: "14px", marginTop: "8px" }}>
+            Try adjusting your date filters or clear them to see all matches
+          </div>
+        </div>
+      ) : (
+        <div style={{ overflowX: "auto" }}>
+          <table className="player-stats-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -269,7 +339,7 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
             </tr>
           </thead>
           <tbody>
-            {playerStats.filter(stat => stat.match).map((stat) => {
+            {filteredPlayerStats.filter(stat => stat.match).map((stat) => {
               const match = stat.match!;
               
               const yellowCards = stat.yellow_cards || 0;
@@ -298,7 +368,8 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
             })}
           </tbody>
         </table>
-      </div>
+        </div>
+      )}
 
       {/* Additional Stats Section */}
       <div style={{ marginTop: "24px" }}>
@@ -307,25 +378,25 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
           <div style={{ padding: "16px", backgroundColor: "var(--bg)", borderRadius: "8px" }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: "14px", color: "var(--muted)" }}>Attacking</h4>
             <div style={{ fontSize: "12px", lineHeight: "1.6" }}>
-              <div>Chances Created: {playerStats.reduce((sum, stat) => sum + (stat.chances_created || 0), 0)}</div>
-              <div>Dribbles: {playerStats.reduce((sum, stat) => sum + (stat.dribbles_successful || 0), 0)}/{playerStats.reduce((sum, stat) => sum + (stat.dribbles_attempted || 0), 0)}</div>
-              <div>Offsides: {playerStats.reduce((sum, stat) => sum + (stat.offsides || 0), 0)}</div>
+              <div>Chances Created: {filteredPlayerStats.reduce((sum, stat) => sum + (stat.chances_created || 0), 0)}</div>
+              <div>Dribbles: {filteredPlayerStats.reduce((sum, stat) => sum + (stat.dribbles_successful || 0), 0)}/{filteredPlayerStats.reduce((sum, stat) => sum + (stat.dribbles_attempted || 0), 0)}</div>
+              <div>Offsides: {filteredPlayerStats.reduce((sum, stat) => sum + (stat.offsides || 0), 0)}</div>
             </div>
           </div>
           <div style={{ padding: "16px", backgroundColor: "var(--bg)", borderRadius: "8px" }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: "14px", color: "var(--muted)" }}>Defending</h4>
             <div style={{ fontSize: "12px", lineHeight: "1.6" }}>
-              <div>Interceptions: {playerStats.reduce((sum, stat) => sum + (stat.interceptions || 0), 0)}</div>
-              <div>Clearances: {playerStats.reduce((sum, stat) => sum + (stat.clearances || 0), 0)}</div>
-              <div>Saves: {playerStats.reduce((sum, stat) => sum + (stat.saves || 0), 0)}</div>
+              <div>Interceptions: {filteredPlayerStats.reduce((sum, stat) => sum + (stat.interceptions || 0), 0)}</div>
+              <div>Clearances: {filteredPlayerStats.reduce((sum, stat) => sum + (stat.clearances || 0), 0)}</div>
+              <div>Saves: {filteredPlayerStats.reduce((sum, stat) => sum + (stat.saves || 0), 0)}</div>
             </div>
           </div>
           <div style={{ padding: "16px", backgroundColor: "var(--bg)", borderRadius: "8px" }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: "14px", color: "var(--muted)" }}>Discipline</h4>
             <div style={{ fontSize: "12px", lineHeight: "1.6" }}>
-              <div>Yellow Cards: {playerStats.reduce((sum, stat) => sum + (stat.yellow_cards || 0), 0)}</div>
-              <div>Red Cards: {playerStats.reduce((sum, stat) => sum + (stat.red_cards || 0), 0)}</div>
-              <div>Clean Sheets: {playerStats.reduce((sum, stat) => sum + (stat.clean_sheets || 0), 0)}</div>
+              <div>Yellow Cards: {filteredPlayerStats.reduce((sum, stat) => sum + (stat.yellow_cards || 0), 0)}</div>
+              <div>Red Cards: {filteredPlayerStats.reduce((sum, stat) => sum + (stat.red_cards || 0), 0)}</div>
+              <div>Clean Sheets: {filteredPlayerStats.reduce((sum, stat) => sum + (stat.clean_sheets || 0), 0)}</div>
             </div>
           </div>
         </div>
