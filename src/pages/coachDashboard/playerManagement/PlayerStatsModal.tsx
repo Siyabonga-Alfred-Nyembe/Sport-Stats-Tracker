@@ -22,9 +22,6 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
   // State to provide user feedback during the export
   const [isExporting, setIsExporting] = useState(false);
   
-  // Date filter states
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
 
   // Robust handleExportPdf function
    const handleExportPdf = async () => {
@@ -106,21 +103,6 @@ const PlayerStatsModal: React.FC<Props> = ({ player, onClose }) => {
     <section className="stats-modal-overlay" onClick={onClose}>
       <section className="stats-modal-content" ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
         <button className="modal-close-btn" onClick={onClose}>&times;</button>
-        <div className="date-filters">
-          <label>
-            From: <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-          </label>
-          <label>
-            To: <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-          </label>
-          <button 
-            className="rs-btn ghost" 
-            onClick={() => { setStartDate(''); setEndDate(''); }}
-            style={{ marginLeft: '10px' }}
-          >
-            Clear Filters
-          </button>
-        </div>
         <header className="modal-header">
           <img src={player.imageUrl} alt={player.name} className="player-avatar" />
           <section className="player-info">
