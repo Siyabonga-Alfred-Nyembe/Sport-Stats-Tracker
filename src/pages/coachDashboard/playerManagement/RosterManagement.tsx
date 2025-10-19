@@ -53,6 +53,7 @@ const RosterManagement: React.FC<Props> = ({
   const [name, setName] = useState('');
   const [position, setPosition] = useState('');
   const [jerseyNum, setJerseyNum] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +64,19 @@ const RosterManagement: React.FC<Props> = ({
     setJerseyNum('');
   };
 
-  const groupedPlayers = players.reduce((acc, player) => {
+  // Filter players based on search query
+  const filteredPlayers = players.filter(player => {
+    const query = searchQuery.toLowerCase();
+    if (!query) return true;
+    
+    return (
+      player.name.toLowerCase().includes(query) ||
+      player.position.toLowerCase().includes(query) ||
+      player.jerseyNum.toString().includes(query)
+    );
+  });
+
+  const groupedPlayers = filteredPlayers.reduce((acc, player) => {
     const { category } = getPositionCategory(player.position);
     if (!acc[category]) acc[category] = [];
     acc[category].push(player);
@@ -78,6 +91,24 @@ const RosterManagement: React.FC<Props> = ({
       
 
       <h2 className="section-title">Team Roster</h2>
+      
+      {/* Search functionality */}
+      <div className="search-section" style={{ marginBottom: '20px' }}>
+        <input
+          type="text"
+          placeholder="Search players by name, position, or jersey number..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0',
+            fontSize: '14px'
+          }}
+        />
+      </div>
+
     {errorMsg && (
         <InlineAlert 
           type="error" 
