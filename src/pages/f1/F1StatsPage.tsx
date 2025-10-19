@@ -1,32 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useConstructors, useDrivers } from './F1ApiBackend';
+import { useConstructors} from './F1ApiBackend';
 
-const countryFlags: Record<string, string> = {
-  'NLD': '🇳🇱', 'MEX': '🇲🇽', 'GBR': '🇬🇧', 'AUS': '🇦🇺', 
-  'MCO': '🇲🇨', 'ESP': '🇪🇸', 'GER': '🇩🇪', 'CAN': '🇨🇦',
-  'FRA': '🇫🇷', 'THA': '🇹🇭', 'CHN': '🇨🇳', 'JPN': '🇯🇵',
-  'FIN': '🇫🇮', 'DNK': '🇩🇰', 'USA': '🇺🇸', 'ITA': '🇮🇹',
-  'DEU': '🇩🇪', 'AUT': '🇦🇹', 'BEL': '🇧🇪', 'BRA': '🇧🇷',
-};
-
-const teamColors: Record<string, { primary: string; accent: string }> = {
-  'Red Bull': { primary: '#0600EF', accent: '#FF1801' },
-  'McLaren': { primary: '#FF8700', accent: '#47C7FC' },
-  'Ferrari': { primary: '#DC0000', accent: '#FFF500' },
-  'Mercedes': { primary: '#00D2BE', accent: '#00D2BE' },
-  'Aston Martin': { primary: '#006F62', accent: '#00D2BE' },
-  'Alpine F1 Team': { primary: '#0090FF', accent: '#FF1801' },
-  'Williams': { primary: '#005AFF', accent: '#FFFFFF' },
-  'RB F1 Team': { primary: '#2B4562', accent: '#6692FF' },
-  'Haas F1 Team': { primary: '#FFFFFF', accent: '#B6BABD' },
-  'Sauber': { primary: '#00E701', accent: '#000000' },
-};
 
 const F1StatsPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear.toString());
   const { constructorStats, loading: constructorsLoading, refetchStats } = useConstructors();
-  const { drivers, loading: driversLoading } = useDrivers();
+ 
 
   // Fetch constructor stats when year changes
   useEffect(() => {
@@ -35,7 +15,7 @@ const F1StatsPage: React.FC = () => {
     }
   }, [year, refetchStats]);
 
-  const loading = constructorsLoading || driversLoading;
+  const loading = constructorsLoading;
 
   if (loading) {
     return (
@@ -53,8 +33,6 @@ const F1StatsPage: React.FC = () => {
     (a, b) => a.stats.position - b.stats.position
   );
 
-  // Get active drivers with team info
-  const activeDrivers = drivers?.filter(d => d.current_team_name) || [];
 
   return (
     <section className="f1-page" aria-labelledby="stats-title">
