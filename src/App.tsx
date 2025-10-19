@@ -3,7 +3,6 @@ import LandingPage from "./pages/landingPage";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import CoachDashboard from "./pages/coachDashboard/CoachDashboard";
-import ProfileSettings from "./pages/ProfileSettings";
 import AuthCallback from "./pages/authCallback";
 import TeamSetup from "./pages/TeamSetup";
 import UserDashboard from "./pages/userDashboard/RedesignedDashboard";
@@ -138,16 +137,6 @@ function App() {
             element={
               <ProtectedRoute requiredRole="Admin" redirectTo="/login">
                 <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Shared Routes */}
-          <Route
-            path="/profile-settings"
-            element={
-              <ProtectedRoute>
-                <ProfileSettings />
               </ProtectedRoute>
             }
           />
