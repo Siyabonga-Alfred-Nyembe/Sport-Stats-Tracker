@@ -31,18 +31,18 @@ const GKStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
   return (
     <div className="position-stats-form">
       <div className="form-group">
-        <label htmlFor="saves">Saves</label>
+        <label htmlFor="saves" style={{ color: "var(--primary)" }}>Saves</label>
         <input
           id="saves"
           type="number"
           min={0}
           aria-label="Number of saves"
           value={form.saves}
-          onChange={(e) => handleInputChange("saves", +e.target.value)}
+          onChange={(e) => handleInputChange("saves", +e.target.value) }
         />
       </div>
       <div className="form-group">
-        <label htmlFor="clearances">Clearances</label>
+        <label htmlFor="clearances" style={{ color: "var(--primary)" }}>Clearances</label>
         <input
           id="clearances"
           type="number"
@@ -53,7 +53,7 @@ const GKStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
         />
       </div>
       <div className="form-group">
-        <label htmlFor="goalsConceded">Goals Conceded</label>
+        <label htmlFor="goalsConceded"style={{ color: "var(--primary)" }}>Goals Conceded</label>
         <input
           id="goalsConceded"
           type="number"

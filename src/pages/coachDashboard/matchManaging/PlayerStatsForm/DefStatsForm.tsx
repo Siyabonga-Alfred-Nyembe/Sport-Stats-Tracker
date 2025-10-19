@@ -34,13 +34,12 @@ const DefStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
     <div className="position-stats-form">
       {Object.keys(form).map((field) => (
         <div key={field} className="form-group">
-          <label htmlFor={field}>{field}</label>
+          <label htmlFor={field} style={{ color: "var(--primary)" }}>{field} </label>
           <input
             id={field}
             type="number"
             min={0}
             aria-label={`${field} value`}
-            style={{ color: "blue" }}
             value={(form as any)[field]}
             onChange={(e) => handleInputChange(field, +e.target.value)}
           />

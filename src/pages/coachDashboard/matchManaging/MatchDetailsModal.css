@@ -32,8 +32,8 @@
   top: 1rem;
   right: 1rem;
   background: none;
-  border: 2px solid #3b82f6;
-  color: #3b82f6;
+  border: 2px solid var(--primary);
+  color:var(--primary);
   font-size: 1.5rem;
   width: 36px;
   height: 36px;
@@ -46,12 +46,12 @@
 }
 
 .mdm-close-btn:hover {
-  background-color: #3b82f6;
+  background-color: var(--primary);
   color: white;
 }
 
 .mdm-close-btn:focus {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
@@ -83,11 +83,11 @@
 /* Saving Indicator */
 .mdm-saving-indicator {
   background-color: #dbeafe;
-  color: #1e40af;
+  color: var(--primary);
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
   border-radius: 6px;
-  border: 1px solid rgb(59, 130, 246);
+  border: 1px solid var(--primary);
   font-size: 0.875rem;
 }
 
@@ -140,7 +140,7 @@
 
 .mdm-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -215,7 +215,7 @@
 
 .mdm-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -230,11 +230,11 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: #3b82f6;
+  accent-color: var(--primary);
 }
 
 .mdm-checkbox:focus {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 

@@ -38,7 +38,7 @@ const MidStatsForm: React.FC<Props> = ({ onSave, initialStats }) => {
     <div className="position-stats-form">
       {Object.keys(form).map((field) => (
         <div key={field} className="form-group">
-          <label htmlFor={field} style={{ color: "blue" }}>
+          <label htmlFor={field} style={{ color: "var(--primary)" }}>
             {field}
           </label>
           <input
