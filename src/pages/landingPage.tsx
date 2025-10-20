@@ -4,9 +4,10 @@ import supabase from "../../supabaseClient";
 import "../Styles/landingPage.css";
 
 function LandingPage() {
-  const navigate = useNavigate();
+   const navigate = useNavigate();
   const sectionsRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
   const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
@@ -14,16 +15,17 @@ function LandingPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setIsLoggedIn(true);
+        setUsername(session.user.email || 'User');
         
-        // Get user role from users table
-        const { data: user } = await supabase
-          .from('users')
+        // Get user role
+        const { data: profile } = await supabase
+          .from('profiles')
           .select('role')
           .eq('id', session.user.id)
           .single();
         
-        if (user) {
-          setUserRole(user.role);
+        if (profile) {
+          setUserRole(profile.role);
         }
       }
     };
@@ -47,23 +49,31 @@ function LandingPage() {
 
       const sections = sectionsRef.current?.querySelectorAll('.fade-in-section');
       sections?.forEach(section => {
-        observer.observe(section);
+        if (typeof (observer as any).observe === 'function') (observer as any).observe(section);
       });
 
       const featureCards = sectionsRef.current?.querySelectorAll('.features-grid .feature-card');
-      featureCards?.forEach(card => observer.observe(card));
+      featureCards?.forEach(card => {
+        if (typeof (observer as any).observe === 'function') (observer as any).observe(card);
+      });
 
       const roleCards = sectionsRef.current?.querySelectorAll('.roles-grid .role-card');
-      roleCards?.forEach(card => observer.observe(card));
+      roleCards?.forEach(card => {
+        if (typeof (observer as any).observe === 'function') (observer as any).observe(card);
+      });
 
       const statCards = sectionsRef.current?.querySelectorAll('.stats-dashboard-preview .stat-card');
-      statCards?.forEach(card => observer.observe(card));
+      statCards?.forEach(card => {
+        if (typeof (observer as any).observe === 'function') (observer as any).observe(card);
+      });
 
       return () => {
-        sections?.forEach(section => observer.unobserve(section));
-        featureCards?.forEach(card => observer.unobserve(card));
-        roleCards?.forEach(card => observer.unobserve(card));
-        statCards?.forEach(card => observer.unobserve(card));
+        if (typeof (observer as any).unobserve === 'function') {
+          sections?.forEach(section => (observer as any).unobserve(section));
+          featureCards?.forEach(card => (observer as any).unobserve(card));
+          roleCards?.forEach(card => (observer as any).unobserve(card));
+          statCards?.forEach(card => (observer as any).unobserve(card));
+        }
       };
     }, 100);
 
@@ -78,7 +88,23 @@ function LandingPage() {
       navigate('/');
     }
   };
+  
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error('Error signing out:', e);
+    }
 
+    // Clear local state so the landing page reflects sign-out immediately
+    setIsLoggedIn(false);
+    setUsername('');
+    setUserRole('');
+
+    // Navigate to landing (may be the same route) — state changes above will
+    // ensure the UI updates without forcing a full reload.
+    navigate('/');
+  };
   return (
     <section className="landing-page" ref={sectionsRef}>
       <nav className="landing-nav fade-in-section">
@@ -98,7 +124,7 @@ function LandingPage() {
                     Admin
                   </button>
                 )}
-                <button className="nav-btn secondary" onClick={() => supabase.auth.signOut().then(() => navigate('/'))}>
+                <button className="nav-btn secondary" onClick={handleSignOut}>
                   Sign Out
                 </button>
               </>

@@ -544,12 +544,14 @@ describe('AuthCallback Component', () => {
         fireEvent.click(adminButton);
 
         await waitFor(() => {
-          expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Admin');
-          expect(mockNavigateFn).toHaveBeenCalledWith('/admin-dashboard', { replace: true });
+          // Creating an Admin via role selection is not allowed; ensure we did NOT attempt to create the profile
+          expect(mockCreateUserProfile).not.toHaveBeenCalled();
+          // Navigation must not occur; user should remain on role selection and be informed
+          expect(mockNavigateFn).not.toHaveBeenCalled();
         });
 
-        expect(localStorage.getItem('user_role')).toBe('Admin');
-        expect(localStorage.getItem('user_id')).toBe(mockUser.id);
+        expect(localStorage.getItem('user_role')).toBeNull();
+        expect(localStorage.getItem('user_id')).toBeNull();
       });
 
       it('should navigate to login when role creation fails', async () => {
@@ -569,9 +571,15 @@ describe('AuthCallback Component', () => {
         fireEvent.click(fanButton);
 
         await waitFor(() => {
+          // createUserProfile was attempted
           expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Fan');
-          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
         });
+
+        // The component does not navigate to /login on profile creation failure;
+        // instead it sets an error and keeps the role selection visible.
+        expect(mockNavigateFn).not.toHaveBeenCalled();
+        expect(screen.getByTestId('role-selection')).toBeInTheDocument();
+        expect(localStorage.getItem('user_role')).toBeNull();
       });
 
       it('should navigate to login when role creation throws error', async () => {
@@ -591,8 +599,15 @@ describe('AuthCallback Component', () => {
         fireEvent.click(fanButton);
 
         await waitFor(() => {
-          expect(mockNavigateFn).toHaveBeenCalledWith('/login', { replace: true });
+          // createUserProfile was attempted and threw
+          expect(mockCreateUserProfile).toHaveBeenCalledWith(mockUser.id, mockUser.email, 'Fan');
+          // an error should have been logged by the component
+          expect(consoleSpy.error).toHaveBeenCalledWith('[AuthCallback] Error handling user profile:', expect.any(Error));
         });
+
+        // Component should not navigate to /login on exception; role selection remains
+        expect(mockNavigateFn).not.toHaveBeenCalled();
+        expect(screen.getByTestId('role-selection')).toBeInTheDocument();
       });
 
       it('should not handle role selection without userData', async () => {

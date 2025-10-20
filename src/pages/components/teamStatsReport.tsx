@@ -52,13 +52,7 @@ const TeamStatsReport: React.FC<Props> = ({
   const [isExporting, setIsExporting] = useState(false);
 
   // Early return if stats is null or undefined
-  if (!stats) {
-    return (
-      <main className="team-stats-container">
-        <div className="loading">Loading team statistics...</div>
-      </main>
-    );
-  }
+  const noStats = !stats;
 
   const handleExportPdf = async () => {
     if (!reportRef.current) return;
@@ -108,7 +102,7 @@ const TeamStatsReport: React.FC<Props> = ({
       )}
       <div className="team-info">
         <h1>{team.name}</h1>
-        <p>Performance Report · Based on {stats.totalMatches || 0} matches</p>
+  <p>Performance Report · Based on {stats?.totalMatches || 0} matches</p>
       </div>
     </section>
 
@@ -131,16 +125,22 @@ const TeamStatsReport: React.FC<Props> = ({
         </div>
       )}
 
-      <button className="CoachBtn export-btn" onClick={handleExportPdf} disabled={isExporting}>
-        {isExporting ? "Exporting..." : "Export as PDF"}
+      <button
+        className="CoachBtn export-btn"
+        onClick={handleExportPdf}
+        disabled={isExporting || noStats}
+        aria-disabled={isExporting || noStats}
+        title={noStats ? 'No data to export' : undefined}
+      >
+        {isExporting ? 'Exporting...' : 'Export as PDF'}
       </button>
     </nav>
   </div>
 
   <div className="info-bar">
-    <div className="info-item">
+      <div className="info-item">
       <span className="info-label">Recent Form (Last 5):</span>
-      <TeamFormGuide form={stats.form || []} />
+      <TeamFormGuide form={stats?.form || []} />
     </div>
   </div>
 </header>
@@ -156,19 +156,33 @@ const TeamStatsReport: React.FC<Props> = ({
       </section>
 
       <article ref={reportRef} className={isExporting ? "pdf-mode" : ""}>
+        {noStats && (
+          <section className="no-stats-message pdf-capture" aria-live="polite">
+            <h2>No statistics found</h2>
+            <p>
+              There are no team statistics for the selected date range. Try adjusting the "From" and
+              "To" dates to expand your search.
+            </p>
+            <div className="no-stats-actions">
+              <button className="CoachBtn" onClick={() => { setStartDate(''); setEndDate(''); }}>
+                Reset dates
+              </button>
+            </div>
+          </section>
+        )}
   <section className="pef-sec">
     <h2>Team Performance Averages</h2>
     <ul>
-      <StatCard label="Matches Played" value={stats.totalMatches || 0} />
-      <StatCard label="Possession" value={stats.avgPossession || 0} />
-      <StatCard label="Shots" value={stats.avgShots || 0} />
-      <StatCard label="Shots on Target" value={stats.avgShotsOnTarget || 0} />
-      <StatCard label="Fouls" value={stats.avgFouls || 0} />
-      <StatCard label="Corners" value={stats.avgCorners || 0} />
-      <StatCard label="Passes" value={stats.avgPasses || 0} />
-      <StatCard label="Pass Accuracy" value={`${stats.avgPassAccuracy || 0}%`} />
-      <StatCard label="Tackles" value={stats.avgTackles || 0} />
-      <StatCard label="Saves" value={stats.avgSaves || 0} />
+      <StatCard label="Matches Played" value={stats?.totalMatches || 0} />
+      <StatCard label="Possession" value={stats?.avgPossession || 0} />
+      <StatCard label="Shots" value={stats?.avgShots || 0} />
+      <StatCard label="Shots on Target" value={stats?.avgShotsOnTarget || 0} />
+      <StatCard label="Fouls" value={stats?.avgFouls || 0} />
+      <StatCard label="Corners" value={stats?.avgCorners || 0} />
+      <StatCard label="Passes" value={stats?.avgPasses || 0} />
+      <StatCard label="Pass Accuracy" value={`${stats?.avgPassAccuracy || 0}%`} />
+      <StatCard label="Tackles" value={stats?.avgTackles || 0} />
+      <StatCard label="Saves" value={stats?.avgSaves || 0} />
     </ul>
   </section>
 
@@ -178,17 +192,17 @@ const TeamStatsReport: React.FC<Props> = ({
       <BarChart
         title="Goals"
         label={["Goals For", "Goals Against", "Goal Difference"]}
-        values={[stats.goalsFor || 0, stats.goalsAgainst || 0, stats.goalDifference || 0]}
+        values={[stats?.goalsFor || 0, stats?.goalsAgainst || 0, stats?.goalDifference || 0]}
       />
       <PiChart
         title="Results %"
         label={["Win%", "Loss/Draw%"]}
-        values={[stats.winPercentage || 0, 100 - (stats.winPercentage || 0)]}
+        values={[stats?.winPercentage || 0, 100 - (stats?.winPercentage || 0)]}
       />
       <PiChart
         title="Results"
         label={["Wins", "Losses", "Draws"]}
-        values={[stats.wins || 0, stats.losses || 0, stats.draws || 0]}
+        values={[stats?.wins || 0, stats?.losses || 0, stats?.draws || 0]}
       />
     </section>
   </section>
@@ -200,14 +214,14 @@ const TeamStatsReport: React.FC<Props> = ({
         <BarChart
           title="Shooting"
           label={["Shots", "Shots on Target", "Goals"]}
-          values={[stats.totalShots || 0, stats.totalShotsOnTarget || 0, stats.goalsFor || 0]}
+          values={[stats?.totalShots || 0, stats?.totalShotsOnTarget || 0, stats?.goalsFor || 0]}
         />
         <PiChart
           title="Passing"
           label={["Successful Passes", "Unsuccessful Passes"]}
           values={[
-            Number(stats.avgPassAccuracy) || 0,
-            100 - (Number(stats.avgPassAccuracy) || 0),
+              Number(stats?.avgPassAccuracy) || 0,
+              100 - (Number(stats?.avgPassAccuracy) || 0),
           ]}
         />
       </section>
@@ -219,12 +233,12 @@ const TeamStatsReport: React.FC<Props> = ({
         <BarChart
           title="General"
           label={["Tackles", "Interceptions", "Clearances"]}
-          values={[stats.totalTackles || 0, totalInterceptions, totalClearances]}
+          values={[stats?.totalTackles || 0, totalInterceptions, totalClearances]}
         />
         <BarChart
           title="Discipline"
           label={["Fouls", "Yellow Cards", "Red Cards"]}
-          values={[stats.totalFouls || 0, totalYellowCards, totalRedCards]}
+            values={[stats?.totalFouls || 0, totalYellowCards, totalRedCards]}
         />
       </section>
     </section>

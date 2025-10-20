@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import supabase from "../../supabaseClient";
 import { type DbChatRecord } from "../services/chatService";
 import { deleteUserCompletely } from "../services/adminService";
+import { updateUserRole } from "../services/roleService";
 import "../Styles/admin-dashboard.css";
 
 interface User {
@@ -18,7 +19,11 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("chats");
   const [chats, setChats] = useState<DbChatRecord[]>([]);
+  const [chatSearch, setChatSearch] = useState('');
   const [users, setUsers] = useState<User[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'all' | string>('all');
+  const [promotingUser, setPromotingUser] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [stats, setStats] = useState({
@@ -160,28 +165,47 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'chats' && (
           <section className="chats-tab">
             <h2>Chats</h2>
+            <div style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
+              <input
+                type="text"
+                placeholder="Search chats by author or message..."
+                value={chatSearch}
+                onChange={e => setChatSearch(e.target.value)}
+                style={{ padding: '6px 8px', flex: 1 }}
+                aria-label="Search chats"
+              />
+            </div>
             {chats.length === 0 ? (
               <p>No chats found.</p>
             ) : (
               <section className="chats-list">
-                {chats.map(chat => (
-                  <section key={chat.id} className="chat-card">
-                    <section className="chat-card-header">
-                      <span className="chat-author">
-                        {chat.author || 'Anonymous'}
-                      </span>
-                      <button 
-                        className="delete-btn"
-                        onClick={() => deleteChat(chat.id)}
-                      >
-                        Remove
-                      </button>
+                {chats
+                  .filter(chat => {
+                    const q = chatSearch.trim().toLowerCase();
+                    if (!q) return true;
+                    return (
+                      (chat.author || '').toLowerCase().includes(q) ||
+                      (chat.message || '').toLowerCase().includes(q)
+                    );
+                  })
+                  .map(chat => (
+                    <section key={chat.id} className="chat-card">
+                      <section className="chat-card-header">
+                        <span className="chat-author">
+                          {chat.author || 'Anonymous'}
+                        </span>
+                        <button 
+                          className="delete-btn"
+                          onClick={() => deleteChat(chat.id)}
+                        >
+                          Remove
+                        </button>
+                      </section>
+                      <section className="chat-message">
+                        {chat.message}
+                      </section>
                     </section>
-                    <section className="chat-message">
-                      {chat.message}
-                    </section>
-                  </section>
-                ))}
+                  ))}
               </section>
             )}
           </section>
@@ -190,41 +214,97 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'users' && (
           <section className="users-tab">
             <h2>User Management</h2>
-            {users.length === 0 ? (
-              <p>No users found.</p>
-            ) : (
-              <table className="users-table">
-                <thead>
-                  <tr>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Joined</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(user => (
-                    <tr key={user.id}>
-                      <td>{user.email}</td>
-                      <td>
-                        <span className={`role-badge ${user.role}`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td>{new Date(user.created_at).toLocaleDateString()}</td>
-                      <td>
-                        <button 
-                          className="delete-btn"
-                          onClick={() => deleteUser(user.id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+              <div className="user-filters" style={{ marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input
+                  type="text"
+                  placeholder="Search by email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search users by email"
+                  style={{ padding: '6px 8px', flex: 1 }}
+                />
+
+                <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} aria-label="Filter by role" style={{ padding: '6px 8px' }}>
+                  <option value="all">All roles</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                  <option value="Coach">Coach</option>
+                  <option value="Fan">Fan</option>
+                </select>
+              </div>
+
+              {users.length === 0 ? (
+                <p>No users found.</p>
+              ) : (
+                (() => {
+                  const filtered = users.filter(u => {
+                    const matchesSearch = searchQuery.trim() === '' || (u.email || '').toLowerCase().includes(searchQuery.trim().toLowerCase());
+                    const matchesRole = roleFilter === 'all' || (u.role || '').toLowerCase() === roleFilter.toLowerCase();
+                    return matchesSearch && matchesRole;
+                  });
+
+                  return (
+                    <table className="users-table">
+                      <thead>
+                        <tr>
+                          <th>Email</th>
+                          <th>Role</th>
+                          <th>Joined</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map(user => (
+                          <tr key={user.id}>
+                            <td>{user.email}</td>
+                            <td>
+                              <span className={`role-badge ${user.role}`}>
+                                {user.role}
+                              </span>
+                            </td>
+                            <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                            <td style={{ display: 'flex', gap: 8 }}>
+                              <button 
+                                className="delete-btn"
+                                onClick={() => deleteUser(user.id)}
+                              >
+                                Delete
+                              </button>
+
+                              {user.role?.toLowerCase() !== 'admin' && (
+                                <button
+                                  className="promote-btn"
+                                  onClick={async () => {
+                                    if (!window.confirm(`Promote ${user.email} to Admin?`)) return;
+                                    try {
+                                      setPromotingUser(user.id);
+                                      const ok = await updateUserRole(user.id as string, 'Admin');
+                                      if (ok) {
+                                        setUsers(prev => prev.map(p => p.id === user.id ? { ...p, role: 'Admin' } : p));
+                                        setStats(s => ({ ...s, totalUsers: s.totalUsers }));
+                                      } else {
+                                        alert('Failed to update role.');
+                                      }
+                                    } catch (err) {
+                                      console.error('Error promoting user:', err);
+                                      alert('Error promoting user');
+                                    } finally {
+                                      setPromotingUser(null);
+                                    }
+                                  }}
+                                  disabled={promotingUser === user.id}
+                                >
+                                  {promotingUser === user.id ? 'Promoting...' : 'Make Admin'}
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                })()
+              )}
           </section>
         )}
       </section>

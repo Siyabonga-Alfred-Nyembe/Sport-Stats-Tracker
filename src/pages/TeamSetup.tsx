@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createTeam } from '../services/teamService';
+import { createTeam, slugify, fetchTeamById } from '../services/teamService';
 import { useNavigate} from 'react-router-dom';
 import supabase from '../../supabaseClient';
 import InlineAlert from './components/InlineAlert';
@@ -29,13 +29,28 @@ const TeamSetup: React.FC = () => {
     if (!teamName.trim() || !userId) return;
     
     setSaving(true);
-    const team = await createTeam(teamName.trim(), logoFile, userId);
-    setSaving(false);
-    
-    if (team) {
-      setErrorMsg(null);
-      navigate('/coach-dashboard?tab=players');
-    } else {
+    // pre-check: if a team with the same slug already exists, show a clearer message
+    try {
+      const slug = slugify(teamName.trim());
+      const existing = await fetchTeamById(slug);
+      if (existing) {
+        setSaving(false);
+        setErrorMsg('A team with that name already exists. Please choose a different name.');
+        return;
+      }
+
+      const team = await createTeam(teamName.trim(), logoFile, userId);
+      setSaving(false);
+
+      if (team) {
+        setErrorMsg(null);
+        navigate('/coach-dashboard?tab=players');
+      } else {
+        setErrorMsg('We could not create your team right now. Please check your internet and try again.');
+      }
+    } catch (err) {
+      setSaving(false);
+      console.error('Error creating team:', err);
       setErrorMsg('We could not create your team right now. Please check your internet and try again.');
     }
   };

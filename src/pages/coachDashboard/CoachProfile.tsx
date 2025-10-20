@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { DragEvent } from "react";
 import "./CoachProfile.css";
 import Logo from "../../images/7435680.jpg";
-import { fetchTeamById, updateTeam, uploadTeamLogo } from "../../services/teamService";
+import { fetchTeamById, updateTeam, uploadTeamLogo, createTeam } from "../../services/teamService";
 import { getCurrentTeamId } from "../../services/teamService";
 interface CoachProfileProps {
   initialCoachName?: string;
@@ -36,7 +36,10 @@ export default function CoachProfile({
         console.log("Loading team data for team ID:", currentTeamId);
         
         if (!currentTeamId) {
-          setMessage("No team found. Please create a team first.");
+          // No team: allow coach to create one inline
+          setMessage("");
+          setTeamId(null);
+          setIsLoading(false);
           return;
         }
 
@@ -74,7 +77,23 @@ export default function CoachProfile({
 
   const handleSave = async () => {
     if (!teamId) {
-      setMessage("No team ID found");
+      // Create a new team for the coach
+      setIsSaving(true);
+      setMessage("");
+      try {
+        const created = await createTeam(teamName.trim(), undefined, undefined, coachName || undefined);
+        if (created) {
+          setTeamId(created.id);
+          setMessage("Team created and profile saved successfully!");
+        } else {
+          setMessage("Failed to create team");
+        }
+      } catch (err) {
+        console.error("Error creating team:", err);
+        setMessage("Error creating team");
+      } finally {
+        setIsSaving(false);
+      }
       return;
     }
 

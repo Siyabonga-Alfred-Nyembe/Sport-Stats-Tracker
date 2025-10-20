@@ -1,32 +1,41 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { updateUserRole } from '../services/roleService';
 import './RoleSelection.css';
 
 interface RoleSelectionProps {
+  userId: string;
   userEmail: string;
   onRoleSelected: (role: 'Fan' | 'Coach' | 'Admin') => void;
   includeAdminOption?: boolean;
+  allowedRoles?: Array<'Fan' | 'Coach' | 'Admin'>;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 const RoleSelection: React.FC<RoleSelectionProps> = ({ 
+  userId, 
   userEmail, 
   onRoleSelected,
-  includeAdminOption = false
+  includeAdminOption = false,
+  allowedRoles,
+  isLoading: externalLoading = false,
+  error: externalError = null
 }) => {
   const [selectedRole, setSelectedRole] = useState<'Fan' | 'Coach' | 'Admin' | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleRoleSelect = async (role: 'Fan' | 'Coach' | 'Admin') => {
     setSelectedRole(role);
-    setIsLoading(true);
-    setError(null);
-
+    
     try {
-      // Call the parent's role selection handler instead of doing navigation here
+      // Let the parent component handle the role update/creation
       onRoleSelected(role);
+      
+      // Navigation will be handled by the parent component
+      // after successful role creation/update
     } catch (err) {
-      setError('An error occurred. Please try again.');
-      setIsLoading(false);
+      console.error('Error in handleRoleSelect:', err);
     }
   };
 
@@ -69,7 +78,7 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({
             </ul>
           </section>
 
-          {includeAdminOption && (
+          {((allowedRoles && allowedRoles.includes('Admin')) || (!allowedRoles && includeAdminOption)) && (
             <section 
               className={`role-option ${selectedRole === 'Admin' ? 'selected' : ''}`}
               onClick={() => setSelectedRole('Admin')}
@@ -92,16 +101,16 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({
             <button
               className="continue-btn"
               onClick={() => handleRoleSelect(selectedRole)}
-              disabled={isLoading}
+              disabled={externalLoading}
             >
-              {isLoading ? 'Setting up...' : `Continue as ${selectedRole}`}
+              {externalLoading ? 'Setting up...' : `Continue as ${selectedRole}`}
             </button>
           </section>
         )}
 
-        {error && (
+        {externalError && (
           <section className="error-message">
-            {error}
+            {externalError}
           </section>
         )}
       </section>

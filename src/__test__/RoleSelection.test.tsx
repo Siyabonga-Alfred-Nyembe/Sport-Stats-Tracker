@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 describe('RoleSelection Component', () => {
   const userEmail = 'test@example.com';
+  const userId = 'user-123';
   const onRoleSelected = vi.fn();
 
   beforeEach(() => {
@@ -14,7 +15,7 @@ describe('RoleSelection Component', () => {
   it('renders component with both roles', () => {
     render(
       <MemoryRouter>
-        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -26,7 +27,7 @@ describe('RoleSelection Component', () => {
   it('selects Fan role when clicked', () => {
     render(
       <MemoryRouter>
-        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -38,7 +39,7 @@ describe('RoleSelection Component', () => {
   it('selects Coach role when clicked', () => {
     render(
       <MemoryRouter>
-        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -50,7 +51,7 @@ describe('RoleSelection Component', () => {
   it('calls onRoleSelected for Fan', async () => {
     render(
       <MemoryRouter>
-        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -65,7 +66,7 @@ describe('RoleSelection Component', () => {
   it('calls onRoleSelected for Coach', async () => {
     render(
       <MemoryRouter>
-        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 
@@ -77,42 +78,26 @@ describe('RoleSelection Component', () => {
     });
   });
 
-  it('displays loading state while processing', async () => {
+  it('displays loading state when isLoading prop is true', async () => {
+    // Render with external loading state enabled. The component shows the
+    // "Setting up..." label and disables the button when `isLoading` is true.
     render(
       <MemoryRouter>
-        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} isLoading={true} />
       </MemoryRouter>
     );
 
+    // Select a role to reveal the continue button, which should show the
+    // loading label and be disabled because `isLoading` is true.
     fireEvent.click(screen.getByText('Fan'));
-    fireEvent.click(screen.getByRole('button', { name: /Continue as Fan/i }));
 
     expect(screen.getByRole('button', { name: /Setting up.../i })).toBeDisabled();
-
-    await waitFor(() => {
-      expect(onRoleSelected).toHaveBeenCalled();
-    });
   });
 
   it('handles role selection without errors', async () => {
     render(
       <MemoryRouter>
-        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
-      </MemoryRouter>
-    );
-
-    fireEvent.click(screen.getByText('Fan'));
-    fireEvent.click(screen.getByRole('button', { name: /Continue as Fan/i }));
-
-    await waitFor(() => {
-      expect(onRoleSelected).toHaveBeenCalledWith('Fan');
-    });
-  });
-
-  it('handles role selection successfully', async () => {
-    render(
-      <MemoryRouter>
-        <RoleSelection userEmail={userEmail} onRoleSelected={onRoleSelected} />
+        <RoleSelection userId={userId} userEmail={userEmail} onRoleSelected={onRoleSelected} />
       </MemoryRouter>
     );
 

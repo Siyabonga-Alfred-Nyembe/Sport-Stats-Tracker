@@ -8,6 +8,8 @@ const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [userData, setUserData] = useState<{ id: string; email: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const hasProcessed = useRef(false); // Prevent double execution
 
   useEffect(() => {
@@ -143,14 +145,40 @@ const AuthCallback: React.FC = () => {
   const handleRoleSelected = async (role: 'Fan' | 'Coach' | 'Admin') => {
     if (!userData) return;
 
+    setIsLoading(true);
+    setError(null);
+
     try {
-      console.log("[AuthCallback] Role selected; creating user profile", {
+      console.log("[AuthCallback] Role selected; handling user profile", {
         role,
         userId: userData.id,
         email: userData.email
       });
-      const success = await createUserProfile(userData.id, userData.email, role);
-      console.log("[AuthCallback] createUserProfile result", { success });
+
+      // First check if user already exists
+      const existingUser = await getUserRole(userData.id);
+      
+      let success = false;
+      if (existingUser) {
+        // User exists, update their role
+        console.log("[AuthCallback] User exists, updating role");
+        const { updateUserRole } = await import('../services/roleService');
+        success = await updateUserRole(userData.id, role);
+      } else {
+        // User doesn't exist. Disallow creating Admin accounts via the public role selection UI.
+        if (role === 'Admin') {
+          console.warn('[AuthCallback] Admin accounts cannot be self-created via signup');
+          setError('Admin accounts must be created by an administrator.');
+          setIsLoading(false);
+          return;
+        }
+
+        // User doesn't exist, create new profile
+        console.log("[AuthCallback] User doesn't exist, creating profile");
+        success = await createUserProfile(userData.id, userData.email, role);
+      }
+      
+      console.log("[AuthCallback] Profile operation result", { success });
       
       if (success) {
         // Store role in localStorage
@@ -165,28 +193,37 @@ const AuthCallback: React.FC = () => {
           console.log("[AuthCallback] Navigating to team setup");
           navigate('/team-setup', { replace: true });
         } else if (role === 'Admin') {
-          console.log("[AuthCallback] Navigating to admin dashboard after profile creation");
+          console.log("[AuthCallback] Navigating to admin dashboard");
           navigate('/admin-dashboard', { replace: true });
         } else {
-          console.log("[AuthCallback] Navigating to user dashboard after profile creation");
+          console.log("[AuthCallback] Navigating to user dashboard");
           navigate('/user-dashboard', { replace: true });
         }
       } else {
-        console.error('[AuthCallback] Failed to create user profile');
-        navigate('/login', { replace: true });
+        console.error('[AuthCallback] Failed to handle user profile');
+        setError('Failed to update role. Please try again.');
       }
     } catch (error) {
-      console.error('[AuthCallback] Error creating user profile:', error);
-      navigate('/login', { replace: true });
+      console.error('[AuthCallback] Error handling user profile:', error);
+      setError('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   if (showRoleSelection && userData) {
+    const allowAdmin = typeof window !== 'undefined' && localStorage.getItem('allow_admin_signup') === '1';
+    const allowedRoles: Array<'Fan' | 'Coach' | 'Admin'> = allowAdmin ? ['Fan', 'Coach', 'Admin'] : ['Fan', 'Coach'];
+
     return (
       <RoleSelection
+        userId={userData.id}
         userEmail={userData.email}
         onRoleSelected={handleRoleSelected}
-        includeAdminOption={true}
+        includeAdminOption={allowAdmin}
+        allowedRoles={allowedRoles}
+        isLoading={isLoading}
+        error={error}
       />
     );
   }

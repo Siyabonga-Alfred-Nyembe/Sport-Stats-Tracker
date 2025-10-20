@@ -96,7 +96,7 @@ const MyTeamTab: React.FC = () => {
     return <div className="error">{error}</div>;
   }
 
-  if (!team || !stats) {
+  if (!team) {
     return <div className="error">No team data available.</div>;
   }
 
