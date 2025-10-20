@@ -7,7 +7,6 @@ function LandingPage() {
    const navigate = useNavigate();
   const sectionsRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
   const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
@@ -15,7 +14,7 @@ function LandingPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setIsLoggedIn(true);
-        setUsername(session.user.email || 'User');
+  // setUsername removed
         
         // Get user role
         const { data: profile } = await supabase
@@ -98,7 +97,7 @@ function LandingPage() {
 
     // Clear local state so the landing page reflects sign-out immediately
     setIsLoggedIn(false);
-    setUsername('');
+  // setUsername removed
     setUserRole('');
 
     // Navigate to landing (may be the same route) — state changes above will

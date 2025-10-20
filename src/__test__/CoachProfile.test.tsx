@@ -35,13 +35,15 @@ describe("CoachProfile Component", () => {
     });
   });
 
-  it("shows message when no team found", async () => {
+  it("shows create form when no team found", async () => {
     (teamService.getCurrentTeamId as any).mockReturnValue(null);
 
     render(<CoachProfile />);
 
     await waitFor(() => {
-      expect(screen.getByText(/no team found/i)).toBeInTheDocument();
+      expect(screen.getByLabelText("Team name")).toBeInTheDocument();
+      expect(screen.getByLabelText("Coach name")).toBeInTheDocument();
+      expect(screen.getByLabelText("Save profile changes")).toBeInTheDocument();
     });
   });
 

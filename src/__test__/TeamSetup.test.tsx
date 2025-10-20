@@ -7,6 +7,8 @@ import { MemoryRouter } from "react-router-dom";
 
 vi.mock("../services/teamService", () => ({
   createTeam: vi.fn(),
+  fetchTeamById: vi.fn(),
+  slugify: vi.fn((name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')),
 }));
 
 vi.mock("../../supabaseClient", () => ({
@@ -69,6 +71,7 @@ describe("TeamSetup component", () => {
     (supabase.auth.getSession as any).mockResolvedValue({
       data: { session: { user: { id: "user-123" } } },
     });
+    (teamService.fetchTeamById as any).mockResolvedValue(null); // No existing team
     (teamService.createTeam as any).mockResolvedValue({ id: "team-1" });
 
     render(

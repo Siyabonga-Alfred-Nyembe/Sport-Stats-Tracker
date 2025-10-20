@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { updateUserRole } from '../services/roleService';
+// import { useNavigate } from 'react-router-dom';
+// import { updateUserRole } from '../services/roleService';
 import './RoleSelection.css';
 
 interface RoleSelectionProps {
@@ -14,7 +14,7 @@ interface RoleSelectionProps {
 }
 
 const RoleSelection: React.FC<RoleSelectionProps> = ({ 
-  userId, 
+  // userId,
   userEmail, 
   onRoleSelected,
   includeAdminOption = false,
@@ -23,7 +23,7 @@ const RoleSelection: React.FC<RoleSelectionProps> = ({
   error: externalError = null
 }) => {
   const [selectedRole, setSelectedRole] = useState<'Fan' | 'Coach' | 'Admin' | null>(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleRoleSelect = async (role: 'Fan' | 'Coach' | 'Admin') => {
     setSelectedRole(role);
