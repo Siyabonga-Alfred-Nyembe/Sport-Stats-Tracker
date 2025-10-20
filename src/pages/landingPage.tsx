@@ -7,7 +7,6 @@ function LandingPage() {
   const navigate = useNavigate();
   const sectionsRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
   const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
@@ -15,7 +14,6 @@ function LandingPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setIsLoggedIn(true);
-        setUsername(session.user.email || 'User');
         
         // Get user role from users table
         const { data: user } = await supabase
@@ -92,7 +90,6 @@ function LandingPage() {
           <section className="nav-actions">
             {isLoggedIn ? (
               <>
-                <span className="welcome-text">Welcome, {username}</span>
                 <button className="nav-btn secondary" onClick={() => navigate('/user-dashboard')}>
                   Dashboard
                 </button>

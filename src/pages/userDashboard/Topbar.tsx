@@ -10,7 +10,7 @@ interface Props {
   onProfile: ()=>void; 
 }
 
-const Topbar: React.FC<Props> = ({ username, setUsername, onProfile }) => {
+const Topbar: React.FC<Props> = ({ username, setUsername}) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -29,14 +29,7 @@ const Topbar: React.FC<Props> = ({ username, setUsername, onProfile }) => {
         value={username}
         onChange={e => setUsername(e.target.value)}
       />
-      <button className="rs-btn ghost topbar-profile-btn" onClick={onProfile}>
-        Profile
-      </button>
       <button className="topbar-logout-btn" onClick={handleLogout}>
-        <img
-          src="https://img.icons8.com/?size=100&id=98958&format=png&color=ffffff"
-          alt="Logout"
-        />
         Logout
       </button>
     </div>

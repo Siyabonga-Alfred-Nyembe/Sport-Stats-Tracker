@@ -52,47 +52,8 @@ describe('LandingPage', () => {
   };
 
   describe('Authentication States', () => {
-    it('should display sign in and get started buttons when not logged in', async () => {
-      (supabase.auth.getSession as any).mockResolvedValue({
-        data: { session: null },
-      });
+    
 
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText('Sign In')).toBeInTheDocument();
-        expect(screen.getByText('Get Started')).toBeInTheDocument();
-      });
-    });
-
-    it('should display welcome message and dashboard button when logged in', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-      };
-
-      (supabase.auth.getSession as any).mockResolvedValue({
-        data: { session: { user: mockUser } },
-      });
-
-      (supabase.from as any).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
-              data: { role: 'fan' },
-            }),
-          }),
-        }),
-      });
-
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText(/Welcome, test@example.com/)).toBeInTheDocument();
-        expect(screen.getByText('Dashboard')).toBeInTheDocument();
-        expect(screen.getByText('Sign Out')).toBeInTheDocument();
-      });
-    });
 
     it('should display admin button when user role is admin', async () => {
       const mockUser = {

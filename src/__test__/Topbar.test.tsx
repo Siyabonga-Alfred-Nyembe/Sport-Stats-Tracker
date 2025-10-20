@@ -56,14 +56,5 @@ describe("Topbar - UI Tests", () => {
     expect(setUsernameMock).toHaveBeenCalledWith("Bob");
   });
 
-  it("calls onProfile when Profile button is clicked", () => {
-    render(
-      <MemoryRouter>
-        <Topbar username="Alice" setUsername={setUsernameMock} onProfile={onProfileMock} />
-      </MemoryRouter>
-    );
-
-    fireEvent.click(screen.getByText("Profile"));
-    expect(onProfileMock).toHaveBeenCalled();
-  });
+  
 });

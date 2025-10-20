@@ -17,11 +17,9 @@ const MatchesList: React.FC<Props> = ({matches, teams, query, setQuery, onOpen})
       <div className="matches-header">
         <div>
           <h3>Matches</h3>
-          <div className="subtitle">Search and open a match to view details & chat</div>
         </div>
         <div className="rs-actions">
-          <input  placeholder="Search teams or dates" value={query} onChange={e => setQuery(e.target.value)} />
-          <button className="rs-btn" onClick={() => setQuery(query)}>Search</button>
+          <input className="searchMatch"  placeholder="Search teams or dates" value={query} onChange={e => setQuery(e.target.value)} />
           <button className="rs-btn ghost" onClick={() => setQuery("")}>Clear</button>
         </div>
       </div>

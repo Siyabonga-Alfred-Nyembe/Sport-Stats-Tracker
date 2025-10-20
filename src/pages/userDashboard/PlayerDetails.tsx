@@ -167,19 +167,6 @@ const PlayerDetails: React.FC<Props> = ({ onBack }) => {
 
   return (
     <>
-    <section className="filter-by-date" aria-label="Filter By date section">
-        <label htmlFor="start-date" aria-label="Start date input">
-          From
-        </label>
-        <input type="date" id="start-date" name="start-date" />
-
-        <label htmlFor="end-date">To</label>
-        <input type="date" id="end-date" name="end-date" aria-label="End date input" />
-
-        <button className="CoachBtn" aria-label="Apply Filter button">
-          Apply
-        </button>
-      </section>
     <div className="rs-card">
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>

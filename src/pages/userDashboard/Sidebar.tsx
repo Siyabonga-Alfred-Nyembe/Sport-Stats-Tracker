@@ -50,7 +50,6 @@ const Sidebar: React.FC<Props> = ({ activeTab, goToTab }) => {
             <div className="hamburger-line"></div>
             <div className="hamburger-line"></div>
           </button>
-          <h1 className="title">R&S Sports</h1>
         </div>
       </header>
 

@@ -19,6 +19,9 @@
   gap: 8px;
   align-items: center;
 }
+.searchMatch{
+  margin-left: 10px;
+}
 
 .rs-actions input {
   padding: 8px;
